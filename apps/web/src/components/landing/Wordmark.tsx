@@ -1,16 +1,22 @@
 import clsx from "clsx";
+import { triggerLogoTap } from "@/components/easter-eggs/HiddenEasterEggs";
 
 /**
  * Original NexClass mark: three caption lines of decreasing weight, the first
  * one lit in the teal accent, with a lime cue dot at the end of the last line.
+ * Tapping 5 times triggers the secret multilingual glyph fountain!
  */
-export function NexClassMark({ className }: { className?: string }) {
+export function NexClassMark({ className, onClick }: { className?: string; onClick?: (e: React.MouseEvent) => void }) {
   return (
     <svg
       viewBox="0 0 28 28"
       role="img"
       aria-label="NexClass"
-      className={clsx("h-8 w-8 shrink-0", className)}
+      onClick={(e) => {
+        triggerLogoTap(e);
+        onClick?.(e);
+      }}
+      className={clsx("h-8 w-8 shrink-0 cursor-pointer transition-transform active:scale-90 select-none", className)}
     >
       <rect
         x="0.75"
@@ -40,12 +46,19 @@ export function NexClassMark({ className }: { className?: string }) {
   );
 }
 
-export function Wordmark({ className }: { className?: string }) {
+export function Wordmark({ className, onClick }: { className?: string; onClick?: (e: React.MouseEvent) => void }) {
   return (
-    <span className={clsx("flex items-center gap-2.5", className)}>
+    <span
+      onClick={(e) => {
+        triggerLogoTap(e);
+        onClick?.(e);
+      }}
+      className={clsx("flex items-center gap-2.5 cursor-pointer select-none group", className)}
+      title="NexClass (Psst: Tap 5 times for a surprise!)"
+    >
       <NexClassMark />
-      <span className="font-display text-[17px] font-semibold tracking-[-0.03em] text-ivory-50">
-        Nex<span className="text-ivory-300">Class</span>
+      <span className="font-display text-[17px] font-semibold tracking-[-0.03em] text-ivory-50 group-hover:text-accent-300 transition-colors">
+        Nex<span className="text-ivory-300 group-hover:text-ivory-100">Class</span>
       </span>
     </span>
   );

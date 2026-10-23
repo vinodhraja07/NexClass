@@ -7,6 +7,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
+      "@": path.resolve(here, "../web/src"),
       "@nexclass/shared": path.resolve(here, "../../packages/shared/src/index.ts"),
       "@nexclass/terminology": path.resolve(here, "../../packages/terminology/src/index.ts"),
     },

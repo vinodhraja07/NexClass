@@ -4,6 +4,7 @@ import { Captions, Mic, Volume2 } from "lucide-react";
 import { DEMO_SEGMENTS, LANGUAGES, type LanguageCode } from "@nexclass/shared";
 import { languageNativeName } from "@nexclass/shared";
 import clsx from "clsx";
+import { useVisualizerMode } from "@/components/easter-eggs/HiddenEasterEggs";
 
 const CURRENT = DEMO_SEGMENTS[1];
 const PREVIOUS = DEMO_SEGMENTS[0];
@@ -25,27 +26,55 @@ function lineFor(segment: (typeof DEMO_SEGMENTS)[number], code: LanguageCode): s
 const BAR_HEIGHTS = [6, 12, 20, 9, 16, 11, 7, 18, 13, 8, 15, 10, 6, 12, 17, 9, 14, 8];
 
 function Waveform({ accent = false }: { accent?: boolean }) {
+  const [mode, toggleMode] = useVisualizerMode();
   return (
-    <div className="flex h-6 items-end gap-[3px]" aria-hidden="true">
-      {BAR_HEIGHTS.map((height, index) => (
-        <motion.span
-          key={index}
-          className={clsx(
-            "w-[3px] rounded-full",
-            accent ? "bg-accent-400" : "bg-ivory-400/45",
-          )}
-          animate={{
-            height: [`${Math.max(4, height * 0.35)}px`, `${Math.max(6, height)}px`, `${Math.max(4, height * 0.35)}px`],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 0.75 + (index % 4) * 0.15,
-            ease: "easeInOut",
-          }}
-          style={{ height }}
-        />
-      ))}
-    </div>
+    <button
+      type="button"
+      onClick={toggleMode}
+      title="Audio Visualizer · Easter Egg: Click to cycle secret modes!"
+      className="cursor-pointer transition-transform active:scale-95 select-none"
+    >
+      {mode === "rings" ? (
+        <span className="relative flex h-6 w-6 items-center justify-center" aria-hidden="true">
+          <motion.span
+            animate={{ scale: [0.8, 1.8], opacity: [0.9, 0] }}
+            transition={{ repeat: Infinity, duration: 1.1, ease: "easeOut" }}
+            className="absolute h-6 w-6 rounded-full border border-accent-400"
+          />
+          <span className="h-2 w-2 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(46,224,168,0.9)]" />
+        </span>
+      ) : mode === "pulsar" ? (
+        <span className="relative flex h-6 w-6 items-center justify-center text-accent-300 font-bold text-sm" aria-hidden="true">
+          <motion.span
+            animate={{ rotate: 360, scale: [0.9, 1.25, 0.9] }}
+            transition={{ rotate: { repeat: Infinity, duration: 3, ease: "linear" }, scale: { repeat: Infinity, duration: 0.8, ease: "easeInOut" } }}
+          >
+            ✦
+          </motion.span>
+        </span>
+      ) : (
+        <div className="flex h-6 items-end gap-[3px]" aria-hidden="true">
+          {BAR_HEIGHTS.map((height, index) => (
+            <motion.span
+              key={index}
+              className={clsx(
+                "w-[3px] rounded-full",
+                accent ? "bg-accent-400" : "bg-ivory-400/45",
+              )}
+              animate={{
+                height: [`${Math.max(4, height * 0.35)}px`, `${Math.max(6, height)}px`, `${Math.max(4, height * 0.35)}px`],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 0.75 + (index % 4) * 0.15,
+                ease: "easeInOut",
+              }}
+              style={{ height }}
+            />
+          ))}
+        </div>
+      )}
+    </button>
   );
 }
 
@@ -99,9 +128,9 @@ export function ClassroomMock() {
         </span>
       </div>
 
-      <div className="grid gap-0 xl:grid-cols-[1fr_1.05fr]">
+      <div className="grid gap-0 lg:grid-cols-[1fr_1.05fr]">
         {/* ---------------------------- video strip --------------------------- */}
-        <div className="border-b border-ink-700/70 p-3 sm:p-4 xl:border-b-0 xl:border-r">
+        <div className="border-b border-ink-700/70 p-3 sm:p-4 lg:border-b-0 lg:border-r">
           <div className="overflow-hidden rounded-xl border border-ink-600/70 bg-ink-900">
             <div className="relative flex aspect-[16/9] flex-col items-center justify-center gap-4 bg-[radial-gradient(120%_120%_at_50%_0%,#16203a_0%,#080d18_72%)] overflow-hidden">
               <motion.span

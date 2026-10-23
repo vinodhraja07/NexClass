@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
-import { Compass, Eye, EyeOff, RotateCcw, Ruler, ArrowUpRight } from "lucide-react";
+import { Compass, Eye, EyeOff, RotateCcw, Ruler, ArrowUpRight, Sparkles } from "lucide-react";
 import clsx from "clsx";
 import type { LanguageCode } from "@nexclass/shared";
+import { triggerHologramEasterEgg } from "../easter-eggs/HiddenEasterEggs";
 
 export interface ObjectStageLabels {
   rotate: string;
@@ -44,6 +45,16 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
   const [showVectors, setShowVectors] = useState(true);
   const [measuring, setMeasuring] = useState(false);
   const [angle, setAngle] = useState(32);
+  const [hologramActive, setHologramActive] = useState(false);
+
+  useEffect(() => {
+    const handleHologram = () => {
+      setHologramActive(true);
+      window.setTimeout(() => setHologramActive(false), 4500);
+    };
+    window.addEventListener("nexclass:hologram-scan", handleHologram);
+    return () => window.removeEventListener("nexclass:hologram-scan", handleHologram);
+  }, []);
 
   const applyTransform = useCallback((value: number) => {
     angleRef.current = value;
@@ -149,8 +160,23 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
   ];
 
   return (
-    <div className={clsx("overflow-hidden rounded-xl border border-ink-700/80 bg-ink-950/60", className)}>
-      <svg viewBox="0 0 320 220" className="h-auto w-full" role="img" aria-label={labels.angle} lang={language}>
+    <div
+      className={clsx(
+        "relative overflow-hidden rounded-xl border bg-ink-950/60 transition-all duration-300",
+        hologramActive
+          ? "border-sky-400/80 shadow-lg shadow-sky-500/25 ring-1 ring-sky-400/40"
+          : "border-ink-700/80",
+        className,
+      )}
+    >
+      <svg
+        viewBox="0 0 320 220"
+        className="h-auto w-full cursor-pointer select-none"
+        role="img"
+        aria-label={labels.angle}
+        lang={language}
+        onDoubleClick={() => triggerHologramEasterEgg()}
+      >
         <defs>
           <pattern id="nc-room-grid" width="20" height="20" patternUnits="userSpaceOnUse">
             <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--border)" strokeOpacity="0.45" strokeWidth="1" />
@@ -161,6 +187,45 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
           </linearGradient>
         </defs>
         <rect width="320" height="220" fill="url(#nc-room-grid)" />
+
+        {hologramActive && !reduced ? (
+          <g className="pointer-events-none">
+            {/* Animated sweeping laser scan line */}
+            <line
+              x1="0"
+              y1="10"
+              x2="320"
+              y2="10"
+              stroke="#38BDF8"
+              strokeWidth="2.5"
+              strokeDasharray="6 3"
+              opacity="0.9"
+            >
+              <animate attributeName="y1" values="10; 210; 10" dur="2.2s" repeatCount="indefinite" />
+              <animate attributeName="y2" values="10; 210; 10" dur="2.2s" repeatCount="indefinite" />
+            </line>
+            {/* Hologram corner target brackets */}
+            <path
+              d="M 10 24 L 10 10 L 24 10 M 310 24 L 310 10 L 296 10 M 10 196 L 10 210 L 24 210 M 310 196 L 310 210 L 296 210"
+              fill="none"
+              stroke="#38BDF8"
+              strokeWidth="1.5"
+              opacity="0.85"
+            />
+            <text
+              x="160"
+              y="22"
+              textAnchor="middle"
+              fill="#38BDF8"
+              fontSize="8.5"
+              fontFamily="JetBrains Mono, monospace"
+              letterSpacing="2"
+              opacity="0.9"
+            >
+              ⚡ 3D HOLO-SCAN: MULTILINGUAL SYNC ACTIVE
+            </text>
+          </g>
+        ) : null}
 
         {variant === "matrix-board" ? (
           <g opacity="0.85">
@@ -324,6 +389,12 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
             </button>
           );
         })}
+        {hologramActive && (
+          <span className="inline-flex h-7 items-center gap-1 rounded-lg border border-sky-400/50 bg-sky-500/15 px-2 text-2xs font-semibold text-sky-200 animate-pulse">
+            <Sparkles className="h-3 w-3 text-sky-300" aria-hidden="true" />
+            Holo-Scan
+          </span>
+        )}
       </div>
     </div>
   );

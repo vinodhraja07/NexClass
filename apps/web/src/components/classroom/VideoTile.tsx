@@ -17,6 +17,7 @@ import clsx from "clsx";
 import type { ParticipantPublic } from "@nexclass/shared";
 import { languageNativeName } from "@nexclass/shared";
 import { Avatar } from "./Avatar";
+import { useVisualizerMode } from "@/components/easter-eggs/HiddenEasterEggs";
 
 export type TileStatus = "connecting" | "connected" | "failed" | "closed" | "idle" | "local";
 
@@ -69,6 +70,7 @@ export function VideoTile({
 }: VideoTileProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const reduced = useReducedMotion() ?? false;
+  const [visualizerMode, toggleVisualizer] = useVisualizerMode();
 
   const cameraOn = participant.videoEnabled && Boolean(stream);
   const isHost = participant.role === "teacher";
@@ -191,36 +193,75 @@ export function VideoTile({
         {/* Mic status inside name pill */}
         {participant.audioEnabled ? (
           activeSpeaker ? (
-            /* Active speaking dynamic equalizer wave bars */
-            <span className="flex items-end gap-[3px] h-3.5 px-0.5" aria-hidden="true" title="Speaking">
-              {[
-                { id: 0, scaleY: [0.3, 0.85, 0.45, 1.0, 0.35, 0.7, 0.3], duration: 0.78, delay: 0 },
-                { id: 1, scaleY: [0.45, 1.0, 0.35, 0.8, 0.55, 0.95, 0.45], duration: 0.64, delay: 0.1 },
-                { id: 2, scaleY: [0.35, 0.75, 0.5, 0.95, 0.3, 0.85, 0.35], duration: 0.86, delay: 0.18 },
-                { id: 3, scaleY: [0.25, 0.65, 0.4, 0.75, 0.45, 0.6, 0.25], duration: 0.72, delay: 0.08 },
-              ].map((bar) => (
-                <motion.span
-                  key={bar.id}
-                  animate={
-                    reduced
-                      ? { scaleY: 0.6 }
-                      : { scaleY: bar.scaleY }
-                  }
-                  transition={
-                    reduced
-                      ? { duration: 0 }
-                      : {
-                          repeat: Infinity,
-                          repeatType: "reverse",
-                          duration: bar.duration,
-                          delay: bar.delay,
-                          ease: "easeInOut",
-                        }
-                  }
-                  className="w-[2.5px] h-3 rounded-full bg-emerald-400 origin-bottom shadow-[0_0_6px_rgba(52,211,153,0.6)]"
-                />
-              ))}
-            </span>
+            /* Active speaking dynamic equalizer wave with secret visualizer modes */
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleVisualizer();
+              }}
+              title="Speaking · Easter Egg: Click to cycle secret visualizer modes!"
+              className="group/vis relative flex items-center justify-center cursor-pointer p-0.5 rounded transition-transform active:scale-90"
+            >
+              {visualizerMode === "rings" ? (
+                /* Kinetic Neon Rings Easter Egg */
+                <span className="relative flex h-3.5 w-3.5 items-center justify-center" aria-hidden="true">
+                  <motion.span
+                    animate={reduced ? {} : { scale: [0.8, 1.8], opacity: [0.9, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.1, ease: "easeOut" }}
+                    className="absolute h-3.5 w-3.5 rounded-full border border-emerald-400"
+                  />
+                  <motion.span
+                    animate={reduced ? {} : { scale: [0.6, 1.4], opacity: [0.9, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.1, delay: 0.45, ease: "easeOut" }}
+                    className="absolute h-3 w-3 rounded-full border border-teal-300"
+                  />
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                </span>
+              ) : visualizerMode === "pulsar" ? (
+                /* Radiant Quantum Pulsar Easter Egg */
+                <span className="relative flex h-3.5 w-3.5 items-center justify-center" aria-hidden="true">
+                  <motion.span
+                    animate={reduced ? {} : { rotate: 360, scale: [0.9, 1.15, 0.9] }}
+                    transition={{ rotate: { repeat: Infinity, duration: 3, ease: "linear" }, scale: { repeat: Infinity, duration: 0.8, ease: "easeInOut" } }}
+                    className="absolute flex items-center justify-center text-[10px] text-emerald-300"
+                  >
+                    ✦
+                  </motion.span>
+                </span>
+              ) : (
+                /* Standard Dynamic Equalizer Bars with glow */
+                <span className="flex items-end gap-[3px] h-3.5 px-0.5" aria-hidden="true">
+                  {[
+                    { id: 0, scaleY: [0.3, 0.85, 0.45, 1.0, 0.35, 0.7, 0.3], duration: 0.78, delay: 0 },
+                    { id: 1, scaleY: [0.45, 1.0, 0.35, 0.8, 0.55, 0.95, 0.45], duration: 0.64, delay: 0.1 },
+                    { id: 2, scaleY: [0.35, 0.75, 0.5, 0.95, 0.3, 0.85, 0.35], duration: 0.86, delay: 0.18 },
+                    { id: 3, scaleY: [0.25, 0.65, 0.4, 0.75, 0.45, 0.6, 0.25], duration: 0.72, delay: 0.08 },
+                  ].map((bar) => (
+                    <motion.span
+                      key={bar.id}
+                      animate={
+                        reduced
+                          ? { scaleY: 0.6 }
+                          : { scaleY: bar.scaleY }
+                      }
+                      transition={
+                        reduced
+                          ? { duration: 0 }
+                          : {
+                              repeat: Infinity,
+                              repeatType: "reverse",
+                              duration: bar.duration,
+                              delay: bar.delay,
+                              ease: "easeInOut",
+                            }
+                      }
+                      className="w-[2.5px] h-3 rounded-full bg-emerald-400 origin-bottom shadow-[0_0_6px_rgba(52,211,153,0.6)]"
+                    />
+                  ))}
+                </span>
+              )}
+            </button>
           ) : (
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" title="Microphone on" />
           )

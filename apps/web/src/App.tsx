@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "./lib/auth";
+import { HiddenEasterEggs } from "./components/easter-eggs/HiddenEasterEggs";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Login = lazy(() => import("./pages/Login"));
@@ -36,7 +37,9 @@ export default function App() {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
+    <>
+      <HiddenEasterEggs />
+      <AnimatePresence mode="wait">
       <Suspense fallback={<PageFallback />}>
         <motion.div
           key={location.pathname}
@@ -72,5 +75,6 @@ export default function App() {
         </motion.div>
       </Suspense>
     </AnimatePresence>
+    </>
   );
 }

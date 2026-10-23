@@ -4,6 +4,7 @@ import { Check, Copy, Gauge, SignalHigh, SignalLow, SignalMedium, TriangleAlert 
 import clsx from "clsx";
 import type { ConnectionStatus } from "@/lib/transport";
 import { LiveDot } from "@/components/ui";
+import { NexClassMark } from "@/components/landing/Wordmark";
 
 function formatDuration(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));
@@ -88,7 +89,8 @@ export function ClassroomHeader({
         className,
       )}
     >
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <NexClassMark className="h-6 w-6" />
         <h1 className="truncate text-xs sm:text-sm font-semibold text-text-primary tracking-tight">
           {title}
         </h1>
