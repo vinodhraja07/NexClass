@@ -60,10 +60,54 @@ export default function Demo() {
       {/* demo overview banner */}
       <div className="border-b border-ink-700/70 bg-ink-850/60 px-3.5 py-2 sm:px-5">
         <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-2.5">
-          <Badge tone="warn">
-            <CircleAlert className="h-3 w-3" aria-hidden="true" />
-            Demo 1 - captions &amp; voice translation
-          </Badge>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            <Badge tone="warn">
+              <CircleAlert className="h-3 w-3" aria-hidden="true" />
+              Demo 1 - captions &amp; voice translation
+            </Badge>
+
+            <Button
+              size="sm"
+              variant={playing ? "secondary" : "primary"}
+              icon={
+                playing ? (
+                  <span className="flex items-center gap-0.5 h-3.5 mr-0.5" aria-hidden="true">
+                    {[0.4, 0.9, 1, 0.6].map((scale, i) => (
+                      <motion.span
+                        key={i}
+                        animate={reduced ? {} : { scaleY: [0.25, scale, 0.25] }}
+                        transition={{ repeat: Infinity, duration: 0.65 + i * 0.15, ease: "easeInOut" }}
+                        className="w-0.5 h-3 rounded-full bg-accent-300 origin-bottom"
+                      />
+                    ))}
+                  </span>
+                ) : (
+                  <Play className="h-3.5 w-3.5" aria-hidden="true" />
+                )
+              }
+              className={
+                playing
+                  ? clsx(
+                      "h-8 border-accent-400/50 bg-accent-400/15 text-accent-200 shadow-sm shadow-accent-400/20 text-xs",
+                      !reduced && "animate-pulse",
+                    )
+                  : "h-8 shadow-md shadow-accent-400/25 text-xs"
+              }
+              onClick={togglePlayback}
+            >
+              {playing ? "Pause lecture" : "Play lecture"}
+            </Button>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />}
+              className="h-8 text-xs text-ivory-200 hover:text-ivory-50 border border-ink-600/60 hover:bg-ink-800"
+              onClick={restart}
+            >
+              Restart
+            </Button>
+          </div>
 
           <div className="flex items-center gap-2">
             {/* Direct Button to Demo 2 */}
@@ -91,52 +135,6 @@ export default function Demo() {
             </Link>
           </div>
         </div>
-      </div>
-
-      {/* demo control strip */}
-      <div
-        className="flex items-center gap-2 overflow-x-auto border-b border-ink-700/70 bg-ink-900/80 px-3.5 py-2.5 scrollbar-none sm:px-5"
-        aria-label="Demo controls"
-      >
-        <Button
-          size="sm"
-          variant={playing ? "secondary" : "primary"}
-          icon={
-            playing ? (
-              <span className="flex items-center gap-0.5 h-3.5 mr-0.5" aria-hidden="true">
-                {[0.4, 0.9, 1, 0.6].map((scale, i) => (
-                  <motion.span
-                    key={i}
-                    animate={reduced ? {} : { scaleY: [0.25, scale, 0.25] }}
-                    transition={{ repeat: Infinity, duration: 0.65 + i * 0.15, ease: "easeInOut" }}
-                    className="w-0.5 h-3 rounded-full bg-accent-300 origin-bottom"
-                  />
-                ))}
-              </span>
-            ) : (
-              <Play className="h-3.5 w-3.5" aria-hidden="true" />
-            )
-          }
-          className={
-            playing
-              ? clsx(
-                  "border-accent-400/50 bg-accent-400/15 text-accent-200 shadow-sm shadow-accent-400/20",
-                  !reduced && "animate-pulse",
-                )
-              : "shadow-md shadow-accent-400/25"
-          }
-          onClick={togglePlayback}
-        >
-          {playing ? "Pause lecture" : "Play lecture"}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          icon={<RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />}
-          onClick={restart}
-        >
-          Restart
-        </Button>
       </div>
 
       {/* the classroom itself - the identical shell from the live room */}

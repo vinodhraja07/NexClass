@@ -40,20 +40,17 @@ export default function DemoRoom() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-5 px-4 py-8">
-      <header className="flex flex-wrap items-center gap-3">
-        <span className="nc-eyebrow flex items-center gap-1.5 text-accent-300">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <span className="nc-eyebrow flex items-center gap-1.5 text-accent-300 text-sm font-semibold">
           <Boxes className="h-4 w-4" aria-hidden="true" />
           Demo 2 - 3D shared room labels
         </span>
-        <h1 className="w-full text-2xl font-semibold text-ivory-50 sm:w-auto sm:flex-1">
-          Demo 2 - one shared object, one teacher, six languages
-        </h1>
         <div className="flex items-center gap-2">
           <Link
             to="/demo/captions"
             className="nc-focus inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-accent-400/50 bg-accent-400/10 px-3 text-[13px] font-semibold text-accent-300 transition-colors hover:bg-accent-400/20"
           >
-            ← Demo 1 (Captions & Audio)
+            ← Demo 1 (Captions &amp; Audio)
           </Link>
           <Link
             to="/demo"
@@ -63,13 +60,6 @@ export default function DemoRoom() {
           </Link>
         </div>
       </header>
-
-      <p className="max-w-3xl text-sm leading-relaxed text-ivory-300">
-        The teacher highlights one object for the whole classroom. The geometry is identical for every
-        participant, but each student reads the object name, instructions, control buttons and units in their
-        own language. Technical words never change meaning because every label is hand-authored per language -
-        nothing here is a machine mistranslation.
-      </p>
 
       <section
         aria-label="Teacher console"
@@ -169,13 +159,6 @@ export default function DemoRoom() {
           );
         })}
       </div>
-
-      <footer className="rounded-2xl border border-ink-700 bg-ink-850/60 p-4 text-2xs leading-relaxed text-ivory-400">
-        <strong className="text-ivory-200">What this proves:</strong> the teacher switches a single shared
-        object; labels, instructions, buttons and measurement units are re-rendered per student language with
-        correct script shading (<code lang="en">lang</code> attributes), and the original English wording is
-        guarded by the terminology engine so words like "torque" never silently change meaning.
-      </footer>
     </main>
   );
 }
