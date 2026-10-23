@@ -207,11 +207,19 @@ export function ClassroomShell({
     onLeft?.();
   }, [classroom, handleLeave, onLeft, pushToast, transport.kind]);
 
-  const streams: Record<string, MediaStream | null> = Object.fromEntries(
-    Object.entries(peers.peers).map(([id, entry]) => [id, entry.stream]),
+  const streams = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(peers.peers).map(([id, entry]) => [id, entry.stream]),
+      ),
+    [peers.peers],
   );
-  const statuses: Record<string, TileStatus> = Object.fromEntries(
-    Object.entries(peers.peers).map(([id, entry]) => [id, entry.status]),
+  const statuses = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(peers.peers).map(([id, entry]) => [id, entry.status as TileStatus]),
+      ),
+    [peers.peers],
   );
 
   const availableLanguages = classroom.meeting?.availableLanguages ?? [];
@@ -244,7 +252,7 @@ export function ClassroomShell({
   ].filter((entry): entry is { text: string; header: string } => entry !== null);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden flex-col bg-background text-text-primary select-none">
+    <div className="flex h-full w-full overflow-hidden flex-col bg-background text-text-primary select-none">
       {/* Sleek Google Meet Top Bar */}
       <ClassroomHeader
         title={classroom.meeting?.title ?? (simulated ? "Demo classroom" : "NexClass Classroom")}

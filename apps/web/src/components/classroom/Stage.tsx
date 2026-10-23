@@ -51,7 +51,7 @@ export function Stage({
   const gridLayout = (() => {
     if (count <= 1) return "grid-cols-1 max-w-4xl max-h-[82vh]";
     if (count === 2) return "grid-cols-1 sm:grid-cols-2 max-w-6xl max-h-[82vh]";
-    if (count <= 4) return "grid-cols-1 sm:grid-cols-2 max-w-6xl max-h-[85vh]";
+    if (count <= 4) return "grid-cols-2 max-w-6xl max-h-[85vh]";
     if (count <= 6) return "grid-cols-2 sm:grid-cols-3 max-w-7xl max-h-[88vh]";
     return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 max-w-7xl max-h-[90vh]";
   })();
@@ -121,7 +121,7 @@ export function Stage({
   return (
     <div
       className={clsx(
-        "relative flex h-full w-full flex-1 items-center justify-center p-2 sm:p-4 overflow-hidden",
+        "relative flex h-full w-full flex-1 items-center justify-center p-2 sm:p-4 overflow-y-auto overflow-x-hidden scrollbar-none",
         className,
       )}
     >

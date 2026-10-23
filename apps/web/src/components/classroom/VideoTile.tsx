@@ -1,15 +1,17 @@
 import { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
+  AlertTriangle,
   Crown,
   Mic,
   MicOff,
   MonitorUp,
   Pin,
+  PinOff,
+  Radio,
   Signal,
   SignalLow,
-  TriangleAlert,
-  VideoOff,
+  WifiOff,
 } from "lucide-react";
 import clsx from "clsx";
 import type { ParticipantPublic } from "@nexclass/shared";
@@ -20,68 +22,69 @@ export type TileStatus = "connecting" | "connected" | "failed" | "closed" | "idl
 
 export interface VideoTileProps {
   participant: ParticipantPublic;
+  isSelf: boolean;
   stream: MediaStream | null;
   status: TileStatus;
-  isSelf?: boolean;
   activeSpeaker?: boolean;
-  /** Remote audio is muted while the translated voice mode is active. */
   audioMuted?: boolean;
+  onPin?: () => void;
+  isPinned?: boolean;
   className?: string;
 }
 
-function statusMeta(status: TileStatus) {
+function statusMeta(status: TileStatus): { label: string; icon: typeof Signal; tone: string } {
   switch (status) {
     case "connected":
-      return { label: "Good Connection", icon: Signal, tone: "text-emerald-400" };
+      return { label: "Connected (Good)", icon: Signal, tone: "text-emerald-400" };
     case "connecting":
       return { label: "Connecting…", icon: SignalLow, tone: "text-amber-400" };
     case "failed":
-      return { label: "Connection issue", icon: TriangleAlert, tone: "text-rose-400" };
+      return { label: "Connection lost", icon: WifiOff, tone: "text-rose-400" };
     case "closed":
-      return { label: "Closed", icon: SignalLow, tone: "text-white/40" };
+      return { label: "Left room", icon: AlertTriangle, tone: "text-text-secondary" };
     case "local":
-      return { label: "Your preview", icon: Signal, tone: "text-emerald-400" };
+      return { label: "You", icon: Signal, tone: "text-primary" };
+    case "idle":
     default:
-      return { label: "Connecting", icon: SignalLow, tone: "text-white/40" };
+      return { label: "Connected", icon: Signal, tone: "text-emerald-400" };
   }
 }
 
 /**
- * Google Meet-Style Participant Video Tile.
+ * Google Meet Video Tile.
  *
- * Implements the iconic Google Meet meeting tile:
- * - Edge-to-edge video canvas
- * - Bottom-left translucent name pill with mic status
- * - Subtle active speaker border ring
- * - Centered initials avatar on camera-off
+ * Implements bottom-left translucent name pill, mic indicator,
+ * active speaking equalizer bars, and centered large initials avatar on camera off.
  */
 export function VideoTile({
   participant,
+  isSelf,
   stream,
   status,
-  isSelf = false,
   activeSpeaker = false,
   audioMuted = false,
+  onPin,
+  isPinned = false,
   className,
 }: VideoTileProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const reduced = useReducedMotion() ?? false;
 
+  const cameraOn = participant.videoEnabled && Boolean(stream);
+  const isHost = participant.role === "teacher";
+  const meta = statusMeta(status);
+  const StatusIcon = meta.icon;
+
   useEffect(() => {
     const element = videoRef.current;
     if (!element) return;
-    if (stream) {
+    if (stream && cameraOn) {
       element.srcObject = stream;
       void element.play().catch(() => undefined);
     } else {
       element.srcObject = null;
     }
-  }, [stream]);
-
-  const cameraOn = participant.videoEnabled && Boolean(stream);
-  const isHost = participant.role === "teacher";
-  const meta = statusMeta(status);
-  const StatusIcon = meta.icon;
+  }, [stream, cameraOn]);
 
   return (
     <motion.div
@@ -134,14 +137,20 @@ export function VideoTile({
           <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
           <span className="sr-only">{meta.label}</span>
         </span>
-        <button
-          type="button"
-          aria-label="Pin tile"
-          title="Pin to main screen"
-          className="grid h-7 w-7 place-items-center rounded-full bg-black/60 backdrop-blur-md text-white/80 hover:text-white shadow-sm border border-white/10 transition-colors"
-        >
-          <Pin className="h-3.5 w-3.5" aria-hidden="true" />
-        </button>
+        {onPin && (
+          <button
+            type="button"
+            onClick={onPin}
+            aria-label={isPinned ? "Unpin tile" : "Pin tile"}
+            title={isPinned ? "Unpin from main screen" : "Pin to main screen"}
+            className={clsx(
+              "grid h-7 w-7 place-items-center rounded-full bg-black/60 backdrop-blur-md shadow-sm border border-white/10 transition-colors",
+              isPinned ? "bg-primary text-background font-bold" : "text-white/80 hover:text-white",
+            )}
+          >
+            {isPinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+          </button>
+        )}
       </div>
 
       {/* Google Meet Signature Bottom-Left Name Pill */}
@@ -169,7 +178,7 @@ export function VideoTile({
           )
         ) : (
           <span
-            className="grid h-4 w-4 place-items-center rounded-full bg-rose-600/90 text-white shadow-xs"
+            className="grid h-4 w-4 place-items-center rounded-full bg-rose-600/90 text-white shadow-sm"
             title="Microphone muted"
           >
             <MicOff className="h-2.5 w-2.5" aria-hidden="true" />
@@ -177,7 +186,7 @@ export function VideoTile({
         )}
 
         {/* Participant Name */}
-        <span className="truncate font-medium text-white/95 text-[12px] drop-shadow-xs">
+        <span className="truncate font-medium text-white/95 text-[12px] drop-shadow-sm">
           {participant.displayName}
           {isSelf ? " (You)" : ""}
         </span>
@@ -186,7 +195,7 @@ export function VideoTile({
         {isHost && (
           <span
             title="Host of this classroom"
-            className="inline-flex items-center gap-0.5 rounded bg-amber-400/20 px-1 py-0.2 text-[10px] font-bold text-amber-300"
+            className="inline-flex items-center gap-0.5 rounded bg-amber-400/20 px-1 py-0.5 text-[10px] font-bold text-amber-300"
           >
             <Crown className="h-2.5 w-2.5" />
             <span>Host</span>
@@ -196,7 +205,7 @@ export function VideoTile({
         {/* Language Badge */}
         <span
           lang={participant.interfaceLanguage}
-          className="rounded bg-white/10 px-1.5 py-0.2 text-[10px] text-white/80"
+          className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/80"
           title={`Language: ${languageNativeName(participant.interfaceLanguage)}`}
         >
           {languageNativeName(participant.interfaceLanguage)}
@@ -204,7 +213,7 @@ export function VideoTile({
 
         {/* Screen sharing pill */}
         {participant.screenSharing && (
-          <span className="inline-flex items-center gap-1 rounded bg-blue-500/30 px-1.5 py-0.2 text-[10px] text-blue-200">
+          <span className="inline-flex items-center gap-1 rounded bg-blue-500/30 px-1.5 py-0.5 text-[10px] text-blue-200">
             <MonitorUp className="h-2.5 w-2.5" />
             <span>Sharing</span>
           </span>

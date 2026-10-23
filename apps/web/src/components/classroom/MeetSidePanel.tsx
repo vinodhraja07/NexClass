@@ -84,7 +84,7 @@ export function MeetSidePanel({
       animate={{ x: 0, opacity: 1 }}
       exit={reduced ? { opacity: 0 } : { x: 360, opacity: 0 }}
       transition={{ type: "spring", stiffness: 350, damping: 30 }}
-      className="relative flex h-full w-[360px] shrink-0 flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface/95 shadow-2xl backdrop-blur-2xl z-20"
+      className="fixed inset-y-0 right-0 z-40 flex h-full w-full sm:w-[360px] sm:relative sm:z-20 shrink-0 flex-col overflow-hidden rounded-none sm:rounded-2xl border-l sm:border border-border/80 bg-surface/95 shadow-2xl backdrop-blur-2xl"
       aria-label="Meeting side panel"
     >
       {/* Top Header */}
@@ -124,7 +124,7 @@ export function MeetSidePanel({
               className={clsx(
                 "nc-focus relative flex flex-1 items-center justify-center gap-1.5 rounded-xl py-1.5 text-xs font-semibold transition-all",
                 isActive
-                  ? "bg-primary text-background shadow-xs font-bold"
+                  ? "bg-primary text-background shadow-sm font-bold"
                   : "text-text-secondary hover:bg-surface hover:text-text-primary",
               )}
             >

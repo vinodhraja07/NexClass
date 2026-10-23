@@ -48,11 +48,36 @@ export interface ClassroomToolbarProps {
 }
 
 /**
+ * Isolated Meeting Clock to prevent re-rendering the full toolbar every second.
+ */
+function MeetingClock() {
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      setTime(
+        now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true }),
+      );
+    };
+    update();
+    const interval = window.setInterval(update, 10000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  return (
+    <span className="hidden md:inline font-mono text-sm font-medium text-text-primary/90">
+      {time || "12:00 PM"}
+    </span>
+  );
+}
+
+/**
  * Authentic Google Meet Circular Bottom Toolbar.
  *
  * Implements the 3-zone Google Meet layout:
  * - Left: Meeting Time & Clickable Room Code
- * - Center: 48px Circular Media Buttons (Mic, Cam, CC, Audio Mode, Share, Hand) & Red Leave Pill
+ * - Center: Responsive Circular Media Buttons & Red Leave Pill
  * - Right: Circular Drawer Triggers (Info, People with count, Chat with badge, Language Hub)
  */
 export function ClassroomToolbar({
@@ -80,20 +105,6 @@ export function ClassroomToolbar({
   const reduced = useReducedMotion() ?? false;
   const [handRaised, setHandRaised] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
-  const [currentTime, setCurrentTime] = useState("");
-
-  // Live Google Meet digital clock
-  useEffect(() => {
-    const update = () => {
-      const now = new Date();
-      setCurrentTime(
-        now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true }),
-      );
-    };
-    update();
-    const interval = window.setInterval(update, 1000);
-    return () => window.clearInterval(interval);
-  }, []);
 
   const copyCode = () => {
     try {
@@ -106,31 +117,31 @@ export function ClassroomToolbar({
   };
 
   return (
-    <div className="relative z-30 flex h-[76px] w-full shrink-0 items-center justify-between border-t border-border/80 bg-background/95 px-4 backdrop-blur-2xl sm:px-6">
+    <div className="relative z-30 flex h-[72px] sm:h-[76px] w-full shrink-0 items-center justify-between border-t border-border/80 bg-background/95 px-2 sm:px-6 backdrop-blur-2xl">
       {/* Zone 1 (Left): Time & Room Code */}
-      <div className="flex items-center gap-3 min-w-0 flex-1 max-w-xs">
-        <span className="hidden sm:inline font-mono text-sm font-medium text-text-primary/90">
-          {currentTime || "12:00 PM"}
-        </span>
-        <span className="hidden sm:inline text-border select-none">|</span>
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 max-w-xs">
+        <MeetingClock />
+        <span className="hidden md:inline text-border select-none">|</span>
         <button
           type="button"
           onClick={copyCode}
-          className="nc-focus group flex items-center gap-1.5 rounded-lg border border-transparent px-2 py-1 text-xs font-semibold text-text-secondary hover:border-border hover:bg-surface hover:text-text-primary transition-all"
+          className="nc-focus group flex items-center gap-1.5 rounded-lg border border-transparent px-1.5 sm:px-2 py-1 text-xs font-semibold text-text-secondary hover:border-border hover:bg-surface hover:text-text-primary transition-all truncate"
           title="Click to copy meeting code"
         >
-          <span className="font-mono tracking-wide">{meetingCode.toLowerCase()}</span>
+          <span className="font-mono tracking-wide truncate max-w-[80px] sm:max-w-none">
+            {meetingCode.toLowerCase()}
+          </span>
           {codeCopied ? (
-            <Check className="h-3.5 w-3.5 text-primary" />
+            <Check className="h-3.5 w-3.5 text-primary shrink-0" />
           ) : (
-            <Copy className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+            <Copy className="h-3 w-3 opacity-60 group-hover:opacity-100 shrink-0" />
           )}
         </button>
       </div>
 
-      {/* Zone 2 (Center): 48px Circular Media Controls + Red Leave Pill */}
+      {/* Zone 2 (Center): Circular Media Controls + Red Leave Pill */}
       <div
-        className="flex items-center gap-2 sm:gap-3"
+        className="flex items-center gap-1.5 sm:gap-3 shrink-0"
         role="toolbar"
         aria-label="Google Meet call controls"
       >
@@ -146,13 +157,17 @@ export function ClassroomToolbar({
           aria-label={audioEnabled ? "Mute microphone" : "Unmute microphone"}
           aria-pressed={audioEnabled}
           className={clsx(
-            "nc-focus grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
             audioEnabled
               ? "bg-surface/90 text-text-primary border border-border/80 hover:bg-surface hover:border-primary/50"
               : "bg-rose-600 text-white shadow-rose-600/30 hover:bg-rose-700",
           )}
         >
-          {audioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+          {audioEnabled ? (
+            <Mic className="h-4 w-4 sm:h-5 sm:w-5" />
+          ) : (
+            <MicOff className="h-4 w-4 sm:h-5 sm:w-5" />
+          )}
         </motion.button>
 
         {/* Camera Button */}
@@ -167,13 +182,17 @@ export function ClassroomToolbar({
           aria-label={videoEnabled ? "Stop video" : "Start video"}
           aria-pressed={videoEnabled}
           className={clsx(
-            "nc-focus grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
             videoEnabled
               ? "bg-surface/90 text-text-primary border border-border/80 hover:bg-surface hover:border-primary/50"
               : "bg-rose-600 text-white shadow-rose-600/30 hover:bg-rose-700",
           )}
         >
-          {videoEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
+          {videoEnabled ? (
+            <Video className="h-4 w-4 sm:h-5 sm:w-5" />
+          ) : (
+            <VideoOff className="h-4 w-4 sm:h-5 sm:w-5" />
+          )}
         </motion.button>
 
         {/* Closed Captions (CC) */}
@@ -187,13 +206,13 @@ export function ClassroomToolbar({
           aria-label="Toggle subtitles"
           aria-pressed={captionsVisible}
           className={clsx(
-            "nc-focus grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
             captionsVisible
               ? "bg-primary text-background font-bold shadow-primary/25 hover:bg-primary/90"
               : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
           )}
         >
-          <Captions className="h-5 w-5" />
+          <Captions className="h-4 w-4 sm:h-5 sm:w-5" />
         </motion.button>
 
         {/* Quick Language / Voice Mode Toggle */}
@@ -211,20 +230,20 @@ export function ClassroomToolbar({
             }
             aria-label="Toggle audio voice mode"
             className={clsx(
-              "nc-focus relative grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
+              "nc-focus relative grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
               voiceMode === "translated"
                 ? "bg-primary/20 text-primary border border-primary/50 hover:bg-primary/30"
                 : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
             )}
           >
-            <Headphones className="h-5 w-5" />
+            <Headphones className="h-4 w-4 sm:h-5 sm:w-5" />
             {voiceMode === "translated" && (
-              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-background" />
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-400 ring-2 ring-background" />
             )}
           </motion.button>
         )}
 
-        {/* Screen Share */}
+        {/* Screen Share (Hidden on small mobile) */}
         <motion.button
           type="button"
           whileHover={{ scale: 1.05 }}
@@ -236,7 +255,7 @@ export function ClassroomToolbar({
           aria-label="Present screen"
           aria-pressed={screenSharing}
           className={clsx(
-            "nc-focus grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus hidden sm:grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
             screenSharing
               ? "bg-primary text-background font-bold shadow-primary/25"
               : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
@@ -245,7 +264,7 @@ export function ClassroomToolbar({
           {screenSharing ? <MonitorOff className="h-5 w-5" /> : <MonitorUp className="h-5 w-5" />}
         </motion.button>
 
-        {/* Raise Hand Reaction */}
+        {/* Raise Hand Reaction (Hidden on small mobile) */}
         <motion.button
           type="button"
           whileHover={{ scale: 1.05 }}
@@ -256,7 +275,7 @@ export function ClassroomToolbar({
           aria-label="Raise hand"
           aria-pressed={handRaised}
           className={clsx(
-            "nc-focus grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus hidden sm:grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
             handRaised
               ? "bg-amber-500 text-background font-bold shadow-amber-500/30"
               : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
@@ -266,7 +285,7 @@ export function ClassroomToolbar({
         </motion.button>
 
         {/* Red Leave Call Pill Button */}
-        <div className="flex items-center gap-1.5 ml-1">
+        <div className="flex items-center gap-1 sm:gap-1.5 ml-0.5 sm:ml-1">
           <motion.button
             type="button"
             whileHover={{ scale: 1.03 }}
@@ -275,10 +294,10 @@ export function ClassroomToolbar({
             onClick={onLeave}
             title="Leave call"
             aria-label="Leave meeting"
-            className="nc-focus inline-flex h-12 items-center gap-2 rounded-full bg-rose-600 px-5 text-xs font-semibold text-white shadow-lg shadow-rose-600/25 hover:bg-rose-700 active:bg-rose-800 transition-all select-none"
+            className="nc-focus inline-flex h-10 sm:h-12 items-center gap-1.5 sm:gap-2 rounded-full bg-rose-600 px-3.5 sm:px-5 text-xs font-semibold text-white shadow-lg shadow-rose-600/25 hover:bg-rose-700 active:bg-rose-800 transition-all select-none"
           >
             <PhoneOff className="h-4 w-4" />
-            <span className="hidden sm:inline">Leave</span>
+            <span className="hidden xs:inline">Leave</span>
           </motion.button>
 
           {isHost && (
@@ -290,7 +309,7 @@ export function ClassroomToolbar({
               onClick={onEndMeeting}
               title="End class for everyone"
               aria-label="End meeting"
-              className="nc-focus hidden sm:grid h-12 w-12 place-items-center rounded-full bg-rose-950/70 border border-rose-500/50 text-rose-300 hover:bg-rose-900 transition-all"
+              className="nc-focus hidden md:grid h-12 w-12 place-items-center rounded-full bg-rose-950/70 border border-rose-500/50 text-rose-300 hover:bg-rose-900 transition-all"
             >
               <Square className="h-4 w-4" />
             </motion.button>
@@ -299,7 +318,7 @@ export function ClassroomToolbar({
       </div>
 
       {/* Zone 3 (Right): Side Panel Toggles */}
-      <div className="flex items-center gap-1.5 sm:gap-2 justify-end min-w-0 flex-1 max-w-xs">
+      <div className="flex items-center gap-1 sm:gap-2 justify-end min-w-0 flex-1 max-w-xs">
         {/* Details / Info Trigger */}
         <button
           type="button"
@@ -307,9 +326,9 @@ export function ClassroomToolbar({
           title="Meeting details"
           aria-label="Meeting information"
           className={clsx(
-            "nc-focus grid h-10 w-10 place-items-center rounded-full transition-all select-none",
+            "nc-focus grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full transition-all select-none",
             panelOpen && activePanelTab === "info"
-              ? "bg-primary text-background font-bold shadow-xs"
+              ? "bg-primary text-background font-bold shadow-sm"
               : "text-text-secondary hover:bg-surface hover:text-text-primary",
           )}
         >
@@ -323,9 +342,9 @@ export function ClassroomToolbar({
           title="People"
           aria-label={`Participants (${participantCount})`}
           className={clsx(
-            "nc-focus relative grid h-10 w-10 place-items-center rounded-full transition-all select-none",
+            "nc-focus relative grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full transition-all select-none",
             panelOpen && activePanelTab === "people"
-              ? "bg-primary text-background font-bold shadow-xs"
+              ? "bg-primary text-background font-bold shadow-sm"
               : "text-text-secondary hover:bg-surface hover:text-text-primary",
           )}
         >
@@ -344,15 +363,15 @@ export function ClassroomToolbar({
           title="In-call messages"
           aria-label="In-call chat"
           className={clsx(
-            "nc-focus relative grid h-10 w-10 place-items-center rounded-full transition-all select-none",
+            "nc-focus relative grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full transition-all select-none",
             panelOpen && activePanelTab === "chat"
-              ? "bg-primary text-background font-bold shadow-xs"
+              ? "bg-primary text-background font-bold shadow-sm"
               : "text-text-secondary hover:bg-surface hover:text-text-primary",
           )}
         >
           <MessageSquare className="h-4 w-4" />
           {unreadChat > 0 && (
-            <span className="absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-full bg-signal-live px-1 font-mono text-[9px] font-bold text-white shadow-xs">
+            <span className="absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-full bg-signal-live px-1 font-mono text-[9px] font-bold text-white shadow-sm">
               {unreadChat}
             </span>
           )}
@@ -365,9 +384,9 @@ export function ClassroomToolbar({
           title="Language & Audio Hub"
           aria-label="Language and speech settings"
           className={clsx(
-            "nc-focus relative grid h-10 w-10 place-items-center rounded-full transition-all select-none",
+            "nc-focus relative grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full transition-all select-none",
             panelOpen && activePanelTab === "language"
-              ? "bg-primary text-background font-bold shadow-xs"
+              ? "bg-primary text-background font-bold shadow-sm"
               : "text-text-secondary hover:bg-surface hover:text-text-primary",
           )}
         >

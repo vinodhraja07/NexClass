@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Captions, Radio, Sparkles } from "lucide-react";
 import clsx from "clsx";
@@ -41,19 +42,28 @@ export function CaptionOverlay({
   className,
 }: CaptionOverlayProps) {
   const reduced = useReducedMotion() ?? false;
-  const latest = segments.length > 0 ? segments[segments.length - 1] : null;
-  const view = latest ? describeTranslation(latest, captionLanguage) : null;
+  const [activeLatest, setActiveLatest] = useState<CaptionSegmentPayload | null>(null);
+
+  // Auto-dismiss after 7 seconds of inactivity
+  useEffect(() => {
+    if (segments.length === 0) return;
+    const item = segments[segments.length - 1];
+    setActiveLatest(item);
+    const timer = window.setTimeout(() => {
+      setActiveLatest(null);
+    }, 7000);
+    return () => window.clearTimeout(timer);
+  }, [segments]);
 
   if (!visible) return null;
 
   const isTranslatedMode = captionMode !== "original";
-  const originalLang = latest?.originalLanguage ?? "en";
+  const originalLang = activeLatest?.originalLanguage ?? "en";
   const isCrossLanguage = isTranslatedMode && originalLang !== captionLanguage;
+  const view = activeLatest ? describeTranslation(activeLatest, captionLanguage) : null;
 
   return (
     <div
-      aria-live="polite"
-      aria-atomic="true"
       className={clsx(
         "pointer-events-none absolute bottom-4 inset-x-0 z-20 flex justify-center px-4",
         className,
@@ -61,8 +71,10 @@ export function CaptionOverlay({
     >
       <AnimatePresence mode="wait">
         {interim ? (
+          /* Live interim transcription - aria-hidden to prevent screen reader flood */
           <motion.div
             key="interim"
+            aria-hidden="true"
             initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
@@ -78,9 +90,12 @@ export function CaptionOverlay({
               {interim.text}…
             </p>
           </motion.div>
-        ) : latest && view ? (
+        ) : activeLatest && view ? (
+          /* Finalized caption - aria-live announced once to screen readers */
           <motion.div
-            key={latest.id}
+            key={activeLatest.id}
+            aria-live="polite"
+            aria-atomic="true"
             initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
@@ -89,12 +104,12 @@ export function CaptionOverlay({
           >
             {/* Header: Speaker + Language Routing */}
             <div className="flex items-center gap-2 pb-1 text-xs text-white/70">
-              <span className="font-semibold text-white drop-shadow-xs">
-                {latest.speakerName}:
+              <span className="font-semibold text-white drop-shadow-sm">
+                {activeLatest.speakerName}:
               </span>
 
               {isCrossLanguage && (
-                <span className="inline-flex items-center gap-1 rounded bg-white/10 px-1.5 py-0.2 text-[10px] text-white/80">
+                <span className="inline-flex items-center gap-1 rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/80">
                   <span>{languageNativeName(originalLang)}</span>
                   <ArrowRight className="h-2.5 w-2.5 text-primary" />
                   <span className="font-bold text-primary">
@@ -107,7 +122,7 @@ export function CaptionOverlay({
             {/* Captions Body with Indic Font Optimization */}
             {captionMode === "original" ? (
               <div className={clsx("text-white font-medium drop-shadow-sm", SCALE_CLASSES[scale])}>
-                <TermText text={latest.originalText} language={captionLanguage} />
+                <TermText text={activeLatest.originalText} language={captionLanguage} />
               </div>
             ) : (
               <div className="space-y-1">
@@ -133,9 +148,9 @@ export function CaptionOverlay({
                 </p>
 
                 {/* Subtitle cross-reference original for technical glossary */}
-                {isCrossLanguage && latest.originalText && (
+                {isCrossLanguage && activeLatest.originalText && (
                   <p className="line-clamp-1 text-2xs italic text-white/60 pt-0.5 border-t border-white/10">
-                    <TermText text={latest.originalText} language={captionLanguage} />
+                    <TermText text={activeLatest.originalText} language={captionLanguage} />
                   </p>
                 )}
               </div>
