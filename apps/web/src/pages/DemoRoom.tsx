@@ -50,6 +50,12 @@ export default function DemoRoom() {
         </h1>
         <div className="flex items-center gap-2">
           <Link
+            to="/demo/captions"
+            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-accent-400/50 bg-accent-400/10 px-3 text-[13px] font-semibold text-accent-300 transition-colors hover:bg-accent-400/20"
+          >
+            ← Demo 1 (Captions & Audio)
+          </Link>
+          <Link
             to="/demo"
             className="nc-focus inline-flex h-9 shrink-0 items-center gap-1 rounded-lg border border-ink-500 bg-ink-800/80 px-3 text-[13px] font-medium text-ivory-100 transition-colors hover:border-accent-400/50"
           >
