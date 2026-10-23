@@ -135,7 +135,7 @@ export function ClassroomHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        {!demo && code && !code.toLowerCase().includes("demo") && (
+        {code && (
           <button
             type="button"
             onClick={copyCode}
