@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { CircleAlert, RefreshCw, X } from "lucide-react";
+import { CircleAlert, Disc, RefreshCw, X } from "lucide-react";
 import clsx from "clsx";
 import type { MeetingTransport } from "@/lib/transport";
 import { api } from "@/lib/api";
@@ -9,6 +9,7 @@ import { usePeerConnections } from "@/hooks/usePeerConnections";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoicePlayback } from "@/hooks/useVoicePlayback";
 import { useClassroomPreferences } from "@/hooks/useClassroomPreferences";
+import { useMeetingRecording } from "@/hooks/useMeetingRecording";
 import type { LanguageCode } from "@nexclass/shared";
 import type { TileStatus } from "./VideoTile";
 import { ClassroomHeader } from "./ClassroomHeader";
@@ -272,6 +273,69 @@ export function ClassroomShell({
       : null,
   ].filter((entry): entry is { text: string; header: string } => entry !== null);
 
+  const [showRecordingModal, setShowRecordingModal] = useState(false);
+  const [recordingModalAction, setRecordingModalAction] = useState<"start" | "stop">("start");
+
+  const activeSpeakerName = useMemo(() => {
+    if (!peers.activeSpeakerId) return undefined;
+    return classroom.participants.find((p) => p.id === peers.activeSpeakerId)?.displayName;
+  }, [peers.activeSpeakerId, classroom.participants]);
+
+  const currentCaption = useMemo(() => {
+    if (classroom.interim?.text) return classroom.interim.text;
+    if (classroom.segments.length > 0) {
+      return classroom.segments[classroom.segments.length - 1].originalText;
+    }
+    return undefined;
+  }, [classroom.interim, classroom.segments]);
+
+  const recording = useMeetingRecording({
+    meetingCode: classroom.meeting?.code ?? meetingCode,
+    participantId: classroom.self?.id ?? null,
+    participantName: classroom.self?.displayName ?? name,
+    isHost: classroom.isHost,
+    transport,
+    localStream: classroom.localStream,
+    remoteStreams: streams,
+    screenStream: classroom.screenStream,
+    activeSpeakerName,
+    currentCaption,
+  });
+
+  const handleToggleRecording = useCallback(() => {
+    if (recording.isRecording) {
+      setRecordingModalAction("stop");
+      setShowRecordingModal(true);
+    } else {
+      setRecordingModalAction("start");
+      setShowRecordingModal(true);
+    }
+  }, [recording.isRecording]);
+
+  const handleConfirmRecording = useCallback(async () => {
+    setShowRecordingModal(false);
+    if (recordingModalAction === "start") {
+      try {
+        await recording.startRecording();
+        pushToast("Recording started");
+      } catch (err) {
+        pushToast(err instanceof Error ? err.message : "Could not start recording", "warn");
+      }
+    } else {
+      try {
+        pushToast("Saving recording and uploading to server archive...");
+        const result = await recording.stopRecording();
+        if (result.recording) {
+          pushToast("Recording saved and uploaded to server archive.");
+        } else {
+          pushToast("Recording saved locally (.webm).");
+        }
+      } catch {
+        pushToast("Error saving recording.", "warn");
+      }
+    }
+  }, [recording, recordingModalAction, pushToast]);
+
   return (
     <div className="flex h-full w-full overflow-hidden flex-col bg-background text-text-primary select-none">
       {/* Sleek Google Meet Top Bar */}
@@ -281,6 +345,8 @@ export function ClassroomShell({
         status={classroom.status}
         startedAt={classroom.meeting?.startedAt ?? null}
         demo={simulated}
+        isRecording={recording.isRecording}
+        recordingElapsed={recording.durationSeconds}
       />
 
       {/* Main Google Meet Stage + Sliding Side Panel Container */}
@@ -431,6 +497,22 @@ export function ClassroomShell({
                 onVoiceVolume: prefs.setVoiceVolume,
                 listening: recognition.listening,
               }}
+              recordingsProps={{
+                recordings: recording.recordings,
+                loading: recording.loadingRecordings,
+                onRefresh: () => void recording.fetchRecordings(),
+                isRecording: recording.isRecording,
+                recordingElapsed: recording.durationSeconds,
+                onStartRecording: () => {
+                  setRecordingModalAction("start");
+                  setShowRecordingModal(true);
+                },
+                onStopRecording: () => {
+                  setRecordingModalAction("stop");
+                  setShowRecordingModal(true);
+                },
+                isHost: classroom.isHost,
+              }}
               meetingInfo={{
                 meeting: classroom.meeting,
                 meetingCode,
@@ -479,7 +561,75 @@ export function ClassroomShell({
         participantCount={classroom.participants.length}
         voiceMode={prefs.preferences.voiceMode}
         onToggleVoiceMode={handleToggleVoiceMode}
+        isRecording={recording.isRecording}
+        recordingElapsed={recording.durationSeconds}
+        onToggleRecording={handleToggleRecording}
       />
+
+      {/* Recording Confirmation Modal */}
+      <AnimatePresence>
+        {showRecordingModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="recording-modal-title"
+          >
+            <motion.div
+              initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.95, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 8 }}
+              transition={{ duration: reduced ? 0 : 0.15 }}
+              className="w-full max-w-md rounded-2xl border border-border/80 bg-surface/95 p-6 shadow-2xl backdrop-blur-2xl text-text-primary"
+            >
+              <div className="flex items-start gap-4">
+                <div
+                  className={clsx(
+                    "grid h-10 w-10 shrink-0 place-items-center rounded-xl",
+                    recordingModalAction === "start"
+                      ? "bg-rose-500/15 text-rose-500 border border-rose-500/30"
+                      : "bg-signal-warn/15 text-signal-warn border border-signal-warn/30",
+                  )}
+                >
+                  <Disc className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 id="recording-modal-title" className="text-base font-semibold">
+                    {recordingModalAction === "start" ? "Start recording?" : "Stop recording?"}
+                  </h3>
+                  <p className="mt-2 text-xs text-text-secondary leading-relaxed">
+                    {recordingModalAction === "start"
+                      ? "Recording will capture video, microphone, and translated audio for all participants. Start recording?"
+                      : "The recording will end immediately, download a copy to your computer (.webm), and save an archive copy to the server."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowRecordingModal(false)}
+                  className="nc-focus rounded-xl border border-border bg-surface px-4 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-muted transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleConfirmRecording()}
+                  className={clsx(
+                    "nc-focus inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-md transition-all",
+                    recordingModalAction === "start"
+                      ? "bg-rose-600 hover:bg-rose-700 shadow-rose-600/25"
+                      : "bg-rose-600 hover:bg-rose-700 shadow-rose-600/25",
+                  )}
+                >
+                  {recordingModalAction === "start" ? "Start recording" : "Stop & Save"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Notification Toasts */}
       <div

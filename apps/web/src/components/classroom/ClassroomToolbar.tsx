@@ -3,7 +3,9 @@ import { motion, useReducedMotion } from "motion/react";
 import {
   Captions,
   Check,
+  CircleDot,
   Copy,
+  Disc,
   Hand,
   Headphones,
   Info,
@@ -23,6 +25,7 @@ import {
 import clsx from "clsx";
 import type { MeetTab } from "./MeetSidePanel";
 import type { VoiceMode } from "@/hooks/useVoicePlayback";
+import { formatRecordingDuration } from "@/hooks/useMeetingRecording";
 
 export interface ClassroomToolbarProps {
   audioEnabled: boolean;
@@ -32,6 +35,9 @@ export interface ClassroomToolbarProps {
   unreadChat: number;
   isHost: boolean;
   disabled?: boolean;
+  isRecording?: boolean;
+  recordingElapsed?: number;
+  onToggleRecording?: () => void;
   onToggleAudio: () => void;
   onToggleVideo: () => void;
   onToggleShare: () => void;
@@ -88,6 +94,9 @@ export function ClassroomToolbar({
   unreadChat,
   isHost,
   disabled = false,
+  isRecording = false,
+  recordingElapsed = 0,
+  onToggleRecording,
   onToggleAudio,
   onToggleVideo,
   onToggleShare,
@@ -283,6 +292,43 @@ export function ClassroomToolbar({
         >
           <Hand className="h-5 w-5" />
         </motion.button>
+
+        {/* Record Call Button (Host or allowed participants) */}
+        {onToggleRecording && (
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: reduced ? 0 : 0.12 }}
+            onClick={onToggleRecording}
+            disabled={disabled}
+            title={
+              isRecording
+                ? `Recording in progress (${formatRecordingDuration(recordingElapsed)}). Click to stop.`
+                : "Record meeting (capture video, mic & translation)"
+            }
+            aria-label={isRecording ? "Stop recording" : "Record meeting"}
+            aria-pressed={isRecording}
+            className={clsx(
+              "nc-focus relative grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
+              isRecording
+                ? "bg-rose-600 text-white shadow-rose-600/30 hover:bg-rose-700 ring-2 ring-rose-400/50"
+                : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
+            )}
+          >
+            {isRecording ? (
+              <Disc
+                className={clsx("h-4 w-4 sm:h-5 sm:w-5", !reduced && "animate-spin text-white")}
+                style={{ animationDuration: "3s" }}
+              />
+            ) : (
+              <CircleDot className="h-4 w-4 sm:h-5 sm:w-5" />
+            )}
+            {isRecording && (
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-rose-400 ring-2 ring-background animate-pulse" />
+            )}
+          </motion.button>
+        )}
 
         {/* Red Leave Call Pill Button */}
         <div className="flex items-center gap-1 sm:gap-1.5 ml-0.5 sm:ml-1">

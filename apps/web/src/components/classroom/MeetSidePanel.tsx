@@ -1,11 +1,17 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Check,
+  CircleDot,
   Copy,
+  Download,
+  Film,
   Info,
   Languages,
   MessageSquare,
+  Play,
+  RefreshCw,
   ShieldAlert,
+  Square,
   Users,
   X,
 } from "lucide-react";
@@ -16,8 +22,20 @@ import { ChatPanel, type ChatPanelProps } from "./ChatPanel";
 import { LanguageHubPanel, type LanguageHubPanelProps } from "./LanguageHubPanel";
 import type { ConnectionStatus, ProviderRuntimeStatus } from "@/lib/transport";
 import type { MeetingPublic } from "@nexclass/shared";
+import { type RecordingPublic, formatRecordingDuration } from "@/hooks/useMeetingRecording";
 
 export type MeetTab = "people" | "chat" | "language" | "info";
+
+export interface RecordingsPanelProps {
+  recordings: RecordingPublic[];
+  loading: boolean;
+  onRefresh: () => void;
+  isRecording?: boolean;
+  recordingElapsed?: number;
+  onStartRecording?: () => void;
+  onStopRecording?: () => void;
+  isHost?: boolean;
+}
 
 export interface MeetSidePanelProps {
   open: boolean;
@@ -28,6 +46,7 @@ export interface MeetSidePanelProps {
   participantsProps: ParticipantsPanelProps;
   chatProps: ChatPanelProps;
   languageHubProps: LanguageHubPanelProps;
+  recordingsProps?: RecordingsPanelProps;
   meetingInfo: {
     meeting: MeetingPublic | null;
     meetingCode: string;
@@ -59,6 +78,7 @@ export function MeetSidePanel({
   participantsProps,
   chatProps,
   languageHubProps,
+  recordingsProps,
   meetingInfo,
 }: MeetSidePanelProps) {
   const reduced = useReducedMotion() ?? false;
@@ -166,6 +186,144 @@ export function MeetSidePanel({
                   {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                   {copied ? "Copied" : "Copy"}
                 </button>
+              </div>
+            </div>
+
+            {/* Classroom Recordings Section */}
+            <div className="rounded-xl border border-border/60 bg-background/40 p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Film className="h-4 w-4 text-primary" />
+                  <p className="font-bold text-2xs uppercase tracking-wider text-text-secondary">
+                    Classroom Recordings
+                  </p>
+                </div>
+                {recordingsProps?.onRefresh && (
+                  <button
+                    type="button"
+                    onClick={recordingsProps.onRefresh}
+                    disabled={recordingsProps.loading}
+                    title="Refresh recordings list"
+                    className="nc-focus grid h-6 w-6 place-items-center rounded text-text-secondary hover:text-text-primary hover:bg-surface transition-colors"
+                  >
+                    <RefreshCw className={clsx("h-3 w-3", recordingsProps.loading && "animate-spin")} />
+                  </button>
+                )}
+              </div>
+
+              {/* Realtime Status Indicator */}
+              <div className="flex items-center justify-between rounded-lg border border-border/50 bg-surface/60 px-2.5 py-1.5 text-2xs">
+                <span className="text-text-secondary">Status</span>
+                {recordingsProps?.isRecording ? (
+                  <span className="inline-flex items-center gap-1 font-semibold text-rose-400">
+                    <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                    Recording ({formatRecordingDuration(recordingsProps.recordingElapsed ?? 0)})
+                  </span>
+                ) : (
+                  <span className="text-text-secondary font-medium">Idle</span>
+                )}
+              </div>
+
+              {/* Host Quick Control */}
+              {recordingsProps?.isHost && (
+                <button
+                  type="button"
+                  onClick={
+                    recordingsProps.isRecording
+                      ? recordingsProps.onStopRecording
+                      : recordingsProps.onStartRecording
+                  }
+                  className={clsx(
+                    "nc-focus flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-2xs font-semibold transition-all shadow-sm",
+                    recordingsProps.isRecording
+                      ? "bg-rose-600 text-white hover:bg-rose-700 shadow-rose-600/25"
+                      : "bg-surface hover:bg-surface/80 border border-border text-text-primary",
+                  )}
+                >
+                  {recordingsProps.isRecording ? (
+                    <>
+                      <Square className="h-3 w-3 fill-current" /> Stop Recording
+                    </>
+                  ) : (
+                    <>
+                      <CircleDot className="h-3 w-3 text-rose-500" /> Start Recording
+                    </>
+                  )}
+                </button>
+              )}
+
+              {/* Saved Sessions */}
+              <div className="space-y-2">
+                <p className="font-semibold text-[11px] text-text-secondary">
+                  Saved Sessions ({recordingsProps?.recordings.length ?? 0})
+                </p>
+
+                {!recordingsProps?.recordings || recordingsProps.recordings.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-border/60 p-3 text-center">
+                    <p className="text-2xs text-text-secondary">
+                      No recordings saved yet. When a recording ends, it will appear here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
+                    {recordingsProps.recordings.map((rec) => {
+                      const sizeMb = (rec.sizeBytes / (1024 * 1024)).toFixed(1);
+                      const durFormatted = formatRecordingDuration(rec.durationSeconds);
+                      const dateStr = rec.createdAt
+                        ? new Date(rec.createdAt).toLocaleDateString([], {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Just now";
+
+                      return (
+                        <div
+                          key={rec.id}
+                          className="flex flex-col gap-1.5 rounded-lg border border-border/70 bg-surface/80 p-2 text-2xs transition-colors hover:border-primary/40"
+                        >
+                          <div className="flex items-center justify-between min-w-0">
+                            <span
+                              className="font-medium text-text-primary truncate max-w-[170px]"
+                              title={rec.fileName}
+                            >
+                              {rec.fileName}
+                            </span>
+                            <span className="font-mono text-[10px] text-text-secondary shrink-0">
+                              {durFormatted}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[10px] text-text-secondary">
+                            <span>
+                              {dateStr} • {sizeMb} MB
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <a
+                                href={rec.streamUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Stream playback"
+                                className="nc-focus inline-flex items-center gap-1 rounded bg-surface px-1.5 py-0.5 font-medium text-primary hover:bg-primary/10 transition-colors"
+                              >
+                                <Play className="h-2.5 w-2.5" /> Stream
+                              </a>
+                              <a
+                                href={rec.downloadUrl}
+                                download
+                                title="Download .webm"
+                                className="nc-focus inline-flex items-center gap-1 rounded bg-surface px-1.5 py-0.5 font-medium text-emerald-400 hover:bg-emerald-400/10 transition-colors"
+                              >
+                                <Download className="h-2.5 w-2.5" /> Download
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
