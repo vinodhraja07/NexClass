@@ -68,80 +68,74 @@ export function ClassroomHeader({
   return (
     <header
       className={clsx(
-        "flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/80 bg-background/90 px-3.5 py-2.5 backdrop-blur-2xl sm:px-5",
+        "flex h-12 shrink-0 items-center justify-between border-b border-border/80 bg-background/90 px-4 backdrop-blur-2xl sm:px-6 select-none",
         className,
       )}
     >
-      <div className="min-w-0 flex-1 basis-44">
-        <p className="nc-eyebrow flex items-center gap-2">
-          <LiveDot />
-          {demo ? "Demo classroom - simulated" : "Live classroom"}
-        </p>
-        <h1 className="truncate text-[15px] font-semibold text-text-primary sm:text-base">{title}</h1>
+      <div className="flex items-center gap-3 min-w-0">
+        <h1 className="truncate text-xs sm:text-sm font-semibold text-text-primary tracking-tight">
+          {title}
+        </h1>
+
+        {demo ? (
+          <span className="rounded-full border border-signal-warn/40 bg-signal-warn/12 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-signal-warn">
+            Demo
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-signal-live/40 bg-signal-live/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-signal-live">
+            <LiveDot />
+            <span className="font-mono normal-case tracking-normal text-text-secondary" aria-label="Meeting duration">
+              {formatDuration(elapsed)}
+            </span>
+          </span>
+        )}
       </div>
 
-      {demo ? (
-        <span className="rounded-full border border-signal-warn/40 bg-signal-warn/12 px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.14em] text-signal-warn">
-          Demo - simulated
-        </span>
-      ) : (
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-signal-live/40 bg-signal-live/10 px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.14em] text-signal-live">
-          <LiveDot />
-          Live
-          <span className="font-mono normal-case tracking-normal text-text-secondary" aria-label="Meeting duration">
-            {formatDuration(elapsed)}
-          </span>
-        </span>
-      )}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={copyCode}
+          aria-label={`Copy meeting code ${code}`}
+          className="nc-focus inline-flex h-7 items-center gap-1.5 rounded-lg border border-border/70 bg-surface/80 px-2 font-mono text-[11px] text-text-primary transition-colors hover:border-primary/50"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {copied ? (
+              <motion.span
+                key="check"
+                initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
+                transition={{ duration: reduced ? 0 : 0.16 }}
+                className="text-primary"
+              >
+                <Check className="h-3 w-3" aria-hidden="true" />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="copy"
+                initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
+                transition={{ duration: reduced ? 0 : 0.16 }}
+              >
+                <Copy className="h-3 w-3" aria-hidden="true" />
+              </motion.span>
+            )}
+          </AnimatePresence>
+          {code}
+        </button>
 
-      <button
-        type="button"
-        onClick={copyCode}
-        aria-label={`Copy meeting code ${code}`}
-        className="nc-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/70 bg-surface/80 px-2.5 font-mono text-xs text-text-primary transition-colors hover:border-primary/50"
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          {copied ? (
-            <motion.span
-              key="check"
-              initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
-              transition={{ duration: reduced ? 0 : 0.16 }}
-              className="text-primary"
-            >
-              <Check className="h-3.5 w-3.5" aria-hidden="true" />
-            </motion.span>
-          ) : (
-            <motion.span
-              key="copy"
-              initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
-              transition={{ duration: reduced ? 0 : 0.16 }}
-            >
-              <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-            </motion.span>
+        <span
+          className={clsx(
+            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium",
+            meta.tone,
           )}
-        </AnimatePresence>
-        {code}
-      </button>
-
-      <span
-        className={clsx(
-          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-2xs font-medium",
-          meta.tone,
-        )}
-        title={meta.label}
-      >
-        <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
-        <span className="sr-only sm:not-sr-only">{meta.label}</span>
-      </span>
-
-      <span className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-surface/70 px-2.5 py-1 text-2xs text-text-secondary xl:inline-flex">
-        <Gauge className="h-3 w-3 text-primary" aria-hidden="true" />
-        WebRTC mesh
-      </span>
+          title={meta.label}
+        >
+          <StatusIcon className="h-3 w-3" aria-hidden="true" />
+          <span className="hidden sm:inline">{meta.label}</span>
+        </span>
+      </div>
     </header>
   );
 }

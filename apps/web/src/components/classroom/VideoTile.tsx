@@ -5,9 +5,9 @@ import {
   Mic,
   MicOff,
   MonitorUp,
+  Pin,
   Signal,
   SignalLow,
-  Sparkles,
   TriangleAlert,
   VideoOff,
 } from "lucide-react";
@@ -32,25 +32,28 @@ export interface VideoTileProps {
 function statusMeta(status: TileStatus) {
   switch (status) {
     case "connected":
-      return { label: "Connected (Good)", icon: Signal, tone: "text-primary" };
+      return { label: "Good Connection", icon: Signal, tone: "text-emerald-400" };
     case "connecting":
-      return { label: "Connecting…", icon: SignalLow, tone: "text-signal-warn" };
+      return { label: "Connecting…", icon: SignalLow, tone: "text-amber-400" };
     case "failed":
-      return { label: "Connection failed", icon: TriangleAlert, tone: "text-signal-live" };
+      return { label: "Connection issue", icon: TriangleAlert, tone: "text-rose-400" };
     case "closed":
-      return { label: "Connection closed", icon: SignalLow, tone: "text-text-secondary" };
+      return { label: "Closed", icon: SignalLow, tone: "text-white/40" };
     case "local":
-      return { label: "Your video preview", icon: Signal, tone: "text-primary" };
+      return { label: "Your preview", icon: Signal, tone: "text-emerald-400" };
     default:
-      return { label: "Waiting for stream", icon: SignalLow, tone: "text-text-secondary" };
+      return { label: "Connecting", icon: SignalLow, tone: "text-white/40" };
   }
 }
 
 /**
- * Premium Participant Card.
+ * Google Meet-Style Participant Video Tile.
  *
- * Implements Apple/Linear design precision with theme-aware borders,
- * refined active-speaker wave visualizer, and clear role/language hierarchy.
+ * Implements the iconic Google Meet meeting tile:
+ * - Edge-to-edge video canvas
+ * - Bottom-left translucent name pill with mic status
+ * - Subtle active speaker border ring
+ * - Centered initials avatar on camera-off
  */
 export function VideoTile({
   participant,
@@ -76,33 +79,23 @@ export function VideoTile({
   }, [stream]);
 
   const cameraOn = participant.videoEnabled && Boolean(stream);
+  const isHost = participant.role === "teacher";
   const meta = statusMeta(status);
   const StatusIcon = meta.icon;
-  const isHost = participant.role === "teacher";
 
   return (
     <motion.div
       layout={!reduced}
-      whileHover={reduced ? undefined : { y: -2 }}
-      transition={{ duration: reduced ? 0 : 0.2, ease: [0.2, 0.8, 0.2, 1] }}
       className={clsx(
-        "group relative flex min-h-[140px] flex-col justify-between overflow-hidden rounded-2xl border p-3 transition-all duration-300 select-none shadow-sm",
-        "bg-surface/90 hover:bg-surface",
+        "group relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 select-none",
+        "bg-[#1B192A] border shadow-md",
         activeSpeaker
-          ? "border-primary ring-2 ring-primary/40 shadow-lg shadow-primary/15"
-          : "border-border/70 hover:border-border hover:shadow-md",
+          ? "border-primary ring-2 ring-primary/60 shadow-lg shadow-primary/20"
+          : "border-[#403B56]/50 hover:border-[#403B56]",
         className,
       )}
     >
-      {/* Active speaker border light */}
-      {activeSpeaker && !reduced && (
-        <span
-          className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/[0.06] via-transparent to-primary/[0.04]"
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Video stream container */}
+      {/* Video element when camera is on */}
       {cameraOn ? (
         <video
           ref={videoRef}
@@ -114,139 +107,106 @@ export function VideoTile({
         />
       ) : null}
 
-      {/* Camera Off Avatar Surface */}
+      {/* Camera-off Avatar Canvas */}
       <div
         className={clsx(
-          "absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-gradient-to-b from-surface/60 to-background/90",
-          cameraOn
-            ? "opacity-0 transition-opacity duration-300 group-hover:opacity-100 backdrop-blur-sm"
-            : "opacity-100",
+          "absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-[#262338]/80 to-[#12111E]/95",
+          cameraOn ? "pointer-events-none opacity-0" : "opacity-100",
         )}
-        aria-hidden={cameraOn ? "true" : undefined}
       >
         <Avatar
           name={participant.displayName}
-          size="lg"
+          size="xl"
           active={activeSpeaker}
           muted={!participant.audioEnabled}
-          showMutedBadge
         />
-        {!participant.videoEnabled ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/80 px-2.5 py-0.5 text-2xs text-text-secondary backdrop-blur-sm">
-            <VideoOff className="h-3 w-3" aria-hidden="true" />
-            <span>Camera off</span>
-          </span>
-        ) : null}
       </div>
 
-      {/* Top Participant Meta Bar */}
-      <div className="relative z-10 flex items-start justify-between gap-2">
-        <div className="min-w-0 max-w-[85%] rounded-xl border border-border/50 bg-background/85 px-2.5 py-1.5 backdrop-blur-md shadow-sm">
-          <div className="flex items-center gap-1.5">
-            <p className="truncate text-xs font-semibold text-text-primary">
-              {participant.displayName}
-              {isSelf ? <span className="font-normal text-text-secondary"> (you)</span> : ""}
-            </p>
-            {isHost && (
-              <span
-                title="Classroom Host"
-                className="inline-flex items-center gap-1 rounded-md border border-secondary-accent/40 bg-secondary-accent/15 px-1.5 py-0.2 text-[10px] font-bold text-secondary-accent shrink-0"
-              >
-                <Crown className="h-2.5 w-2.5" aria-hidden="true" />
-                <span>Host</span>
-              </span>
-            )}
-            {participant.isSimulated && (
-              <span className="rounded-md border border-ai-accent/30 bg-ai-accent/10 px-1.5 py-0.2 text-[10px] font-medium text-ai-accent shrink-0">
-                AI Demo
-              </span>
-            )}
-          </div>
-
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-text-secondary">
-            <span
-              lang={participant.interfaceLanguage}
-              className="rounded bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium text-text-secondary"
-              title={`Language: ${languageNativeName(participant.interfaceLanguage)}`}
-            >
-              {languageNativeName(participant.interfaceLanguage)}
-            </span>
-            {participant.screenSharing && (
-              <span className="inline-flex items-center gap-1 rounded bg-lime-400/15 px-1.5 py-0.5 text-[10px] font-medium text-lime-300">
-                <MonitorUp className="h-2.5 w-2.5" aria-hidden="true" />
-                Sharing
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Network status icon badge */}
+      {/* Google Meet Top-Right Controls (Hover Overlay) */}
+      <div className="absolute right-2.5 top-2.5 z-10 flex items-center gap-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <span
           className={clsx(
-            "grid h-6 w-6 place-items-center rounded-lg border border-border/50 bg-background/80 backdrop-blur-sm shadow-sm transition-colors",
+            "grid h-7 w-7 place-items-center rounded-full bg-black/60 backdrop-blur-md text-white/80 shadow-sm border border-white/10",
             meta.tone,
           )}
           title={meta.label}
         >
-          <StatusIcon className="h-3 w-3" aria-hidden="true" />
+          <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
           <span className="sr-only">{meta.label}</span>
         </span>
+        <button
+          type="button"
+          aria-label="Pin tile"
+          title="Pin to main screen"
+          className="grid h-7 w-7 place-items-center rounded-full bg-black/60 backdrop-blur-md text-white/80 hover:text-white shadow-sm border border-white/10 transition-colors"
+        >
+          <Pin className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
       </div>
 
-      {/* Bottom State Bar: Mic & Active Speaker Wave */}
-      <div className="relative z-10 mt-auto flex items-center justify-between gap-2 pt-2">
-        <div className="flex items-center gap-1.5">
-          <span
-            className={clsx(
-              "inline-flex h-6 w-6 items-center justify-center rounded-lg border backdrop-blur-sm shadow-sm transition-colors",
-              participant.audioEnabled
-                ? "border-primary/40 bg-primary/15 text-primary"
-                : "border-signal-live/50 bg-signal-live/20 text-signal-live",
-            )}
-            title={participant.audioEnabled ? "Microphone active" : "Microphone muted"}
-          >
-            {participant.audioEnabled ? (
-              <Mic className="h-3 w-3" aria-hidden="true" />
-            ) : (
-              <MicOff className="h-3 w-3" aria-hidden="true" />
-            )}
-            <span className="sr-only">
-              {participant.audioEnabled ? "Microphone active" : "Microphone muted"}
+      {/* Google Meet Signature Bottom-Left Name Pill */}
+      <div className="absolute bottom-2.5 left-2.5 z-10 flex max-w-[90%] items-center gap-1.5 rounded-lg bg-black/65 px-2.5 py-1 text-xs text-white backdrop-blur-md shadow-md border border-white/10">
+        {/* Mic status inside name pill */}
+        {participant.audioEnabled ? (
+          activeSpeaker ? (
+            /* Active speaking equalizer bars */
+            <span className="flex items-end gap-0.5 h-3" aria-hidden="true">
+              {[0.4, 0.9, 1, 0.6].map((scale, i) => (
+                <motion.span
+                  key={i}
+                  animate={reduced ? {} : { scaleY: [0.25, 1, 0.25] }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 0.7 + i * 0.12,
+                    ease: "easeInOut",
+                  }}
+                  className="w-0.5 h-2.5 rounded-full bg-emerald-400 origin-bottom"
+                />
+              ))}
             </span>
-          </span>
-
-          {activeSpeaker && (
-            <motion.span
-              initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-background/90 px-2 py-0.5 text-[11px] font-medium text-primary shadow-sm backdrop-blur-md"
-            >
-              <span className="flex items-center gap-0.5 h-3" aria-hidden="true">
-                {[0.4, 0.9, 1, 0.6].map((scale, i) => (
-                  <motion.span
-                    key={i}
-                    animate={reduced ? {} : { scaleY: [0.25, 1, 0.25] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 0.75 + i * 0.15,
-                      ease: "easeInOut",
-                    }}
-                    className="w-0.5 h-2.5 rounded-full bg-primary origin-bottom"
-                  />
-                ))}
-              </span>
-              <span>Speaking</span>
-            </motion.span>
-          )}
-        </div>
-
-        {/* Audio muted mode badge */}
-        {audioMuted && !isSelf && (
+          ) : (
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" title="Microphone on" />
+          )
+        ) : (
           <span
-            className="rounded border border-border/60 bg-background/80 px-1.5 py-0.5 text-[10px] text-text-secondary backdrop-blur-sm"
-            title="Audio replaced by translated speech"
+            className="grid h-4 w-4 place-items-center rounded-full bg-rose-600/90 text-white shadow-xs"
+            title="Microphone muted"
           >
-            Translated
+            <MicOff className="h-2.5 w-2.5" aria-hidden="true" />
+          </span>
+        )}
+
+        {/* Participant Name */}
+        <span className="truncate font-medium text-white/95 text-[12px] drop-shadow-xs">
+          {participant.displayName}
+          {isSelf ? " (You)" : ""}
+        </span>
+
+        {/* Host Badge */}
+        {isHost && (
+          <span
+            title="Host of this classroom"
+            className="inline-flex items-center gap-0.5 rounded bg-amber-400/20 px-1 py-0.2 text-[10px] font-bold text-amber-300"
+          >
+            <Crown className="h-2.5 w-2.5" />
+            <span>Host</span>
+          </span>
+        )}
+
+        {/* Language Badge */}
+        <span
+          lang={participant.interfaceLanguage}
+          className="rounded bg-white/10 px-1.5 py-0.2 text-[10px] text-white/80"
+          title={`Language: ${languageNativeName(participant.interfaceLanguage)}`}
+        >
+          {languageNativeName(participant.interfaceLanguage)}
+        </span>
+
+        {/* Screen sharing pill */}
+        {participant.screenSharing && (
+          <span className="inline-flex items-center gap-1 rounded bg-blue-500/30 px-1.5 py-0.2 text-[10px] text-blue-200">
+            <MonitorUp className="h-2.5 w-2.5" />
+            <span>Sharing</span>
           </span>
         )}
       </div>
