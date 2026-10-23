@@ -174,10 +174,10 @@ export function ClassroomToolbar({
           aria-label={audioEnabled ? "Mute microphone" : "Unmute microphone"}
           aria-pressed={audioEnabled}
           className={clsx(
-            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             audioEnabled
-              ? "bg-surface/90 text-text-primary border border-border/80 hover:bg-surface hover:border-primary/50"
-              : "bg-rose-600 text-white shadow-rose-600/30 hover:bg-rose-700",
+              ? "bg-surface/85 text-text-primary border border-white/10 shadow-[0_4px_14px_rgba(0,0,0,0.35)] hover:border-primary/60 hover:shadow-[0_0_20px_rgba(46,224,168,0.3)] hover:text-primary backdrop-blur-xl"
+              : "bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 text-white shadow-[0_0_22px_rgba(244,63,94,0.45)] hover:brightness-110 border border-rose-400/40",
           )}
         >
           {audioEnabled ? (
@@ -199,10 +199,10 @@ export function ClassroomToolbar({
           aria-label={videoEnabled ? "Stop video" : "Start video"}
           aria-pressed={videoEnabled}
           className={clsx(
-            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             videoEnabled
-              ? "bg-surface/90 text-text-primary border border-border/80 hover:bg-surface hover:border-primary/50"
-              : "bg-rose-600 text-white shadow-rose-600/30 hover:bg-rose-700",
+              ? "bg-surface/85 text-text-primary border border-white/10 shadow-[0_4px_14px_rgba(0,0,0,0.35)] hover:border-primary/60 hover:shadow-[0_0_20px_rgba(46,224,168,0.3)] hover:text-primary backdrop-blur-xl"
+              : "bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 text-white shadow-[0_0_22px_rgba(244,63,94,0.45)] hover:brightness-110 border border-rose-400/40",
           )}
         >
           {videoEnabled ? (
@@ -223,10 +223,10 @@ export function ClassroomToolbar({
           aria-label="Toggle subtitles"
           aria-pressed={captionsVisible}
           className={clsx(
-            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             captionsVisible
-              ? "bg-primary text-background font-bold shadow-primary/25 hover:bg-primary/90"
-              : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
+              ? "bg-gradient-to-r from-accent-400 via-emerald-400 to-lime-300 text-ink-950 font-bold shadow-[0_0_24px_rgba(46,224,168,0.55)] border border-emerald-300/40 hover:brightness-105"
+              : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary shadow-sm hover:shadow-[0_0_14px_rgba(46,224,168,0.2)] backdrop-blur-xl",
           )}
         >
           <Captions className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -247,15 +247,15 @@ export function ClassroomToolbar({
             }
             aria-label="Toggle audio voice mode"
             className={clsx(
-              "nc-focus relative grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
+              "nc-focus relative grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
               voiceMode === "translated"
-                ? "bg-primary/20 text-primary border border-primary/50 hover:bg-primary/30"
-                : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
+                ? "bg-accent-400/15 text-accent-300 border border-accent-400/50 shadow-[0_0_20px_rgba(46,224,168,0.3)] hover:bg-accent-400/25"
+                : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary backdrop-blur-xl",
             )}
           >
             <Headphones className="h-4 w-4 sm:h-5 sm:w-5" />
             {voiceMode === "translated" && (
-              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-400 ring-2 ring-background" />
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-400 ring-2 ring-background animate-pulse" />
             )}
           </motion.button>
         )}
@@ -272,10 +272,10 @@ export function ClassroomToolbar({
           aria-label="Present screen"
           aria-pressed={screenSharing}
           className={clsx(
-            "nc-focus hidden sm:grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus hidden sm:grid h-12 w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             screenSharing
-              ? "bg-primary text-background font-bold shadow-primary/25"
-              : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
+              ? "bg-gradient-to-r from-accent-400 to-emerald-400 text-ink-950 font-bold shadow-[0_0_24px_rgba(46,224,168,0.5)] border border-emerald-300/40"
+              : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary backdrop-blur-xl",
           )}
         >
           {screenSharing ? <MonitorOff className="h-5 w-5" /> : <MonitorUp className="h-5 w-5" />}
@@ -292,10 +292,10 @@ export function ClassroomToolbar({
           aria-label="Raise hand"
           aria-pressed={handRaised}
           className={clsx(
-            "nc-focus hidden sm:grid h-12 w-12 place-items-center rounded-full transition-all shadow-md select-none",
+            "nc-focus hidden sm:grid h-12 w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             handRaised
-              ? "bg-amber-500 text-background font-bold shadow-amber-500/30"
-              : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
+              ? "bg-gradient-to-r from-amber-400 to-amber-500 text-ink-950 font-bold shadow-[0_0_24px_rgba(245,158,11,0.55)] border border-amber-300/40"
+              : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary backdrop-blur-xl",
           )}
         >
           <Hand className="h-5 w-5" />
@@ -318,10 +318,10 @@ export function ClassroomToolbar({
             aria-label={isRecording ? "Stop recording" : "Record meeting"}
             aria-pressed={isRecording}
             className={clsx(
-              "nc-focus relative grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all shadow-md select-none",
+              "nc-focus relative grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
               isRecording
-                ? "bg-rose-600 text-white shadow-rose-600/30 hover:bg-rose-700 ring-2 ring-rose-400/50"
-                : "bg-surface/90 text-text-secondary border border-border/80 hover:bg-surface hover:text-text-primary",
+                ? "bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-[0_0_28px_rgba(244,63,94,0.6)] ring-2 ring-rose-400/60 border border-rose-300/40"
+                : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary backdrop-blur-xl",
             )}
           >
             {isRecording ? (
@@ -348,7 +348,7 @@ export function ClassroomToolbar({
             onClick={onLeave}
             title="Leave call"
             aria-label="Leave meeting"
-            className="nc-focus inline-flex h-10 sm:h-12 items-center gap-1.5 sm:gap-2 rounded-full bg-rose-600 px-3.5 sm:px-5 text-xs font-semibold text-white shadow-lg shadow-rose-600/25 hover:bg-rose-700 active:bg-rose-800 transition-all select-none"
+            className="nc-focus inline-flex h-10 sm:h-12 items-center gap-1.5 sm:gap-2 rounded-full bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 px-3.5 sm:px-5 text-xs font-semibold text-white shadow-[0_0_24px_rgba(244,63,94,0.45),0_4px_12px_rgba(0,0,0,0.4)] hover:shadow-[0_0_34px_rgba(244,63,94,0.7),0_6px_16px_rgba(0,0,0,0.5)] hover:brightness-110 active:scale-95 border border-rose-400/30 transition-all select-none cursor-pointer"
           >
             <PhoneOff className="h-4 w-4" />
             <span className="hidden xs:inline">Leave</span>
@@ -363,7 +363,7 @@ export function ClassroomToolbar({
               onClick={onEndMeeting}
               title="End class for everyone"
               aria-label="End meeting"
-              className="nc-focus hidden md:grid h-12 w-12 place-items-center rounded-full bg-rose-950/70 border border-rose-500/50 text-rose-300 hover:bg-rose-900 transition-all"
+              className="nc-focus hidden md:grid h-12 w-12 place-items-center rounded-full bg-rose-950/70 border border-rose-500/50 text-rose-300 hover:bg-rose-900 transition-all cursor-pointer shadow-md"
             >
               <Square className="h-4 w-4" />
             </motion.button>

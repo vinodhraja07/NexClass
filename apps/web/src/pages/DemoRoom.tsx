@@ -48,13 +48,13 @@ export default function DemoRoom() {
         <div className="flex items-center gap-2">
           <Link
             to="/demo/captions"
-            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-accent-400/50 bg-accent-400/10 px-3 text-[13px] font-semibold text-accent-300 transition-colors hover:bg-accent-400/20"
+            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-accent-400/50 bg-gradient-to-r from-accent-400/15 to-emerald-400/15 px-3.5 text-[13px] font-semibold text-accent-300 shadow-sm shadow-accent-400/20 hover:bg-accent-400/25 hover:shadow-accent-400/35 transition-all active:scale-95"
           >
             ← Demo 1 (Captions &amp; Audio)
           </Link>
           <Link
             to="/demo"
-            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1 rounded-lg border border-ink-500 bg-ink-800/80 px-3 text-[13px] font-medium text-ivory-100 transition-colors hover:border-accent-400/50"
+            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1 rounded-xl border border-ink-600/80 bg-gradient-to-b from-ink-800/90 to-ink-900/95 px-3.5 text-[13px] font-medium text-ivory-100 hover:border-accent-400/50 hover:bg-ink-750 hover:text-white shadow-sm hover:shadow-[0_0_15px_rgba(46,224,168,0.15)] transition-all active:scale-95"
           >
             All demos
           </Link>

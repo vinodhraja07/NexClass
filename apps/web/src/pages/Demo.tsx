@@ -130,7 +130,7 @@ export default function Demo() {
             {/* Direct Button to Demo 2 */}
             <Link
               to="/demo/room"
-              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1.5 rounded-xl bg-accent-400 px-3 text-xs font-semibold text-ink-900 transition-all hover:bg-accent-300 shadow-md shadow-accent-400/25 active:scale-95"
+              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-accent-400 via-emerald-400 to-lime-300 px-3.5 text-xs font-semibold text-ink-950 border border-emerald-300/40 shadow-[0_4px_16px_rgba(46,224,168,0.4)] hover:shadow-[0_6px_22px_rgba(46,224,168,0.6)] hover:brightness-105 active:scale-95 transition-all"
             >
               <Boxes className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Move to Demo 2</span>
@@ -139,15 +139,15 @@ export default function Demo() {
 
             <Link
               to="/demo"
-              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border border-ink-500 bg-ink-800/80 px-2.5 text-xs font-medium text-ivory-100 transition-colors hover:border-accent-400/50"
+              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border border-ink-600/80 bg-gradient-to-b from-ink-800/90 to-ink-900/95 px-2.5 text-xs font-medium text-ivory-100 hover:border-accent-400/50 hover:bg-ink-750 hover:text-white shadow-sm hover:shadow-[0_0_15px_rgba(46,224,168,0.15)] transition-all active:scale-95"
             >
               All demos
             </Link>
             <Link
               to="/register"
-              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-ink-500 bg-ink-800/80 px-2.5 text-xs font-semibold text-ivory-100 transition-colors hover:border-accent-400/50"
+              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-ink-600/80 bg-gradient-to-b from-ink-800/90 to-ink-900/95 px-2.5 text-xs font-semibold text-ivory-100 hover:border-accent-400/50 hover:bg-ink-750 hover:text-white shadow-sm hover:shadow-[0_0_15px_rgba(46,224,168,0.15)] transition-all active:scale-95"
             >
-              <Rocket className="h-3 w-3" aria-hidden="true" />
+              <Rocket className="h-3 w-3 text-accent-300" aria-hidden="true" />
               Create real classroom
             </Link>
           </div>

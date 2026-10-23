@@ -17,12 +17,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const buttonVariants: Record<ButtonVariant, string> = {
   primary:
-    "bg-accent-400 text-ink-900 hover:bg-accent-300 active:bg-accent-500 shadow-[0_10px_30px_-16px_rgba(46,224,168,0.9)]",
+    "relative overflow-hidden bg-gradient-to-r from-accent-400 via-emerald-400 to-lime-300 text-ink-950 font-semibold tracking-tight border border-emerald-300/40 shadow-[0_4px_20px_-4px_rgba(46,224,168,0.5),0_1px_2px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_28px_-2px_rgba(46,224,168,0.7),0_2px_4px_rgba(0,0,0,0.4)] hover:brightness-105 active:brightness-95",
   secondary:
-    "bg-ink-700/80 text-ivory-100 hover:bg-ink-600 border border-ink-500/70",
-  ghost: "text-ivory-300 hover:text-ivory-50 hover:bg-ink-750 border border-transparent",
-  danger: "bg-signal-live/90 text-white hover:bg-signal-live",
-  quiet: "bg-transparent text-ivory-400 hover:text-ivory-100",
+    "relative overflow-hidden bg-gradient-to-b from-ink-800/90 to-ink-900/95 text-ivory-50 border border-ink-600/80 hover:border-accent-400/50 hover:bg-ink-750 hover:text-white shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:shadow-[0_0_20px_rgba(46,224,168,0.18)] backdrop-blur-md font-medium",
+  ghost:
+    "text-ivory-300 hover:text-ivory-50 hover:bg-ink-800/70 border border-transparent hover:border-ink-600/70 hover:shadow-sm font-medium",
+  danger:
+    "relative overflow-hidden bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 text-white font-semibold border border-rose-400/40 shadow-[0_4px_20px_-4px_rgba(244,63,94,0.45)] hover:shadow-[0_6px_28px_-2px_rgba(244,63,94,0.65)] hover:brightness-110 active:brightness-95",
+  quiet: "bg-transparent text-ivory-400 hover:text-ivory-100 hover:bg-ink-800/40 transition-colors duration-150",
 };
 
 const buttonSizes: Record<ButtonSize, string> = {
@@ -38,11 +40,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   return (
     <motion.button
       ref={ref}
-      whileTap={disabled ? undefined : { scale: 0.97 }}
-      transition={{ duration: 0.12 }}
+      whileHover={disabled || loading ? undefined : { scale: 1.02, y: -1 }}
+      whileTap={disabled || loading ? undefined : { scale: 0.97, y: 0 }}
+      transition={{ type: "spring", stiffness: 500, damping: 25 }}
       className={clsx(
-        "nc-focus inline-flex items-center justify-center font-medium transition-colors duration-200",
-        "disabled:opacity-45 disabled:pointer-events-none",
+        "nc-focus group inline-flex items-center justify-center font-medium transition-[background,border,box-shadow,color,transform] duration-200 cursor-pointer select-none",
+        "disabled:opacity-45 disabled:pointer-events-none disabled:cursor-not-allowed",
         buttonVariants[variant],
         buttonSizes[size],
         className,
@@ -51,12 +54,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {...(rest as Record<string, unknown>)}
     >
       {loading ? (
-        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent shrink-0" />
       ) : (
-        icon
+        icon && <span className="shrink-0 transition-transform duration-150 group-hover:scale-105">{icon}</span>
       )}
       {children}
-      {trailing}
+      {trailing && <span className="shrink-0 transition-transform duration-150 group-hover:translate-x-0.5">{trailing}</span>}
     </motion.button>
   );
 });
