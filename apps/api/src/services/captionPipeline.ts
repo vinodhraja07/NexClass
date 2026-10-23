@@ -165,94 +165,96 @@ export async function processSegment(options: ProcessSegmentOptions): Promise<Pr
   const ttsAdapter = getTtsAdapter();
   const ttsInfo = ttsProviderInfo();
 
-  for (const language of uniqueVoiceLanguages) {
-    const translation = translations.find((item) => item.language === language);
-    if (!translation || translation.status !== "complete") {
-      voices.push({
-        language,
-        provider: ttsInfo.provider,
-        status: "failed",
-        latencyMs: 0,
-        audioUrl: null,
-        error: translation?.error ?? "No translated text available for this language.",
-      });
-      await VoiceSegmentModel.create({
-        meetingId: meeting.id!,
-        segmentId: segment.id!,
-        language,
-        provider: ttsInfo.provider,
-        status: "failed",
-        latencyMs: 0,
-        audioUrl: null,
-        durationMs: null,
-      });
-      continue;
-    }
+  await Promise.all(
+    uniqueVoiceLanguages.map(async (language) => {
+      const translation = translations.find((item) => item.language === language);
+      if (!translation || translation.status !== "complete") {
+        voices.push({
+          language,
+          provider: ttsInfo.provider,
+          status: "failed",
+          latencyMs: 0,
+          audioUrl: null,
+          error: translation?.error ?? "No translated text available for this language.",
+        });
+        await VoiceSegmentModel.create({
+          meetingId: meeting.id!,
+          segmentId: segment.id!,
+          language,
+          provider: ttsInfo.provider,
+          status: "failed",
+          latencyMs: 0,
+          audioUrl: null,
+          durationMs: null,
+        });
+        return;
+      }
 
-    if (!ttsAdapter) {
-      // The browser will speak the translated text locally with
-      // SpeechSynthesis. The UI labels this clearly as a local fallback.
-      voices.push({
-        language,
-        provider: "browser-speech-synthesis",
-        status: "complete",
-        latencyMs: 0,
-        audioUrl: null,
-      });
-      await VoiceSegmentModel.create({
-        meetingId: meeting.id!,
-        segmentId: segment.id!,
-        language,
-        provider: "browser-speech-synthesis",
-        status: "complete",
-        latencyMs: 0,
-        audioUrl: null,
-        durationMs: null,
-      });
-      continue;
-    }
+      if (!ttsAdapter) {
+        // The browser will speak the translated text locally with
+        // SpeechSynthesis. The UI labels this clearly as a local fallback.
+        voices.push({
+          language,
+          provider: "browser-speech-synthesis",
+          status: "complete",
+          latencyMs: 0,
+          audioUrl: null,
+        });
+        await VoiceSegmentModel.create({
+          meetingId: meeting.id!,
+          segmentId: segment.id!,
+          language,
+          provider: "browser-speech-synthesis",
+          status: "complete",
+          latencyMs: 0,
+          audioUrl: null,
+          durationMs: null,
+        });
+        return;
+      }
 
-    try {
-      const result = await ttsAdapter.synthesize({ text: translation.text, language });
-      voices.push({
-        language,
-        provider: result.provider,
-        status: "complete",
-        latencyMs: result.latencyMs,
-        audioUrl: result.audioUrl,
-      });
-      await VoiceSegmentModel.create({
-        meetingId: meeting.id!,
-        segmentId: segment.id!,
-        language,
-        provider: result.provider,
-        status: "complete",
-        latencyMs: result.latencyMs,
-        audioUrl: result.audioUrl,
-        durationMs: result.durationMs ?? null,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Speech synthesis failed.";
-      voices.push({
-        language,
-        provider: ttsAdapter.name,
-        status: "failed",
-        latencyMs: 0,
-        audioUrl: null,
-        error: message,
-      });
-      await VoiceSegmentModel.create({
-        meetingId: meeting.id!,
-        segmentId: segment.id!,
-        language,
-        provider: ttsAdapter.name,
-        status: "failed",
-        latencyMs: 0,
-        audioUrl: null,
-        durationMs: null,
-      });
-    }
-  }
+      try {
+        const result = await ttsAdapter.synthesize({ text: translation.text, language });
+        voices.push({
+          language,
+          provider: result.provider,
+          status: "complete",
+          latencyMs: result.latencyMs,
+          audioUrl: result.audioUrl,
+        });
+        await VoiceSegmentModel.create({
+          meetingId: meeting.id!,
+          segmentId: segment.id!,
+          language,
+          provider: result.provider,
+          status: "complete",
+          latencyMs: result.latencyMs,
+          audioUrl: result.audioUrl,
+          durationMs: result.durationMs ?? null,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Speech synthesis failed.";
+        voices.push({
+          language,
+          provider: ttsAdapter.name,
+          status: "failed",
+          latencyMs: 0,
+          audioUrl: null,
+          error: message,
+        });
+        await VoiceSegmentModel.create({
+          meetingId: meeting.id!,
+          segmentId: segment.id!,
+          language,
+          provider: ttsAdapter.name,
+          status: "failed",
+          latencyMs: 0,
+          audioUrl: null,
+          durationMs: null,
+        });
+      }
+    }),
+  );
 
   await TranscriptSegmentModel.updateMany(
     { _id: segment.id } as Record<string, unknown>,

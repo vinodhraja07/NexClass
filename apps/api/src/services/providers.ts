@@ -302,10 +302,12 @@ class RemoteAsrAdapter implements AsrAdapter {
 
 /* --------------------------- Registry ------------------------------- */
 
-const fallbackTtsCache = new Map<string, TtsResult>();
-const FALLBACK_TTS_CACHE_MAX = 150;
+export const fallbackTtsCache = new Map<string, TtsResult>();
+export const FALLBACK_TTS_CACHE_MAX = 150;
+export const inflightTtsRequests = new Map<string, Promise<TtsResult>>();
 /** The public Google Translate speech endpoint rejects queries longer than this. */
 const FALLBACK_TTS_CHUNK = 180;
+
 
 function splitForFallbackTts(text: string): string[] {
   const words = text.trim().split(/\s+/);
@@ -346,9 +348,10 @@ export function odiaToDevanagariPhonetic(text: string): string {
   return result;
 }
 
-class GoogleTranslateTtsFallbackAdapter implements TtsAdapter {
+export class GoogleTranslateTtsFallbackAdapter implements TtsAdapter {
   readonly name = "google-translate-tts-fallback";
   readonly label = "Keyless fallback voice (Google Translate speech endpoint)";
+  private inflightPromises = new Map<string, Promise<TtsResult>>();
 
   isConfigured() {
     return true;
@@ -365,53 +368,90 @@ class GoogleTranslateTtsFallbackAdapter implements TtsAdapter {
     const cached = fallbackTtsCache.get(cacheKey);
     if (cached) return cached;
 
-    const isOdia = request.language === "or";
-    const textToSynthesize = isOdia ? odiaToDevanagariPhonetic(request.text) : request.text;
-    const ttsLang = isOdia ? "hi" : request.language;
+    const inflight = this.inflightPromises.get(cacheKey) ?? inflightTtsRequests.get(cacheKey);
+    if (inflight) return inflight;
 
-    const chunks = splitForFallbackTts(textToSynthesize);
-    if (chunks.length === 0) throw new Error("There is no text to synthesize.");
+    const promise = (async (): Promise<TtsResult> => {
+      const doubleCheck = fallbackTtsCache.get(cacheKey);
+      if (doubleCheck) return doubleCheck;
 
-    const started = now();
-    const parts: Buffer[] = [];
-    for (let index = 0; index < chunks.length; index += 1) {
-      const url =
-        "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob" +
-        `&tl=${encodeURIComponent(ttsLang)}` +
-        `&total=${chunks.length}&idx=${index}&textlen=${chunks[index].length}` +
-        `&q=${encodeURIComponent(chunks[index])}`;
-      const response = await fetch(url, {
-        headers: {
-          "user-agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-        },
-        signal: AbortSignal.timeout(10_000),
-      });
-      if (!response.ok) {
-        throw new Error(
-          `Fallback voice request failed (HTTP ${response.status})` +
-            (response.status === 400 ? ` - the endpoint does not support "${request.language}".` : "."),
-        );
+      const isOdia = request.language === "or";
+      const textToSynthesize = isOdia ? odiaToDevanagariPhonetic(request.text) : request.text;
+      const ttsLang = isOdia ? "hi" : request.language;
+
+      const chunks = splitForFallbackTts(textToSynthesize);
+      if (chunks.length === 0) throw new Error("There is no text to synthesize.");
+
+      const started = now();
+      const parts: Buffer[] = [];
+      for (let index = 0; index < chunks.length; index += 1) {
+        const url =
+          "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob" +
+          `&tl=${encodeURIComponent(ttsLang)}` +
+          `&total=${chunks.length}&idx=${index}&textlen=${chunks[index].length}` +
+          `&q=${encodeURIComponent(chunks[index])}`;
+        const response = await fetch(url, {
+          headers: {
+            "user-agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+          },
+          signal: AbortSignal.timeout(10_000),
+        });
+        if (!response.ok) {
+          throw new Error(
+            `Fallback voice request failed (HTTP ${response.status})` +
+              (response.status === 400 ? ` - the endpoint does not support "${request.language}".` : "."),
+          );
+        }
+        parts.push(Buffer.from(await response.arrayBuffer()));
       }
-      parts.push(Buffer.from(await response.arrayBuffer()));
-    }
 
-    const result: TtsResult = {
-      audioUrl: `data:audio/mpeg;base64,${Buffer.concat(parts).toString("base64")}`,
-      provider: isOdia ? "google-translate-tts-fallback (Odia Indic)" : this.name,
-      latencyMs: now() - started,
-    };
-    fallbackTtsCache.set(cacheKey, result);
-    if (fallbackTtsCache.size > FALLBACK_TTS_CACHE_MAX) {
-      fallbackTtsCache.delete(fallbackTtsCache.keys().next().value as string);
+      const result: TtsResult = {
+        audioUrl: `data:audio/mpeg;base64,${Buffer.concat(parts).toString("base64")}`,
+        provider: isOdia ? "google-translate-tts-fallback (Odia Indic)" : this.name,
+        latencyMs: now() - started,
+      };
+      if (fallbackTtsCache.has(cacheKey)) {
+        fallbackTtsCache.delete(cacheKey);
+      }
+      fallbackTtsCache.set(cacheKey, result);
+      while (fallbackTtsCache.size > FALLBACK_TTS_CACHE_MAX) {
+        const oldestKey = fallbackTtsCache.keys().next().value;
+        if (oldestKey !== undefined) {
+          fallbackTtsCache.delete(oldestKey);
+        } else {
+          break;
+        }
+      }
+      return result;
+    })();
+
+    this.inflightPromises.set(cacheKey, promise);
+    inflightTtsRequests.set(cacheKey, promise);
+    try {
+      return await promise;
+    } finally {
+      this.inflightPromises.delete(cacheKey);
+      inflightTtsRequests.delete(cacheKey);
     }
-    return result;
   }
+
+  clearInflight(): void {
+    this.inflightPromises.clear();
+  }
+}
+
+const fallbackTtsAdapter = new GoogleTranslateTtsFallbackAdapter();
+
+export function clearFallbackTtsCache(): void {
+  fallbackTtsCache.clear();
+  inflightTtsRequests.clear();
+  fallbackTtsAdapter.clearInflight();
 }
 
 /** Exposed for the demo speech route: keyless voice for prepared samples. */
 export function synthesizeFallbackSpeech(request: TtsRequest): Promise<TtsResult> {
-  return new GoogleTranslateTtsFallbackAdapter().synthesize(request);
+  return fallbackTtsAdapter.synthesize(request);
 }
 
 const translationAdapters: Record<string, TranslationAdapter> = {
@@ -426,8 +466,6 @@ const ttsAdapters: Record<string, TtsAdapter> = {
   "azure-tts": new AzureTtsAdapter(),
   "generic-tts": new GenericHttpTtsAdapter(),
 };
-
-const fallbackTtsAdapter: TtsAdapter = new GoogleTranslateTtsFallbackAdapter();
 
 const asrAdapters: Record<string, AsrAdapter> = {
   browser: new BrowserAsrAdapter(),

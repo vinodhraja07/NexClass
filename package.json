@@ -15,6 +15,7 @@
     "dev:web": "npm run dev -w @nexclass/web",
     "typecheck": "npm run typecheck -w @nexclass/api && npm run typecheck -w @nexclass/web",
     "test": "npm run test -w @nexclass/api",
+    "test:stress": "npx tsx scripts/stress-concurrency.ts",
     "lint": "npm run lint -w @nexclass/api && npm run lint -w @nexclass/web",
     "setup": "npm install"
   },
