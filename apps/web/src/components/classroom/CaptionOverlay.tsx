@@ -11,9 +11,9 @@ import { describeTranslation } from "./CaptionSegmentCard";
 import { TermText } from "./TermText";
 
 const SCALE_CLASSES: Record<CaptionScale, string> = {
-  sm: "text-[14px] sm:text-[15px] leading-relaxed",
-  md: "text-[16px] sm:text-[18px] leading-relaxed",
-  lg: "text-[19px] sm:text-[22px] leading-relaxed",
+  sm: "text-[14px] sm:text-[15px] leading-[1.6]",
+  md: "text-[16px] sm:text-[18px] leading-[1.6]",
+  lg: "text-[19px] sm:text-[22px] leading-[1.6]",
 };
 
 export interface CaptionOverlayProps {
@@ -30,7 +30,8 @@ export interface CaptionOverlayProps {
  * Google Meet-Style Floating Caption Overlay.
  *
  * Floats directly over the bottom of the video grid like native Google Meet
- * closed captions, with translucent glass background and dual-language clarity.
+ * closed captions, with translucent glass background, fluid spring entry/exit transitions,
+ * and high-contrast Indic typography rendering with safe matra line-height.
  */
 export function CaptionOverlay({
   segments,
@@ -62,6 +63,10 @@ export function CaptionOverlay({
   const isCrossLanguage = isTranslatedMode && originalLang !== captionLanguage;
   const view = activeLatest ? describeTranslation(activeLatest, captionLanguage) : null;
 
+  const springTransition = reduced
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 450, damping: 32 };
+
   return (
     <div
       className={clsx(
@@ -75,18 +80,18 @@ export function CaptionOverlay({
           <motion.div
             key="interim"
             aria-hidden="true"
-            initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
-            transition={{ duration: 0.2 }}
-            className="pointer-events-auto max-w-3xl rounded-2xl bg-black/75 px-5 py-3 text-white backdrop-blur-xl shadow-2xl border border-white/10"
+            initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6 }}
+            transition={springTransition}
+            className="pointer-events-auto max-w-3xl rounded-2xl bg-black/85 px-5 py-3 text-white backdrop-blur-xl shadow-2xl border border-white/15"
           >
             <div className="flex items-center gap-2 text-xs font-semibold text-primary mb-1">
               <Radio className="h-3.5 w-3.5 animate-pulse text-emerald-400" />
               <span>{interim.speakerName || "Speaker"}</span>
               <span className="text-white/60 font-normal">• Transcribing live</span>
             </div>
-            <p className={clsx("italic text-white/90 font-medium", SCALE_CLASSES[scale])}>
+            <p className={clsx("font-indic italic text-white/95 font-medium drop-shadow-sm", SCALE_CLASSES[scale])}>
               {interim.text}…
             </p>
           </motion.div>
@@ -96,11 +101,11 @@ export function CaptionOverlay({
             key={activeLatest.id}
             aria-live="polite"
             aria-atomic="true"
-            initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
-            transition={{ type: "spring", stiffness: 450, damping: 32 }}
-            className="pointer-events-auto max-w-3xl rounded-2xl bg-black/80 px-5 py-3 text-white backdrop-blur-xl shadow-2xl border border-white/10"
+            initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6 }}
+            transition={springTransition}
+            className="pointer-events-auto max-w-3xl rounded-2xl bg-black/85 px-5 py-3 text-white backdrop-blur-xl shadow-2xl border border-white/15"
           >
             {/* Header: Speaker + Language Routing */}
             <div className="flex items-center gap-2 pb-1 text-xs text-white/70">
@@ -110,18 +115,18 @@ export function CaptionOverlay({
 
               {isCrossLanguage && (
                 <span className="inline-flex items-center gap-1 rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/80">
-                  <span>{languageNativeName(originalLang)}</span>
+                  <span className="font-indic">{languageNativeName(originalLang)}</span>
                   <ArrowRight className="h-2.5 w-2.5 text-primary" />
-                  <span className="font-bold text-primary">
+                  <span className="font-indic font-bold text-primary">
                     {languageNativeName(captionLanguage)}
                   </span>
                 </span>
               )}
             </div>
 
-            {/* Captions Body with Indic Font Optimization */}
+            {/* Captions Body with High-Contrast Indic Font Optimization */}
             {captionMode === "original" ? (
-              <div className={clsx("text-white font-medium drop-shadow-sm", SCALE_CLASSES[scale])}>
+              <div className={clsx("font-indic text-white/95 font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]", SCALE_CLASSES[scale])}>
                 <TermText text={activeLatest.originalText} language={captionLanguage} />
               </div>
             ) : (
@@ -129,7 +134,7 @@ export function CaptionOverlay({
                 <p
                   lang={captionLanguage}
                   className={clsx(
-                    "font-display font-medium text-white drop-shadow-sm tracking-normal leading-relaxed",
+                    "font-indic font-medium text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] tracking-normal",
                     SCALE_CLASSES[scale],
                   )}
                 >
@@ -149,7 +154,7 @@ export function CaptionOverlay({
 
                 {/* Subtitle cross-reference original for technical glossary */}
                 {isCrossLanguage && activeLatest.originalText && (
-                  <p className="line-clamp-1 text-2xs italic text-white/60 pt-0.5 border-t border-white/10">
+                  <p className="line-clamp-1 text-2xs italic text-white/60 pt-0.5 border-t border-white/10 font-indic">
                     <TermText text={activeLatest.originalText} language={captionLanguage} />
                   </p>
                 )}

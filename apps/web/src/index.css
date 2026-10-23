@@ -109,6 +109,20 @@
   }
 }
 
+/* Indic Script Typography & Matra Clipping Prevention (Task 4) */
+[lang="hi"],
+[lang="mr"],
+[lang="ta"],
+[lang="bn"],
+[lang="or"],
+.font-indic {
+  font-family: "Noto Sans Devanagari", "Noto Sans Tamil", "Noto Sans Bengali", "Noto Sans Oriya", "Nirmala UI", sans-serif;
+  line-height: 1.6 !important;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern", "liga", "clig";
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

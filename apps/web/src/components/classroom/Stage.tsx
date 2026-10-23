@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import { motion, useReducedMotion } from "motion/react";
-import { MonitorUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { MonitorUp, Pin } from "lucide-react";
 import clsx from "clsx";
 import type { ParticipantPublic } from "@nexclass/shared";
 import { VideoTile, type TileStatus } from "./VideoTile";
@@ -15,14 +15,23 @@ export interface StageProps {
   activeSpeakerId: string | null;
   /** Remote audio is muted while the translated voice mode is active. */
   audioMuted?: boolean;
+  /** Optional external pinned participant ID */
+  pinnedParticipantId?: string | null;
+  /** Optional callback when a tile pin is toggled */
+  onPinParticipant?: (id: string | null) => void;
   className?: string;
 }
+
+type TileDisplayMode = "grid" | "spotlight" | "sidebar" | "screenFilmstrip";
 
 /**
  * Google Meet-Style Adaptive Stage.
  *
  * Expands to full height and width, intelligently scaling video tiles
- * like Google Meet (1, 2, 3, 4, 6, 9 participants).
+ * like Google Meet (1, 2, 3, 4, 6, 9 participants), supporting:
+ * - Fluid layout spring animations (motion/react) for participant join, leave, reorder.
+ * - Interactive pin-to-stage expansion with spotlight and sidebar strips.
+ * - Strict useReducedMotion() compliance.
  */
 export function Stage({
   participants,
@@ -33,10 +42,35 @@ export function Stage({
   screenStream,
   activeSpeakerId,
   audioMuted = false,
+  pinnedParticipantId,
+  onPinParticipant,
   className,
 }: StageProps) {
   const screenRef = useRef<HTMLVideoElement | null>(null);
   const reduced = useReducedMotion() ?? false;
+  const [internalPinnedId, setInternalPinnedId] = useState<string | null>(null);
+
+  const activePinnedId = pinnedParticipantId !== undefined ? pinnedParticipantId : internalPinnedId;
+
+  // Clean up pinned state if participant disconnects / leaves
+  useEffect(() => {
+    if (activePinnedId && !participants.some((p) => p.id === activePinnedId)) {
+      if (onPinParticipant) {
+        onPinParticipant(null);
+      } else {
+        setInternalPinnedId(null);
+      }
+    }
+  }, [participants, activePinnedId, onPinParticipant]);
+
+  const handleTogglePin = (id: string) => {
+    const nextId = activePinnedId === id ? null : id;
+    if (onPinParticipant) {
+      onPinParticipant(nextId);
+    } else {
+      setInternalPinnedId(nextId);
+    }
+  };
 
   useEffect(() => {
     const element = screenRef.current;
@@ -46,6 +80,9 @@ export function Stage({
   }, [screenStream]);
 
   const count = participants.length;
+  const springTransition = reduced
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 350, damping: 32 };
 
   // Google Meet dynamic grid styles
   const gridLayout = (() => {
@@ -56,7 +93,7 @@ export function Stage({
     return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 max-w-7xl max-h-[90vh]";
   })();
 
-  const renderTile = (participant: ParticipantPublic, isFilmstrip = false) => {
+  const renderTile = (participant: ParticipantPublic, mode: TileDisplayMode = "grid") => {
     const isSelf = participant.id === selfId;
     const stream = isSelf ? localStream : streams[participant.id] ?? null;
     const status: TileStatus = isSelf
@@ -64,6 +101,24 @@ export function Stage({
         ? "local"
         : "idle"
       : statuses[participant.id] ?? "idle";
+
+    const tileClassName = (() => {
+      switch (mode) {
+        case "spotlight":
+          return "aspect-video w-full h-full max-h-[82vh] max-w-6xl shadow-2xl";
+        case "sidebar":
+          return "aspect-video h-24 sm:h-28 lg:h-36 shrink-0 w-auto lg:w-full";
+        case "screenFilmstrip":
+          return "aspect-video h-28 sm:h-36 shrink-0";
+        case "grid":
+        default:
+          return count <= 2
+            ? "aspect-video max-h-[75vh]"
+            : count <= 4
+              ? "aspect-video max-h-[38vh]"
+              : "aspect-video max-h-[28vh]";
+      }
+    })();
 
     return (
       <VideoTile
@@ -74,15 +129,9 @@ export function Stage({
         isSelf={isSelf}
         activeSpeaker={activeSpeakerId === participant.id}
         audioMuted={audioMuted}
-        className={
-          isFilmstrip
-            ? "aspect-video h-28 sm:h-36 shrink-0"
-            : count <= 2
-              ? "aspect-video max-h-[75vh]"
-              : count <= 4
-                ? "aspect-video max-h-[38vh]"
-                : "aspect-video max-h-[28vh]"
-        }
+        isPinned={activePinnedId === participant.id}
+        onPin={() => handleTogglePin(participant.id)}
+        className={tileClassName}
       />
     );
   };
@@ -92,6 +141,7 @@ export function Stage({
     return (
       <motion.div
         layout={!reduced}
+        transition={springTransition}
         className={clsx("flex h-full w-full flex-col gap-2 p-2 sm:p-3 overflow-hidden", className)}
       >
         <div className="relative flex-1 overflow-hidden rounded-2xl bg-[#0e0d17] border border-[#403B56]/60 shadow-2xl flex items-center justify-center">
@@ -109,15 +159,50 @@ export function Stage({
           </div>
         </div>
 
-        {/* Filmstrip below shared screen */}
+        {/* Filmstrip below shared screen with layout spring animations */}
         <div className="flex h-32 sm:h-40 shrink-0 gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
-          {participants.map((participant) => renderTile(participant, true))}
+          <AnimatePresence mode="popLayout">
+            {participants.map((participant) => renderTile(participant, "screenFilmstrip"))}
+          </AnimatePresence>
         </div>
       </motion.div>
     );
   }
 
-  /* Normal Google Meet Multi-tile View */
+  const pinnedParticipant = participants.find((p) => p.id === activePinnedId);
+  const otherParticipants = participants.filter((p) => p.id !== activePinnedId);
+
+  /* Pin-to-Stage Spotlight View */
+  if (pinnedParticipant) {
+    return (
+      <motion.div
+        layout={!reduced}
+        transition={springTransition}
+        className={clsx(
+          "relative flex h-full w-full flex-1 flex-col lg:flex-row items-center justify-center gap-3 p-2 sm:p-4 overflow-hidden",
+          className,
+        )}
+      >
+        {/* Primary Spotlight Stage Tile */}
+        <div className="relative flex-1 h-full w-full min-h-0 flex items-center justify-center">
+          <AnimatePresence mode="popLayout">
+            {renderTile(pinnedParticipant, "spotlight")}
+          </AnimatePresence>
+        </div>
+
+        {/* Other participants side filmstrip */}
+        {otherParticipants.length > 0 && (
+          <div className="flex flex-row lg:flex-col gap-2.5 overflow-x-auto lg:overflow-y-auto shrink-0 w-full lg:w-64 xl:w-72 max-h-[22vh] lg:max-h-full pb-1 lg:pb-0 scrollbar-thin">
+            <AnimatePresence mode="popLayout">
+              {otherParticipants.map((p) => renderTile(p, "sidebar"))}
+            </AnimatePresence>
+          </div>
+        )}
+      </motion.div>
+    );
+  }
+
+  /* Normal Google Meet Multi-tile Grid View */
   return (
     <div
       className={clsx(
@@ -132,9 +217,12 @@ export function Stage({
       ) : (
         <motion.div
           layout={!reduced}
+          transition={springTransition}
           className={clsx("grid h-full w-full items-center justify-center gap-3", gridLayout)}
         >
-          {participants.map((participant) => renderTile(participant))}
+          <AnimatePresence mode="popLayout">
+            {participants.map((participant) => renderTile(participant, "grid"))}
+          </AnimatePresence>
         </motion.div>
       )}
     </div>

@@ -86,17 +86,30 @@ export function VideoTile({
     }
   }, [stream, cameraOn]);
 
+  const springTransition = reduced
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 350, damping: 32 };
+
   return (
     <motion.div
       layout={!reduced}
+      initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.85 }}
+      transition={springTransition}
       className={clsx(
-        "group relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 select-none",
+        "group relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl select-none",
         "bg-[#1B192A] border shadow-md",
         activeSpeaker
-          ? "border-primary ring-2 ring-primary/60 shadow-lg shadow-primary/20"
+          ? "border-primary ring-2 ring-primary/60 shadow-lg shadow-primary/25"
           : "border-[#403B56]/50 hover:border-[#403B56]",
         className,
       )}
+      style={{
+        transitionProperty: "border-color, box-shadow, background-color",
+        transitionDuration: reduced ? "0ms" : "300ms",
+        transitionTimingFunction: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      }}
     >
       {/* Video element when camera is on */}
       {cameraOn ? (
@@ -151,18 +164,25 @@ export function VideoTile({
           <span className="sr-only">{meta.label}</span>
         </span>
         {onPin && (
-          <button
+          <motion.button
             type="button"
-            onClick={onPin}
-            aria-label={isPinned ? "Unpin tile" : "Pin tile"}
-            title={isPinned ? "Unpin from main screen" : "Pin to main screen"}
+            whileHover={reduced ? {} : { scale: 1.1 }}
+            whileTap={reduced ? {} : { scale: 0.92 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPin();
+            }}
+            aria-label={isPinned ? "Unpin tile" : "Pin tile to stage"}
+            title={isPinned ? "Unpin from spotlight" : "Pin to stage spotlight"}
             className={clsx(
-              "grid h-7 w-7 place-items-center rounded-full bg-black/60 backdrop-blur-md shadow-sm border border-white/10 transition-colors",
-              isPinned ? "bg-primary text-background font-bold" : "text-white/80 hover:text-white",
+              "grid h-7 w-7 place-items-center rounded-full backdrop-blur-md shadow-sm border transition-colors cursor-pointer",
+              isPinned
+                ? "bg-primary text-background font-bold border-primary shadow-primary/30"
+                : "bg-black/60 text-white/80 hover:text-white border-white/10 hover:bg-black/80",
             )}
           >
             {isPinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
-          </button>
+          </motion.button>
         )}
       </div>
 
@@ -171,18 +191,33 @@ export function VideoTile({
         {/* Mic status inside name pill */}
         {participant.audioEnabled ? (
           activeSpeaker ? (
-            /* Active speaking equalizer bars */
-            <span className="flex items-end gap-0.5 h-3" aria-hidden="true">
-              {[0.4, 0.9, 1, 0.6].map((scale, i) => (
+            /* Active speaking dynamic equalizer wave bars */
+            <span className="flex items-end gap-[3px] h-3.5 px-0.5" aria-hidden="true" title="Speaking">
+              {[
+                { id: 0, scaleY: [0.3, 0.85, 0.45, 1.0, 0.35, 0.7, 0.3], duration: 0.78, delay: 0 },
+                { id: 1, scaleY: [0.45, 1.0, 0.35, 0.8, 0.55, 0.95, 0.45], duration: 0.64, delay: 0.1 },
+                { id: 2, scaleY: [0.35, 0.75, 0.5, 0.95, 0.3, 0.85, 0.35], duration: 0.86, delay: 0.18 },
+                { id: 3, scaleY: [0.25, 0.65, 0.4, 0.75, 0.45, 0.6, 0.25], duration: 0.72, delay: 0.08 },
+              ].map((bar) => (
                 <motion.span
-                  key={i}
-                  animate={reduced ? {} : { scaleY: [0.25, 1, 0.25] }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 0.7 + i * 0.12,
-                    ease: "easeInOut",
-                  }}
-                  className="w-0.5 h-2.5 rounded-full bg-emerald-400 origin-bottom"
+                  key={bar.id}
+                  animate={
+                    reduced
+                      ? { scaleY: 0.6 }
+                      : { scaleY: bar.scaleY }
+                  }
+                  transition={
+                    reduced
+                      ? { duration: 0 }
+                      : {
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          duration: bar.duration,
+                          delay: bar.delay,
+                          ease: "easeInOut",
+                        }
+                  }
+                  className="w-[2.5px] h-3 rounded-full bg-emerald-400 origin-bottom shadow-[0_0_6px_rgba(52,211,153,0.6)]"
                 />
               ))}
             </span>
@@ -218,11 +253,22 @@ export function VideoTile({
         {/* Language Badge */}
         <span
           lang={participant.interfaceLanguage}
-          className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/80"
+          className="font-indic rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/80 leading-[1.6]"
           title={`Language: ${languageNativeName(participant.interfaceLanguage)}`}
         >
           {languageNativeName(participant.interfaceLanguage)}
         </span>
+
+        {/* Pinned pill indicator */}
+        {isPinned && (
+          <span
+            title="Pinned to stage spotlight"
+            className="inline-flex items-center gap-0.5 rounded bg-primary/20 px-1 py-0.5 text-[10px] font-semibold text-primary border border-primary/30"
+          >
+            <Pin className="h-2.5 w-2.5" />
+            <span>Pinned</span>
+          </span>
+        )}
 
         {/* Screen sharing pill */}
         {participant.screenSharing && (
