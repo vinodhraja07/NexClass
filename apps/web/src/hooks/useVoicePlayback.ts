@@ -144,6 +144,8 @@ export function useVoicePlayback({
       stopCurrent();
       playingRef.current = false;
       queueRef.current = [];
+      // Clear seen cache so the currently active sentence can be spoken in the new voice language
+      seenRef.current.clear();
     }
   }, [voiceLanguage, stopCurrent]);
   useEffect(() => {
@@ -200,15 +202,34 @@ export function useVoicePlayback({
       }
 
       if (!voice) {
-        return { provider: null, latencyMs, error: "No voice entry for this language.", browserFallback: false };
+        if (text) {
+          voice = {
+            provider: "browser-speech-synthesis",
+            status: "complete",
+            latencyMs: 0,
+            audioUrl: null,
+          };
+        } else {
+          return { provider: null, latencyMs, error: "No voice entry for this language.", browserFallback: false };
+        }
       }
       if (voice.status !== "complete") {
-        return {
-          provider: voice.provider,
-          latencyMs,
-          error: voice.error ?? "The voice provider did not produce audio for this segment.",
-          browserFallback: false,
-        };
+        if (text) {
+          // If the backend voice failed or is pending, degrade gracefully to browser speech
+          voice = {
+            provider: "browser-speech-synthesis",
+            status: "complete",
+            latencyMs: 0,
+            audioUrl: null,
+          };
+        } else {
+          return {
+            provider: voice.provider,
+            latencyMs,
+            error: voice.error ?? "The voice provider did not produce audio for this segment.",
+            browserFallback: false,
+          };
+        }
       }
 
       if (voice.audioUrl) {
@@ -368,12 +389,25 @@ export function useVoicePlayback({
       return;
     }
 
+    const currentLang = languageRef.current;
     let added = 0;
     segmentsRef.current.forEach((segment) => {
-      if (seenRef.current.has(segment.id)) return;
-      const voice = segment.voices[languageRef.current];
-      if (!voice || voice.status !== "complete") return;
-      seenRef.current.add(segment.id);
+      const seenKey = `${currentLang}:${segment.id}`;
+      if (seenRef.current.has(seenKey)) return;
+      const age = Date.now() - (segment.endTime || segment.startTime);
+      if (age > STALE_LIMIT_MS) {
+        seenRef.current.add(seenKey);
+        return;
+      }
+      const voice = segment.voices[currentLang];
+      const hasText =
+        Boolean(segment.translations[currentLang]?.text?.trim()) ||
+        (currentLang === segment.originalLanguage && Boolean(segment.originalText?.trim()));
+
+      if (!voice && !hasText) return;
+      if (voice && voice.status === "failed" && !hasText) return;
+
+      seenRef.current.add(seenKey);
       queueRef.current.push(segment);
       added += 1;
     });
