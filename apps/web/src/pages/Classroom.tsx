@@ -35,7 +35,7 @@ export default function Classroom() {
       </div>
     );
   }
-  if (!user && !guest) return <Navigate to={`/join?code=${encodeURIComponent(code)}`} replace />;
+  if (!user) return <Navigate to={`/join?code=${encodeURIComponent(code)}`} replace />;
 
   if (!transport) return null;
 
@@ -44,9 +44,9 @@ export default function Classroom() {
       <ClassroomShell
         transport={transport}
         meetingCode={code.toUpperCase()}
-        name={user ? user.name : guest?.name}
-        language={(user ? user.preferredLanguage : guest?.language) as LanguageCode}
-        onLeft={() => navigate(user ? "/dashboard" : "/join?joined=left")}
+        name={user.name}
+        language={user.preferredLanguage as LanguageCode}
+        onLeft={() => navigate("/dashboard")}
       />
     </div>
   );

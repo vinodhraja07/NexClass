@@ -3,11 +3,16 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowLeft,
+  CheckCircle2,
   Globe2,
+  GraduationCap,
   KeyRound,
   Lock,
   Radio,
+  ShieldCheck,
   Sparkles,
+  UserCheck,
+  UserRound,
   Users,
 } from "lucide-react";
 import clsx from "clsx";
@@ -19,12 +24,7 @@ import { CodeInput, sanitiseCode } from "@/components/dashboard/CodeInput";
 import { ErrorNotice } from "@/components/dashboard/ErrorNotice";
 import { FormField } from "@/components/dashboard/FormField";
 import { LanguageChips, ALL_LANGUAGE_CODES } from "@/components/dashboard/LanguageChips";
-import {
-  readGuestName,
-  storeGuestName,
-  storeGuestSession,
-  storeRecentMeeting,
-} from "@/components/dashboard/guestSession";
+import { storeGuestSession, storeRecentMeeting } from "@/components/dashboard/guestSession";
 
 interface JoinProblem {
   title: string;
@@ -34,7 +34,7 @@ interface JoinProblem {
 const OFFLINE_PROBLEM: JoinProblem = {
   title: "Meeting server is unreachable",
   message:
-    "NexClass could not reach the meeting API. Start it with npm run dev:api, then try again.",
+    "NexClass could not reach the meeting API. Make sure the API server is running on port 4000.",
 };
 
 function describeProblem(error: unknown): JoinProblem {
@@ -42,35 +42,35 @@ function describeProblem(error: unknown): JoinProblem {
     switch (error.code) {
       case "meeting_not_found":
         return {
-          title: "Meeting not found",
+          title: "Classroom not found",
           message:
-            "No classroom matches that code. Check the six characters your host shared and try again.",
+            "No active classroom matches that code. Double-check the six characters shared by your teacher.",
         };
       case "invalid_password":
         return {
           title: "Meeting password required",
           message:
-            "This classroom is protected. Enter the password your host shared to continue.",
+            "This classroom is password protected. Enter the password your teacher or host provided.",
         };
       case "meeting_ended":
         return {
-          title: "Meeting already ended",
+          title: "Classroom has ended",
           message:
-            "The host has closed this session. Ask your teacher for a new code or a recording.",
+            "The teacher has concluded this session. Ask your host for a new session code or recording.",
         };
       case "login_required":
         return {
-          title: "Sign in to join",
+          title: "Sign in required to join",
           message:
-            "This server does not allow guest joins yet. Sign in with your NexClass account and try again.",
+            "This classroom requires an authenticated account. Please sign in or create an account to enter.",
         };
       case "teacher_only":
         return {
           title: "Teachers only",
-          message: "Only teacher accounts can create meetings.",
+          message: "Only teacher accounts can initiate classrooms.",
         };
       default:
-        return { title: "Could not join the meeting", message: error.message };
+        return { title: "Could not join classroom", message: error.message };
     }
   }
   return OFFLINE_PROBLEM;
@@ -79,12 +79,11 @@ function describeProblem(error: unknown): JoinProblem {
 export default function JoinMeeting() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const reduced = useReducedMotion() ?? false;
 
   const initialCode = sanitiseCode(searchParams.get("code") ?? "");
   const [code, setCode] = useState(initialCode);
-  const [name, setName] = useState(() => readGuestName() ?? user?.name ?? "");
   const [language, setLanguage] = useState<LanguageCode>(user?.preferredLanguage ?? "en");
   const [password, setPassword] = useState("");
 
@@ -93,6 +92,13 @@ export default function JoinMeeting() {
   const [resolveProblem, setResolveProblem] = useState<JoinProblem | null>(null);
   const [joinProblem, setJoinProblem] = useState<JoinProblem | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Sync preferred language if user loads
+  useEffect(() => {
+    if (user?.preferredLanguage) {
+      setLanguage(user.preferredLanguage);
+    }
+  }, [user]);
 
   /* --------------------------- resolve the meeting ------------------------ */
 
@@ -161,6 +167,11 @@ export default function JoinMeeting() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!user) {
+      navigate(`/login?code=${code}`, { state: { from: `/join?code=${code}`, code } });
+      return;
+    }
+
     const normalised = code.trim().toUpperCase();
     setJoinProblem(null);
 
@@ -171,14 +182,7 @@ export default function JoinMeeting() {
       });
       return;
     }
-    const displayName = name.trim();
-    if (displayName.length < 2) {
-      setJoinProblem({
-        title: "Enter your name",
-        message: "Other participants in the room see this name.",
-      });
-      return;
-    }
+
     if (needsPassword && !password.trim()) {
       setJoinProblem({
         title: "Meeting password required",
@@ -189,6 +193,7 @@ export default function JoinMeeting() {
 
     setSubmitting(true);
     try {
+      const displayName = user.name;
       const result = await api.joinMeeting(normalised, {
         name: displayName,
         language,
@@ -198,7 +203,6 @@ export default function JoinMeeting() {
       });
 
       storeGuestSession(normalised, { token: result.token, name: displayName, language });
-      storeGuestName(displayName);
       storeRecentMeeting({
         code: result.meeting.code,
         title: result.meeting.title,
@@ -236,7 +240,7 @@ export default function JoinMeeting() {
         </Link>
       </header>
 
-      <main className="relative mx-auto grid w-full max-w-[1200px] gap-6 px-5 pb-16 pt-4 sm:px-8 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)] lg:gap-10 lg:pt-10">
+      <main className="relative mx-auto grid w-full max-w-[1200px] gap-6 px-5 pb-16 pt-4 sm:px-8 lg:grid-cols-[minmax(0,490px)_minmax(0,1fr)] lg:gap-10 lg:pt-8">
         <motion.section
           initial={reduced ? { opacity: 1 } : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -245,20 +249,30 @@ export default function JoinMeeting() {
           className="nc-panel relative overflow-hidden order-1 h-fit p-6 sm:p-8 border border-ink-600/80 shadow-lift"
         >
           <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-accent-400/8 blur-3xl" />
-          <p className="nc-eyebrow">Guest access</p>
+          
+          <div className="flex items-center justify-between">
+            <p className="nc-eyebrow flex items-center gap-1.5 text-accent-300">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Verified Classroom Entry
+            </p>
+            <span className="rounded-full border border-ink-600 bg-ink-850 px-2 py-0.5 text-3xs font-mono uppercase tracking-wider text-ivory-400">
+              Account Required
+            </span>
+          </div>
+
           <h1
             id="join-heading"
-            className="mt-2 font-display text-2xl font-semibold tracking-tight text-ivory-50"
+            className="mt-2.5 font-display text-2xl font-bold tracking-tight text-ivory-50 sm:text-[26px]"
           >
-            Join a classroom
+            Join a Classroom
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-ivory-400">
-            Enter the six character code your teacher shared. You do not need an account.
+          <p className="mt-1.5 text-xs leading-relaxed text-ivory-300">
+            Enter the 6-character code provided by your teacher. All participants must have an account to join.
           </p>
 
           {joinProblem ? (
             <ErrorNotice
-              className="mt-5"
+              className="mt-4"
               tone="error"
               title={joinProblem.title}
               message={joinProblem.message}
@@ -267,15 +281,16 @@ export default function JoinMeeting() {
 
           {resolveProblem ? (
             <ErrorNotice
-              className="mt-5"
+              className="mt-4"
               tone="warn"
               title={resolveProblem.title}
               message={resolveProblem.message}
             />
           ) : null}
 
-          <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate>
-            <FormField id="join-meeting-code" label="Meeting code" required>
+          <div className="mt-5 space-y-5">
+            {/* Meeting Code Input */}
+            <FormField id="join-meeting-code" label="Classroom Code" required>
               <CodeInput
                 id="join-meeting-code"
                 value={code}
@@ -283,132 +298,202 @@ export default function JoinMeeting() {
                 invalid={Boolean(resolveProblem)}
               />
               <p className="pt-1 text-2xs text-ivory-400">
-                Six characters, letters and numbers only. Pasting a code works too.
+                6-character code (e.g. 7KQ2MD). Case-insensitive.
               </p>
             </FormField>
 
+            {/* Resolved Meeting Preview */}
             {meeting ? (
               <motion.div
                 initial={reduced ? { opacity: 1 } : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-                className="rounded-xl border border-accent-400/25 bg-accent-400/6 px-4 py-3.5"
+                className="rounded-xl border border-accent-400/35 bg-accent-400/8 p-3.5"
               >
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <Badge tone={meeting.status === "live" ? "live" : "info"}>
-                    {meeting.status === "live" ? "Live now" : meeting.status === "ended" ? "Ended" : "Ready"}
+                    {meeting.status === "live" ? "Live Classroom" : meeting.status === "ended" ? "Ended" : "Ready to Start"}
                   </Badge>
-                  <span className="font-mono text-2xs tracking-[0.2em] text-ivory-300">
-                    {meeting.code}
+                  <span className="font-mono text-xs font-bold tracking-[0.2em] text-accent-300">
+                    #{meeting.code}
                   </span>
                 </div>
-                <p className="mt-2 font-display text-[15px] font-semibold text-ivory-50">
+                <p className="mt-2 font-display text-[15.5px] font-semibold text-ivory-50">
                   {meeting.title}
                 </p>
-                <p className="mt-1 flex items-center gap-1.5 text-2xs text-ivory-400">
-                  <Users className="h-3.5 w-3.5" aria-hidden="true" />
-                  Hosted by {meeting.hostName}
+                <p className="mt-1 flex items-center gap-1.5 text-2xs text-ivory-300">
+                  <Users className="h-3.5 w-3.5 text-accent-400" aria-hidden="true" />
+                  Hosted by Dr. {meeting.hostName}
                 </p>
               </motion.div>
             ) : resolving ? (
-              <p role="status" className="text-2xs text-ivory-400">
-                Looking for that classroom…
+              <p role="status" className="text-2xs text-accent-300 flex items-center gap-1.5">
+                <Radio className="h-3.5 w-3.5 animate-pulse" />
+                Resolving classroom details…
               </p>
             ) : null}
 
-            <FormField id="join-display-name" label="Display name" required>
-              <Input
-                id="join-display-name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                placeholder="How your teacher sees you"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </FormField>
+            {/* If NOT logged in: Show the Account Required Gate */}
+            {!user ? (
+              <div className="rounded-2xl border border-accent-400/35 bg-gradient-to-b from-accent-400/10 to-ink-950 p-5 text-center shadow-lg">
+                <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-accent-400/20 text-accent-300 shadow-inner">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <h2 className="mt-2.5 font-display text-[16px] font-bold text-ivory-50">
+                  Account Required to Join
+                </h2>
+                <p className="mt-1 text-2xs text-ivory-300 leading-relaxed max-w-sm mx-auto">
+                  To protect classroom security and save your personal multilingual transcripts, an account is required to participate in live sessions.
+                </p>
 
-            <fieldset className="space-y-2">
-              <legend className="text-[13px] font-medium text-ivory-200">
-                Caption language
-              </legend>
-              <LanguageChips
-                mode="single"
-                value={[language]}
-                onChange={(next) => setLanguage(next[0] ?? "en")}
-                codes={availableLanguages}
-                label="Caption language"
-                description={
-                  meeting
-                    ? "Available languages for this classroom."
-                    : "Available languages appear once the meeting code resolves."
-                }
-              />
-            </fieldset>
+                <div className="mt-4 flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    size="md"
+                    onClick={() => navigate(`/login?code=${code}`, { state: { from: `/join?code=${code}`, code } })}
+                    className="w-full text-xs font-semibold shadow-md shadow-accent-400/25"
+                    icon={<Sparkles className="h-3.5 w-3.5" />}
+                  >
+                    Sign in to Enter Classroom
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate(`/register?code=${code}`, { state: { from: `/join?code=${code}`, code } })}
+                    className="w-full text-xs font-medium"
+                  >
+                    Create Free Account
+                  </Button>
+                </div>
 
-            <FormField
-              id="join-password"
-              label="Meeting password"
-              hint={needsPassword ? "Required" : "Optional"}
-            >
-              <div className="relative">
-                <Lock
-                  className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ivory-400"
-                  aria-hidden="true"
-                />
-                <Input
-                  id="join-password"
-                  name="password"
-                  type="password"
-                  autoComplete="off"
-                  placeholder="Password shared by the host"
-                  value={password}
-                  aria-describedby="join-password-hint"
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="pl-10"
-                />
+                {/* 1-click test demo sign-in */}
+                <div className="mt-3.5 pt-3 border-t border-ink-700/60">
+                  <p className="text-3xs text-ivory-400 uppercase tracking-wider font-semibold mb-2">
+                    Or 1-click test with demo credentials:
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await login("student@nexclass.com", "password123");
+                        } catch {}
+                      }}
+                      className="nc-focus inline-flex items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-2.5 py-1 text-2xs font-semibold text-ivory-200 hover:border-lime-400/40 hover:text-lime-200 transition-colors"
+                    >
+                      <UserRound className="h-3 w-3 text-lime-400" />
+                      <span>Arjun (Student)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await login("teacher@nexclass.com", "password123");
+                        } catch {}
+                      }}
+                      className="nc-focus inline-flex items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-2.5 py-1 text-2xs font-semibold text-ivory-200 hover:border-accent-400/40 hover:text-accent-200 transition-colors"
+                    >
+                      <GraduationCap className="h-3 w-3 text-accent-300" />
+                      <span>Dr. Meera (Teacher)</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p id="join-password-hint" className="pt-1 text-2xs text-ivory-400">
-                {needsPassword
-                  ? "This classroom is password protected."
-                  : "Leave empty unless the host shared a password."}
-              </p>
-            </FormField>
-
-            <Button
-              type="submit"
-              size="lg"
-              loading={submitting}
-              className="w-full"
-              icon={<Radio className="h-4 w-4" aria-hidden="true" />}
-            >
-              {submitting ? "Joining classroom" : "Join classroom"}
-            </Button>
-          </form>
-
-          <p className="mt-5 border-t border-ink-700 pt-4 text-2xs leading-relaxed text-ivory-400">
-            Your name is remembered on this device so you never retype it.{" "}
-            {user ? (
-              <>
-                You are signed in as{" "}
-                <span className="text-ivory-100">{user.email}</span> - joining as a guest keeps
-                your teacher account untouched.
-              </>
             ) : (
-              <>
-                Have an account?{" "}
-                <Link
-                  to="/login"
-                  className="nc-focus rounded text-accent-300 underline decoration-accent-400/40 underline-offset-4"
+              /* If LOGGED IN: Show the verified student entry form */
+              <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+                {/* Verified user card */}
+                <div className="rounded-xl border border-accent-400/35 bg-accent-400/10 p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent-400/20 text-accent-300 font-bold text-xs uppercase">
+                      {user.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold text-ivory-50 flex items-center gap-1.5">
+                        <span>{user.name}</span>
+                        <span className="rounded bg-accent-400/25 px-1.5 py-0.2 text-3xs font-semibold uppercase text-accent-300">
+                          {user.role}
+                        </span>
+                      </p>
+                      <p className="text-3xs text-ivory-300">{user.email}</p>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-3xs font-semibold text-emerald-400">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Verified
+                  </span>
+                </div>
+
+                <fieldset className="space-y-2">
+                  <legend className="text-[12.5px] font-semibold text-ivory-200">
+                    Listening &amp; Caption Language
+                  </legend>
+                  <LanguageChips
+                    mode="single"
+                    value={[language]}
+                    onChange={(next) => setLanguage(next[0] ?? "en")}
+                    codes={availableLanguages}
+                    label="Caption language"
+                    description={
+                      meeting
+                        ? "Available languages for this classroom."
+                        : "Available languages appear once the meeting code resolves."
+                    }
+                  />
+                </fieldset>
+
+                {needsPassword && (
+                  <FormField
+                    id="join-password"
+                    label="Meeting Password"
+                    hint="Required"
+                  >
+                    <div className="relative">
+                      <Lock
+                        className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ivory-400"
+                        aria-hidden="true"
+                      />
+                      <Input
+                        id="join-password"
+                        name="password"
+                        type="password"
+                        autoComplete="off"
+                        placeholder="Password shared by the host"
+                        value={password}
+                        aria-describedby="join-password-hint"
+                        onChange={(event) => setPassword(event.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </FormField>
+                )}
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  loading={submitting}
+                  className="w-full text-sm font-semibold shadow-md shadow-accent-400/25"
+                  icon={<Radio className="h-4 w-4" aria-hidden="true" />}
                 >
-                  Sign in
-                </Link>{" "}
-                to manage your meetings.
-              </>
+                  {submitting ? "Joining Classroom…" : "Enter Live Classroom"}
+                </Button>
+              </form>
             )}
-          </p>
+          </div>
+
+          <div className="mt-5 border-t border-ink-700/70 pt-3.5 flex items-center justify-between text-3xs text-ivory-400">
+            <span>TLS 1.3 Verified Session</span>
+            <Link
+              to="/demo"
+              className="text-accent-300 font-semibold hover:text-accent-200 underline decoration-accent-400/40"
+            >
+              Explore Demo Classroom &rarr;
+            </Link>
+          </div>
         </motion.section>
 
+        {/* Right Explainer Column */}
         <motion.section
           initial={reduced ? { opacity: 1 } : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -418,72 +503,55 @@ export default function JoinMeeting() {
           aria-label="What happens in the classroom"
           className="order-2 hidden h-fit lg:block"
         >
-          <div className="nc-panel p-6">
-            <p className="nc-eyebrow">Inside the room</p>
-            <p className="mt-3 text-balance font-display text-[22px] font-semibold leading-snug text-ivory-50">
-              Everyone hears the same lecture, in the language that actually reaches them.
+          <div className="nc-panel p-6 border border-ink-600/70 bg-ink-850/80 shadow-lift">
+            <p className="nc-eyebrow text-accent-300">Live Multilingual Learning</p>
+            <p className="mt-2.5 text-balance font-display text-[22px] font-bold leading-snug text-ivory-50">
+              One teacher speaks once. Every student follows in their native language.
             </p>
 
             <ul className="mt-6 space-y-4">
               <li className="flex items-start gap-3">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent-400/12 text-accent-300">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent-400/15 text-accent-300">
                   <Globe2 className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div>
-                  <p className="text-[13px] font-medium text-ivory-100">Captions follow you</p>
-                  <p className="mt-0.5 text-2xs leading-relaxed text-ivory-400">
-                    The original language stays on top. Your translation sits underneath, updated as
-                    the teacher speaks.
+                  <p className="text-[13.5px] font-semibold text-ivory-100">
+                    6 Indian Languages Synchronized
+                  </p>
+                  <p className="mt-1 text-2xs leading-relaxed text-ivory-400">
+                    Real-time neural translation supports English, Tamil, Hindi, Bengali, Marathi, and Odia simultaneously.
                   </p>
                 </div>
               </li>
+
               <li className="flex items-start gap-3">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent-400/12 text-accent-300">
-                  <KeyRound className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent-400/15 text-accent-300">
+                  <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div>
-                  <p className="text-[13px] font-medium text-ivory-100">Guests join instantly</p>
-                  <p className="mt-0.5 text-2xs leading-relaxed text-ivory-400">
-                    No sign-up form, no email confirmation. A code and a name are enough.
+                  <p className="text-[13.5px] font-semibold text-ivory-100">
+                    Terminology Locking
+                  </p>
+                  <p className="mt-1 text-2xs leading-relaxed text-ivory-400">
+                    Scientific and technical terms like torque and eigenvalue never change meaning across translations.
                   </p>
                 </div>
               </li>
+
               <li className="flex items-start gap-3">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent-400/12 text-accent-300">
-                  <Users className="h-4 w-4" aria-hidden="true" />
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent-400/15 text-accent-300">
+                  <UserCheck className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div>
-                  <p className="text-[13px] font-medium text-ivory-100">Your teacher controls</p>
-                  <p className="mt-0.5 text-2xs leading-relaxed text-ivory-400">
-                    Password, mute rules, screen sharing and caption defaults are all set on their
-                    side.
+                  <p className="text-[13.5px] font-semibold text-ivory-100">
+                    Authenticated Safe Classrooms
+                  </p>
+                  <p className="mt-1 text-2xs leading-relaxed text-ivory-400">
+                    Sessions require verified accounts, preventing uninvited intruders and ensuring persistent student notes and transcripts.
                   </p>
                 </div>
               </li>
             </ul>
-
-            <div className="mt-6 rounded-xl border border-ink-700 bg-ink-900/50 p-4">
-              <p className="nc-eyebrow">Languages in this build</p>
-              <p className="mt-2 text-2xs leading-relaxed text-ivory-400">
-                English, Tamil, Hindi, Bengali, Marathi and Odia. The host chooses which caption
-                languages are offered in a given meeting.
-              </p>
-              <ul className="mt-3 flex flex-wrap gap-1.5">
-                {ALL_LANGUAGE_CODES.map((entry) => (
-                  <li
-                    key={entry}
-                    className={clsx(
-                      "rounded-full border px-2.5 py-1 text-2xs",
-                      meeting && !availableLanguages.includes(entry)
-                        ? "border-ink-700 text-ivory-400/60 line-through"
-                        : "border-ink-600 text-ivory-200",
-                    )}
-                  >
-                    {languageName(entry)}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </motion.section>
       </main>

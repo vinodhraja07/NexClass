@@ -774,7 +774,7 @@ export default function Dashboard() {
                       Join with a code
                     </h2>
                     <p className="mt-1 text-2xs text-ivory-400">
-                      Six characters from your teacher. No account needed.
+                      Six characters from your teacher. Instant session entry.
                     </p>
                   </div>
                   <Badge tone="info">Student</Badge>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
   AudioLines,
@@ -91,21 +91,33 @@ const STRENGTH_COLORS = [
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register, user } = useAuth();
+
+  const searchParams = new URLSearchParams(location.search);
+  const codeParam = searchParams.get("code");
+  const state = location.state as { from?: string; code?: string } | null;
+  const meetingCode = codeParam || state?.code || state?.from?.match(/code=([A-Z0-9]{6})/i)?.[1];
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<ParticipantRole>("teacher");
+  const [role, setRole] = useState<ParticipantRole>("student");
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (user) navigate("/dashboard", { replace: true });
-  }, [user, navigate]);
+    if (user) {
+      if (meetingCode) {
+        navigate(`/join?code=${meetingCode.toUpperCase()}`, { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [user, navigate, meetingCode]);
 
   const strength = useMemo(() => scorePassword(password), [password]);
 
@@ -125,13 +137,17 @@ export default function Register() {
         role,
         preferredLanguage: language,
       });
-      navigate("/dashboard", { replace: true });
+      if (meetingCode) {
+        navigate(`/join?code=${meetingCode.toUpperCase()}`, { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     } catch (error) {
       if (error instanceof ApiError) {
         setFormError(error.message);
       } else {
         setFormError(
-          "Meeting server is unreachable - start the API with npm run dev:api and try again.",
+          "Meeting server is unreachable - make sure the API server is running on port 4000.",
         );
       }
     } finally {
@@ -165,6 +181,21 @@ export default function Register() {
     >
       <div className="nc-panel relative overflow-hidden p-6 sm:p-8 border border-ink-600/80 shadow-lift backdrop-blur-xl">
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-accent-400/8 blur-3xl" />
+
+        {meetingCode && (
+          <div className="mb-5 flex items-center gap-3 rounded-xl border border-accent-400/40 bg-accent-400/10 p-3 text-xs text-accent-200">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent-400/20 text-accent-300 font-bold">
+              #{meetingCode.slice(0, 2).toUpperCase()}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-ivory-50">Create Account to Enter Session</p>
+              <p className="text-2xs text-ivory-300">
+                Registering grants you entry into classroom #{meetingCode.toUpperCase()}.
+              </p>
+            </div>
+          </div>
+        )}
+
         <p className="nc-eyebrow">Get started</p>
         <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ivory-50">
           Create your account

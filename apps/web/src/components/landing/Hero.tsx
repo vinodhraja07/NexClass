@@ -105,7 +105,7 @@ export function Hero() {
                   htmlFor="hero-quick-join"
                   className="block text-2xs font-semibold uppercase tracking-wider text-accent-300"
                 >
-                  Join a Live Class (No Account Required)
+                  Join a Live Classroom
                 </label>
                 <div className="mt-1.5 flex items-center gap-2">
                   <input
@@ -133,6 +133,9 @@ export function Hero() {
                     Join
                   </Button>
                 </div>
+                <p className="mt-1.5 text-3xs text-ivory-400">
+                  Enter 6-char code · Account required to join live interactive sessions
+                </p>
               </div>
             </div>
 
