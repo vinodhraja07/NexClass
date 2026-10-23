@@ -100,7 +100,7 @@ export default function Demo() {
   }, [transport, students.length]);
 
   return (
-    <div className="flex min-h-full flex-col bg-ink-900 text-ivory-100">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-ink-900 text-ivory-100">
       {/* demo overview banner */}
       <div className="border-b border-ink-700/70 bg-ink-850/60 px-3.5 py-3 sm:px-5">
         <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center gap-2.5">
@@ -255,7 +255,7 @@ export default function Demo() {
       </div>
 
       {/* the classroom itself - the identical shell from the live room */}
-      <div className="min-h-[75vh] flex-1 xl:h-[82vh]">
+      <div className="flex-1 min-h-0">
         <ClassroomShell
           transport={transport}
           simulated
@@ -266,33 +266,6 @@ export default function Demo() {
           onLeft={() => navigate("/")}
         />
       </div>
-
-      {/* Direct Move to Demo 2 Footer Banner */}
-      <footer className="border-t border-ink-700/70 bg-ink-850/90 px-4 py-3.5 sm:px-6">
-        <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent-400/15 text-accent-300">
-              <Boxes className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-xs sm:text-sm font-semibold text-ivory-50">
-                Next: Demo 2 — 3D Shared-Room Labels
-              </p>
-              <p className="text-2xs sm:text-xs text-ivory-300">
-                One shared 3D object geometry with synchronized multilingual labels for every learner.
-              </p>
-            </div>
-          </div>
-
-          <Link
-            to="/demo/room"
-            className="nc-focus inline-flex h-10 items-center gap-2 rounded-xl bg-accent-400 px-5 text-xs sm:text-sm font-semibold text-ink-900 transition-all hover:bg-accent-300 shadow-lg shadow-accent-400/25 active:scale-95"
-          >
-            <span>Directly Move to Demo 2</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </footer>
     </div>
   );
 }
