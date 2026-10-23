@@ -14,6 +14,18 @@ function formatDuration(ms: number): string {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
+function formatRecTimer(seconds: number): string {
+  const s = Math.max(0, Math.floor(seconds));
+  const hrs = Math.floor(s / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  const secs = s % 60;
+  const pad = (value: number) => String(value).padStart(2, "0");
+  if (hrs > 0) {
+    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+  }
+  return `${pad(mins)}:${pad(secs)}`;
+}
+
 const STATUS_META: Record<ConnectionStatus, { label: string; icon: typeof SignalHigh; tone: string }> = {
   connected: { label: "Connected", icon: SignalHigh, tone: "text-primary border-primary/35 bg-primary/10" },
   connecting: { label: "Connecting…", icon: SignalMedium, tone: "text-signal-warn border-signal-warn/35 bg-signal-warn/10" },
@@ -29,6 +41,8 @@ export interface ClassroomHeaderProps {
   startedAt: string | null;
   demo?: boolean;
   className?: string;
+  isRecording?: boolean;
+  recordingElapsed?: number;
 }
 
 export function ClassroomHeader({
@@ -38,6 +52,8 @@ export function ClassroomHeader({
   startedAt,
   demo = false,
   className,
+  isRecording = false,
+  recordingElapsed = 0,
 }: ClassroomHeaderProps) {
   const reduced = useReducedMotion() ?? false;
   const [copied, setCopied] = useState(false);
@@ -76,6 +92,31 @@ export function ClassroomHeader({
         <h1 className="truncate text-xs sm:text-sm font-semibold text-text-primary tracking-tight">
           {title}
         </h1>
+
+        {isRecording && (
+          <motion.span
+            initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/60 bg-rose-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 shadow-sm shadow-rose-500/20 select-none shrink-0"
+            role="status"
+            aria-label={`Recording active, elapsed time ${formatRecTimer(recordingElapsed)}`}
+          >
+            <span className="relative flex h-2 w-2">
+              <span
+                className={clsx(
+                  "absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75",
+                  !reduced && "animate-ping",
+                )}
+              />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
+            </span>
+            <span>REC</span>
+            <span className="font-mono font-medium normal-case tracking-normal text-rose-300">
+              {formatRecTimer(recordingElapsed)}
+            </span>
+          </motion.span>
+        )}
 
         {demo ? (
           <span className="rounded-full border border-signal-warn/40 bg-signal-warn/12 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-signal-warn">

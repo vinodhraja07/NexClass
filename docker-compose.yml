@@ -1,0 +1,116 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: nexclass-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: nexclass
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - nexclass_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: nexclass-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - nexclass_network
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: nexclass-api
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:3000,http://localhost:80,http://localhost:5173}
+      MONGODB_URI: mongodb://mongodb:27017/nexclass
+      MONGODB_DB_NAME: nexclass
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-nexclass_production_secret_key_change_in_env_2026}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      RECORDINGS_PATH: /app/recordings
+      RECORDINGS_DIR: /app/recordings
+      STUN_SERVERS: ${STUN_SERVERS:-stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302}
+      TURN_SERVER_URL: ${TURN_SERVER_URL:-}
+      TURN_USERNAME: ${TURN_USERNAME:-}
+      TURN_PASSWORD: ${TURN_PASSWORD:-}
+      ASR_PROVIDER: ${ASR_PROVIDER:-browser}
+      TRANSLATION_PROVIDER: ${TRANSLATION_PROVIDER:-none}
+      TTS_PROVIDER: ${TTS_PROVIDER:-google-translate-tts-fallback}
+      TERM_ASSIST_PROVIDER: ${TERM_ASSIST_PROVIDER:-none}
+      ALLOW_GUEST_JOIN: ${ALLOW_GUEST_JOIN:-true}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-300}
+    ports:
+      - "${API_PORT:-4000}:4000"
+    volumes:
+      - recordings_data:/app/recordings
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/api/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - nexclass_network
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: nexclass-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-3000}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - nexclass_network
+
+volumes:
+  mongodb_data:
+    name: nexclass_mongodb_data
+  redis_data:
+    name: nexclass_redis_data
+  recordings_data:
+    name: nexclass_recordings_data
+
+networks:
+  nexclass_network:
+    name: nexclass_network
+    driver: bridge
