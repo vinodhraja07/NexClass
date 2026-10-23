@@ -1,0 +1,21 @@
+{
+  "name": "@nexclass/terminology",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "echo \"@nexclass/terminology is consumed as TypeScript source\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nexclass/shared": "*"
+  }
+}

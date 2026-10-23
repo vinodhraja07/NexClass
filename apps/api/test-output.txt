@@ -1,0 +1,35 @@
+﻿
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mE:/mnt/e/NexClass/apps/api[39m
+
+[90mstdout[2m | tests/api.test.ts[2m > [22m[2msocket.io realtime layer[2m > [22m[2mjoins a meeting and delivers the full caption pipeline
+[22m[39m[nexclass] API listening on http://localhost:0 (test) - mongo: in-memory fallback, redis: in-process fallback
+
+[90mstdout[2m | tests/api.test.ts[2m > [22m[2msocket.io realtime layer[2m > [22m[2mrejects handshakes without a token
+[22m[39m[nexclass] API listening on http://localhost:0 (test) - mongo: in-memory fallback, redis: in-process fallback
+
+ [31mΓ¥»[39m tests/api.test.ts [2m([22m[2m22 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 20877[2mms[22m[39m
+   [33m[2mΓ£ô[22m[39m nexclass REST API[2m > [22mregisters a teacher and a student and returns tokens [33m427[2mms[22m[39m
+[31m   [31m├ù[31m socket.io realtime layer[2m > [22mjoins a meeting and delivers the full caption pipeline[33m 20017[2mms[22m[31m[39m
+[31m     ΓåÆ Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+
+node.exe : [31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1m[7m Failed Tests 1 [27m[22mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m
+At line:1 char:1
++ & "D:\nodejs/node.exe" "D:\nodejs/node_modules/npm/bin/npx-cli.js" vi ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([31mΓÄ»ΓÄ»ΓÄ»Γ...»ΓÄ»ΓÄ»ΓÄ»[39m:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+[31m[1m[7m FAIL [27m[22m[39m tests/api.test.ts[2m > [22msocket.io realtime layer[2m > [22mjoins a meeting 
+and delivers the full caption pipeline
+[31m[1mError[22m: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with 
+"testTimeout".[39m
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m21 passed[39m[22m[90m (22)[39m
+[2m   Start at [22m 22:22:21
+[2m   Duration [22m 34.11s[2m (transform 210ms, setup 0ms, collect 135ms, tests 20.88s, environment 0ms, prepare 63ms)[22m
+

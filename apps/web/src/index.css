@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --nc-ink: 7 11 20;
+  --nc-surface: 14 21 36;
+  --nc-raised: 23 33 54;
+  --nc-line: 42 58 87;
+  --nc-accent: 46 224 168;
+  --nc-lime: 211 242 92;
+  --nc-ivory: 244 239 230;
+  --nc-muted: 154 167 192;
+}
+
+@layer base {
+  * {
+    @apply border-ink-600;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-900 text-ivory-100 font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-[-0.02em];
+  }
+
+  ::selection {
+    background: rgba(46, 224, 168, 0.28);
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--nc-accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(42, 58, 87, 0.9);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(60, 80, 118, 0.95);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  .nc-surface {
+    @apply bg-ink-800/80 border border-ink-600/70 rounded-2xl backdrop-blur-xl;
+  }
+
+  .nc-panel {
+    @apply bg-ink-850 border border-ink-600/60 rounded-2xl;
+  }
+
+  .nc-hairline {
+    @apply border-b border-ink-600/60;
+  }
+
+  .nc-focus {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900;
+  }
+
+  .nc-eyebrow {
+    @apply text-2xs font-semibold uppercase tracking-[0.18em] text-ivory-400;
+  }
+
+  .nc-grain {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
