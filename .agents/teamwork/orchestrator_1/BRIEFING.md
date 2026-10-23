@@ -59,12 +59,23 @@ Orchestrate full production hardening, recording pipeline, Docker deployment, Go
 | explorer_survey_1 | teamwork_preview_explorer | Survey Backend & Signaling | completed | f9163ca0-5ad3-4d13-ab85-fe370afd7a39 |
 | explorer_survey_2 | teamwork_preview_explorer | Survey Frontend UI & Animations | completed | b0e668f8-ff3f-427b-90ae-70193f01432e |
 | explorer_survey_3 | teamwork_preview_explorer | Survey DevOps & Concurrency | completed | 6a690482-59cb-478f-9141-e7ece91a4dfb |
-| worker_m1 | teamwork_preview_worker | Milestone 1: Backend Recording & Signaling | in-progress | f9bc79f2-baf4-4266-b7f0-56bd6ed61e83 |
+| worker_m1 | teamwork_preview_worker | Milestone 1: Backend Recording & Signaling | completed | f9bc79f2-baf4-4266-b7f0-56bd6ed61e83 |
+| reviewer_m1_1 | teamwork_preview_reviewer | M1 Reviewer 1 | completed | c1bafe84-e788-4b79-b04b-aceb9321b7c8 |
+| reviewer_m1_2 | teamwork_preview_reviewer | M1 Reviewer 2 | completed | ba7c70e4-077d-49a8-bb86-cbad4e9522e1 |
+| challenger_m1_1 | teamwork_preview_challenger | M1 Challenger 1 | in-progress | cff3ebe9-95b3-4e96-83f7-45f66703da2a |
+| challenger_m1_2 | teamwork_preview_challenger | M1 Challenger 2 | in-progress | ef376455-c998-44ac-9ac0-fe2ba051e566 |
+| auditor_m1_1 | teamwork_preview_auditor | M1 Forensic Auditor | completed | 674eae91-0311-4dc8-9729-6414b3be4114 |
+| worker_m1_fix_1 | teamwork_preview_worker | M1 Hardening Fixes | completed | f1a9af2b-264c-4eae-af0a-c0fc45c12ffa |
+| worker_m2 | teamwork_preview_worker | Milestone 2: Frontend Recording UI | completed | de9c809d-1da5-4eb8-ac8d-8a861a970082 |
+| worker_m4 | teamwork_preview_worker | Milestone 4: Docker Production Infra | completed | 114bcd8e-2957-4346-889f-d08ec93c9962 |
+| worker_m3 | teamwork_preview_worker | Milestone 3: UI Animations & Typography | completed | 85cfe056-eff0-4c07-9774-3c493cfe76aa |
+| worker_m5_2 | teamwork_preview_worker | Milestone 5: Concurrency Stress Test | completed | a0d59a84-d8ba-4dae-854b-70ec8d6febc0 |
+| worker_final_verify | teamwork_preview_worker | Final QA & Gating Verification | in-progress | ef84582f-9c87-4963-9653-dca77737e445 |
 
 ## Succession Status
-- Succession required: no
-- Spawn count: 4 / 16
-- Pending subagents: f9bc79f2-baf4-4266-b7f0-56bd6ed61e83
+- Succession required: yes (upon worker_final_verify completion)
+- Spawn count: 16 / 16
+- Pending subagents: ef84582f-9c87-4963-9653-dca77737e445
 - Predecessor: none
 - Successor: not yet spawned
 

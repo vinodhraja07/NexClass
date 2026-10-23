@@ -36,6 +36,70 @@ export interface MeetingSocket {
   server: { sockets: { sockets: Map<string, MeetingSocket> } };
 }
 
+export interface RecordingStatePayload {
+  isRecording: boolean;
+  isPaused: boolean;
+  startedAt: number | null;
+  elapsedSeconds: number;
+  recordedBy: string | null;
+}
+
+interface RoomRecordingInternal {
+  isRecording: boolean;
+  isPaused: boolean;
+  startedAt: number | null;
+  segmentStartedAt: number | null;
+  accumulatedElapsedSeconds: number;
+  recordedBy: string | null;
+}
+
+const roomRecordingStates = new Map<string, RoomRecordingInternal>();
+
+export function getRoomRecordingState(meetingCode: string): RecordingStatePayload {
+  const code = (meetingCode ?? "").toUpperCase();
+  const internal = roomRecordingStates.get(code);
+  if (!internal || !internal.isRecording) {
+    return {
+      isRecording: false,
+      isPaused: false,
+      startedAt: null,
+      elapsedSeconds: internal?.accumulatedElapsedSeconds ?? 0,
+      recordedBy: null,
+    };
+  }
+  let currentElapsed = internal.accumulatedElapsedSeconds;
+  if (!internal.isPaused && internal.segmentStartedAt) {
+    currentElapsed += Math.max(0, Math.floor((Date.now() - internal.segmentStartedAt) / 1000));
+  }
+  return {
+    isRecording: internal.isRecording,
+    isPaused: internal.isPaused,
+    startedAt: internal.startedAt,
+    elapsedSeconds: currentElapsed,
+    recordedBy: internal.recordedBy,
+  };
+}
+
+export function resetRoomRecordingStates(): void {
+  roomRecordingStates.clear();
+}
+
+/**
+ * O(1) Participant socket map for high-concurrency WebRTC signaling relay.
+ */
+export const participantSockets = new Map<string, MeetingSocket>();
+
+export function getParticipantSocket(socket: MeetingSocket, participantId?: string): MeetingSocket | undefined {
+  if (!participantId) return undefined;
+  const mapped = participantSockets.get(participantId);
+  if (mapped) return mapped;
+  return peerSockets(socket).find((candidate) => candidate.data.participantId === participantId);
+}
+
+export function clearParticipantSockets(): void {
+  participantSockets.clear();
+}
+
 function peerSockets(socket: MeetingSocket): MeetingSocket[] {
   return [...socket.server.sockets.sockets.values()];
 }
@@ -205,6 +269,7 @@ export function registerMeetingHandlers(socket: MeetingSocket, identity: SocketI
           await socket.join(roomName(meeting.code));
           socket.data.meetingCode = meeting.code;
           socket.data.participantId = participant.id;
+          participantSockets.set(participant.id!, socket);
 
           if (meeting.status === "scheduled") {
             await MeetingModel.findOneAndUpdate(
@@ -220,13 +285,16 @@ export function registerMeetingHandlers(socket: MeetingSocket, identity: SocketI
           }).exec();
 
           const freshMeeting = (await resolveMeeting(meeting.code)) ?? meeting;
+          const recordingState = getRoomRecordingState(meeting.code);
           socket.emit("meeting:joined", {
             participant: toParticipantPublic(participant),
             meeting: toMeetingPublic(freshMeeting),
             participants: participants.map(toParticipantPublic),
             providerStatus: providerStatusPayload(),
             labels: translateUiBundle(participant.interfaceLanguage),
+            recordingState,
           });
+          socket.emit("recording:state", recordingState);
           ack?.({ ok: true, participantId: participant.id });
 
           socket.to(roomName(meeting.code)).emit("participant:joined", {
@@ -245,6 +313,9 @@ export function registerMeetingHandlers(socket: MeetingSocket, identity: SocketI
       if (!code) return;
       const participantId = socket.data.participantId as string | undefined;
       if (participantId) {
+        if (participantSockets.get(participantId) === socket) {
+          participantSockets.delete(participantId);
+        }
         await ParticipantModel.updateMany(
           { id: participantId } as Record<string, unknown>,
           { $set: { leftAt: new Date() } },
@@ -316,9 +387,7 @@ export function registerMeetingHandlers(socket: MeetingSocket, identity: SocketI
     /* ------------------------- WebRTC signalling ------------------------- */
 
     socket.on("webrtc:offer", (payload: { toId: string; sdp: unknown }) => {
-      const target = peerSockets(socket).find(
-        (candidate) => candidate.data.participantId === payload?.toId,
-      );
+      const target = getParticipantSocket(socket, payload?.toId);
       if (!target) return;
       target.emit("webrtc:offer", {
         fromId: socket.data.participantId,
@@ -327,9 +396,7 @@ export function registerMeetingHandlers(socket: MeetingSocket, identity: SocketI
     });
 
     socket.on("webrtc:answer", (payload: { toId: string; sdp: unknown }) => {
-      const target = peerSockets(socket).find(
-        (candidate) => candidate.data.participantId === payload?.toId,
-      );
+      const target = getParticipantSocket(socket, payload?.toId);
       if (!target) return;
       target.emit("webrtc:answer", {
         fromId: socket.data.participantId,
@@ -338,15 +405,176 @@ export function registerMeetingHandlers(socket: MeetingSocket, identity: SocketI
     });
 
     socket.on("webrtc:ice", (payload: { toId: string; candidate: unknown }) => {
-      const target = peerSockets(socket).find(
-        (candidate) => candidate.data.participantId === payload?.toId,
-      );
+      const target = getParticipantSocket(socket, payload?.toId);
       if (!target) return;
       target.emit("webrtc:ice", {
         fromId: socket.data.participantId,
         candidate: payload.candidate,
       });
     });
+
+    /* ------------------------ Recording Signaling ------------------------ */
+
+    socket.on(
+      "recording:start",
+      async (
+        payload?: { meetingCode?: string; participantId?: string },
+        ack?: (response: unknown) => void,
+      ) => {
+        const code = ((payload?.meetingCode ?? socket.data.meetingCode) as string | undefined)?.toUpperCase();
+        if (!code) {
+          ack?.({ ok: false, error: "No meeting code provided." });
+          return;
+        }
+        const participantId = (payload?.participantId ?? socket.data.participantId ?? identity.participantId) as string | undefined;
+
+        const existing = roomRecordingStates.get(code);
+        if (existing && existing.isRecording) {
+          const current = getRoomRecordingState(code);
+          ack?.({ ok: true, alreadyActive: true, state: current });
+          return;
+        }
+
+        const now = Date.now();
+        const internal: RoomRecordingInternal = {
+          isRecording: true,
+          isPaused: false,
+          startedAt: now,
+          segmentStartedAt: now,
+          accumulatedElapsedSeconds: 0,
+          recordedBy: participantId ?? null,
+        };
+        roomRecordingStates.set(code, internal);
+
+        const statePayload: RecordingStatePayload = {
+          isRecording: true,
+          isPaused: false,
+          startedAt: now,
+          elapsedSeconds: 0,
+          recordedBy: participantId ?? null,
+        };
+
+        broadcast(socket, code, "recording:state", statePayload);
+        broadcast(socket, code, "recording:started", {
+          startedAt: now,
+          startedBy: identity.name,
+          recordedBy: participantId ?? null,
+        });
+        ack?.({ ok: true, state: statePayload });
+      },
+    );
+
+    socket.on(
+      "recording:pause",
+      async (
+        payload?: { meetingCode?: string; participantId?: string },
+        ack?: (response: unknown) => void,
+      ) => {
+        const code = ((payload?.meetingCode ?? socket.data.meetingCode) as string | undefined)?.toUpperCase();
+        if (!code) {
+          ack?.({ ok: false, error: "No meeting code provided." });
+          return;
+        }
+        const internal = roomRecordingStates.get(code);
+        if (!internal || !internal.isRecording) {
+          ack?.({ ok: false, error: "Recording is not active." });
+          return;
+        }
+
+        if (!internal.isPaused && internal.segmentStartedAt) {
+          internal.accumulatedElapsedSeconds += Math.max(
+            0,
+            Math.floor((Date.now() - internal.segmentStartedAt) / 1000),
+          );
+          internal.segmentStartedAt = null;
+          internal.isPaused = true;
+        }
+
+        const statePayload: RecordingStatePayload = {
+          isRecording: true,
+          isPaused: true,
+          startedAt: internal.startedAt,
+          elapsedSeconds: internal.accumulatedElapsedSeconds,
+          recordedBy: internal.recordedBy,
+        };
+
+        broadcast(socket, code, "recording:state", statePayload);
+        broadcast(socket, code, "recording:paused", { elapsedSeconds: internal.accumulatedElapsedSeconds });
+        ack?.({ ok: true, state: statePayload });
+      },
+    );
+
+    socket.on(
+      "recording:resume",
+      async (
+        payload?: { meetingCode?: string; participantId?: string },
+        ack?: (response: unknown) => void,
+      ) => {
+        const code = ((payload?.meetingCode ?? socket.data.meetingCode) as string | undefined)?.toUpperCase();
+        if (!code) {
+          ack?.({ ok: false, error: "No meeting code provided." });
+          return;
+        }
+        const internal = roomRecordingStates.get(code);
+        if (!internal || !internal.isRecording) {
+          ack?.({ ok: false, error: "Recording is not active." });
+          return;
+        }
+
+        if (internal.isPaused) {
+          internal.isPaused = false;
+          internal.segmentStartedAt = Date.now();
+        }
+
+        const statePayload: RecordingStatePayload = {
+          isRecording: true,
+          isPaused: false,
+          startedAt: internal.startedAt,
+          elapsedSeconds: internal.accumulatedElapsedSeconds,
+          recordedBy: internal.recordedBy,
+        };
+
+        broadcast(socket, code, "recording:state", statePayload);
+        broadcast(socket, code, "recording:resumed", { elapsedSeconds: internal.accumulatedElapsedSeconds });
+        ack?.({ ok: true, state: statePayload });
+      },
+    );
+
+    socket.on(
+      "recording:stop",
+      async (
+        payload?: { meetingCode?: string; participantId?: string },
+        ack?: (response: unknown) => void,
+      ) => {
+        const code = ((payload?.meetingCode ?? socket.data.meetingCode) as string | undefined)?.toUpperCase();
+        if (!code) {
+          ack?.({ ok: false, error: "No meeting code provided." });
+          return;
+        }
+        const internal = roomRecordingStates.get(code);
+
+        let totalElapsed = 0;
+        if (internal) {
+          totalElapsed = internal.accumulatedElapsedSeconds;
+          if (internal.isRecording && !internal.isPaused && internal.segmentStartedAt) {
+            totalElapsed += Math.max(0, Math.floor((Date.now() - internal.segmentStartedAt) / 1000));
+          }
+          roomRecordingStates.delete(code);
+        }
+
+        const statePayload: RecordingStatePayload = {
+          isRecording: false,
+          isPaused: false,
+          startedAt: null,
+          elapsedSeconds: totalElapsed,
+          recordedBy: null,
+        };
+
+        broadcast(socket, code, "recording:state", statePayload);
+        broadcast(socket, code, "recording:stopped", { elapsedSeconds: totalElapsed });
+        ack?.({ ok: true, state: statePayload });
+      },
+    );
 
     /* ----------------------------- Captions ------------------------------ */
 
@@ -544,6 +772,9 @@ export function registerMeetingHandlers(socket: MeetingSocket, identity: SocketI
       const code = socket.data.meetingCode as string | undefined;
       const participantId = socket.data.participantId as string | undefined;
       if (!code || !participantId) return;
+      if (participantSockets.get(participantId) === socket) {
+        participantSockets.delete(participantId);
+      }
       await ParticipantModel.updateMany(
         { id: participantId } as Record<string, unknown>,
         { $set: { leftAt: new Date() } },

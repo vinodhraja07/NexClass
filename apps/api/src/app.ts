@@ -9,6 +9,7 @@ import { rateLimit } from "./middleware/rateLimit";
 import { errorHandler, notFoundHandler } from "./middleware/errors";
 import authRoutes from "./routes/auth";
 import meetingRoutes from "./routes/meetings";
+import recordingRoutes from "./routes/recordings";
 import providerRoutes from "./routes/providers";
 import demoRoutes from "./routes/demo";
 import { LANGUAGES } from "@nexclass/shared";
@@ -51,6 +52,7 @@ export function createApp(): Express {
 
   app.use("/api/auth", authRoutes);
   app.use("/api", meetingRoutes);
+  app.use("/api", recordingRoutes);
   app.use("/api/providers", providerRoutes);
   app.use("/api/demo", demoRoutes);
 

@@ -151,12 +151,13 @@ export function streamRecording(recording: RecordingDoc, options: StreamRecordin
       end = fileSize - 1;
     }
 
-    if (isNaN(start) || isNaN(end) || start >= fileSize || end >= fileSize || start > end) {
+    if (isNaN(start) || isNaN(end) || start >= fileSize || start > end) {
       res.setHeader("Content-Range", `bytes */${fileSize}`);
       res.sendStatus(416);
       return;
     }
 
+    end = Math.min(end, fileSize - 1);
     const chunkSize = end - start + 1;
     res.writeHead(206, {
       "Content-Range": `bytes ${start}-${end}/${fileSize}`,
@@ -167,8 +168,16 @@ export function streamRecording(recording: RecordingDoc, options: StreamRecordin
 
     const stream = fs.createReadStream(recording.filePath, { start, end });
     stream.on("error", () => {
-      if (!res.headersSent) {
-        res.status(500).end();
+      try {
+        if (!res.headersSent) {
+          if (typeof res.status === "function") {
+            res.status(500).end();
+          } else if (typeof res.writeHead === "function") {
+            res.writeHead(500).end();
+          }
+        }
+      } catch {
+        // ignore
       }
     });
     stream.pipe(res);
@@ -181,8 +190,16 @@ export function streamRecording(recording: RecordingDoc, options: StreamRecordin
 
     const stream = fs.createReadStream(recording.filePath);
     stream.on("error", () => {
-      if (!res.headersSent) {
-        res.status(500).end();
+      try {
+        if (!res.headersSent) {
+          if (typeof res.status === "function") {
+            res.status(500).end();
+          } else if (typeof res.writeHead === "function") {
+            res.writeHead(500).end();
+          }
+        }
+      } catch {
+        // ignore
       }
     });
     stream.pipe(res);
