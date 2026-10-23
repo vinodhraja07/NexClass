@@ -51,6 +51,7 @@ export interface ClassroomToolbarProps {
   participantCount?: number;
   voiceMode?: VoiceMode;
   onToggleVoiceMode?: () => void;
+  simulated?: boolean;
 }
 
 /**
@@ -110,10 +111,13 @@ export function ClassroomToolbar({
   participantCount = 1,
   voiceMode = "translated",
   onToggleVoiceMode,
+  simulated = false,
 }: ClassroomToolbarProps) {
   const reduced = useReducedMotion() ?? false;
   const [handRaised, setHandRaised] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+
+  const isDemoCode = simulated || !meetingCode || meetingCode.toLowerCase().includes("demo");
 
   const copyCode = () => {
     try {
@@ -130,22 +134,26 @@ export function ClassroomToolbar({
       {/* Zone 1 (Left): Time & Room Code */}
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 max-w-xs">
         <MeetingClock />
-        <span className="hidden md:inline text-border select-none">|</span>
-        <button
-          type="button"
-          onClick={copyCode}
-          className="nc-focus group flex items-center gap-1.5 rounded-lg border border-transparent px-1.5 sm:px-2 py-1 text-xs font-semibold text-text-secondary hover:border-border hover:bg-surface hover:text-text-primary transition-all truncate"
-          title="Click to copy meeting code"
-        >
-          <span className="font-mono tracking-wide truncate max-w-[80px] sm:max-w-none">
-            {meetingCode.toLowerCase()}
-          </span>
-          {codeCopied ? (
-            <Check className="h-3.5 w-3.5 text-primary shrink-0" />
-          ) : (
-            <Copy className="h-3 w-3 opacity-60 group-hover:opacity-100 shrink-0" />
-          )}
-        </button>
+        {!isDemoCode && meetingCode && (
+          <>
+            <span className="hidden md:inline text-border select-none">|</span>
+            <button
+              type="button"
+              onClick={copyCode}
+              className="nc-focus group flex items-center gap-1.5 rounded-lg border border-transparent px-1.5 sm:px-2 py-1 text-xs font-semibold text-text-secondary hover:border-border hover:bg-surface hover:text-text-primary transition-all truncate"
+              title="Click to copy meeting code"
+            >
+              <span className="font-mono tracking-wide truncate max-w-[80px] sm:max-w-none">
+                {meetingCode.toLowerCase()}
+              </span>
+              {codeCopied ? (
+                <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+              ) : (
+                <Copy className="h-3 w-3 opacity-60 group-hover:opacity-100 shrink-0" />
+              )}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Zone 2 (Center): Circular Media Controls + Red Leave Pill */}

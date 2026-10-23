@@ -135,38 +135,40 @@ export function ClassroomHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={copyCode}
-          aria-label={`Copy meeting code ${code}`}
-          className="nc-focus inline-flex h-7 items-center gap-1.5 rounded-lg border border-border/70 bg-surface/80 px-2 font-mono text-[11px] text-text-primary transition-colors hover:border-primary/50"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {copied ? (
-              <motion.span
-                key="check"
-                initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
-                transition={{ duration: reduced ? 0 : 0.16 }}
-                className="text-primary"
-              >
-                <Check className="h-3 w-3" aria-hidden="true" />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="copy"
-                initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
-                transition={{ duration: reduced ? 0 : 0.16 }}
-              >
-                <Copy className="h-3 w-3" aria-hidden="true" />
-              </motion.span>
-            )}
-          </AnimatePresence>
-          {code}
-        </button>
+        {!demo && code && !code.toLowerCase().includes("demo") && (
+          <button
+            type="button"
+            onClick={copyCode}
+            aria-label={`Copy meeting code ${code}`}
+            className="nc-focus inline-flex h-7 items-center gap-1.5 rounded-lg border border-border/70 bg-surface/80 px-2 font-mono text-[11px] text-text-primary transition-colors hover:border-primary/50"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {copied ? (
+                <motion.span
+                  key="check"
+                  initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
+                  transition={{ duration: reduced ? 0 : 0.16 }}
+                  className="text-primary"
+                >
+                  <Check className="h-3 w-3" aria-hidden="true" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="copy"
+                  initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
+                  transition={{ duration: reduced ? 0 : 0.16 }}
+                >
+                  <Copy className="h-3 w-3" aria-hidden="true" />
+                </motion.span>
+              )}
+            </AnimatePresence>
+            {code}
+          </button>
+        )}
 
         <span
           className={clsx(

@@ -542,6 +542,7 @@ export function ClassroomShell({
         unreadChat={classroom.unreadChat}
         isHost={classroom.isHost}
         disabled={classroom.status === "disconnected" && !simulated}
+        simulated={simulated}
         onToggleAudio={() => {
           classroom.toggleAudio();
           pushToast(classroom.audioEnabled ? "Microphone muted" : "Microphone unmuted");
