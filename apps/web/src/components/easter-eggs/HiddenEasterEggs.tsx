@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Sparkles, Gamepad2, Volume2, Wand2 } from "lucide-react";
 
@@ -99,7 +99,26 @@ export function HiddenEasterEggs() {
   const reduce = useReducedMotion();
   const [particles, setParticles] = useState<Particle[]>([]);
   const [toast, setToast] = useState<{ title: string; subtitle: string; icon: string } | null>(null);
-  const [visualizerMode, setVisualizerMode] = useState<VisualizerMode>("bars");
+  const toastTimerRef = useRef<number | null>(null);
+
+  const showToast = useCallback((t: { title: string; subtitle: string; icon: string }, duration = 3400) => {
+    if (toastTimerRef.current !== null) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    setToast(t);
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast(null);
+      toastTimerRef.current = null;
+    }, duration);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current !== null) {
+        window.clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
 
   // Konami Code Detection
   useEffect(() => {
@@ -160,88 +179,54 @@ export function HiddenEasterEggs() {
   useEffect(() => {
     const handleVisualizerToggle = () => {
       const current = (localStorage.getItem("nexclass_vis_mode") as VisualizerMode) || "bars";
-      setVisualizerMode(current);
       const names: Record<VisualizerMode, { name: string; desc: string }> = {
         bars: { name: "Dynamic Equalizer Bars", desc: "Classic audio frequency bars" },
         rings: { name: "Kinetic Neon Rings", desc: "Concentric sound wave radar ripples" },
         pulsar: { name: "Radiant Quantum Pulsar", desc: "Nebula dot wave sound pulsation" },
       };
-      setToast({
+      showToast({
         title: `🎛️ Visualizer Mode: ${names[current].name}`,
         subtitle: names[current].desc,
         icon: "visualizer",
-      });
-      window.setTimeout(() => setToast(null), 3200);
+      }, 3000);
     };
 
     window.addEventListener("nexclass:toggle-visualizer", handleVisualizerToggle);
     return () => window.removeEventListener("nexclass:toggle-visualizer", handleVisualizerToggle);
-  }, []);
+  }, [showToast]);
 
   // Hologram Scan Notification
   useEffect(() => {
     const handleHologram = () => {
-      setToast({
+      showToast({
         title: "⚡ Holographic Geometry Scan Activated!",
         subtitle: "3D synchronized multilingual object scan mode discovered",
         icon: "hologram",
-      });
-      window.setTimeout(() => setToast(null), 3600);
+      }, 3400);
     };
     window.addEventListener("nexclass:hologram-scan", handleHologram);
     return () => window.removeEventListener("nexclass:hologram-scan", handleHologram);
-  }, []);
+  }, [showToast]);
 
   const launchKonamiParty = () => {
-    setToast({
+    showToast({
       title: "🎮 KONAMI CODE UNLOCKED!",
       subtitle: "Multilingual Starlight Matrix Celebration Activated! ✨",
       icon: "gamepad",
-    });
-    window.setTimeout(() => setToast(null), 4200);
+    }, 4000);
 
-    const count = reduce ? 15 : 65;
+    const count = reduce ? 12 : 36;
     const nextParticles: Particle[] = [];
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count;
-      const speed = 4 + Math.random() * 9;
-      nextParticles.push({
-        id: Math.random() + Date.now(),
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2,
-        vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 4,
-        vy: Math.sin(angle) * speed - (2 + Math.random() * 5),
-        size: 16 + Math.random() * 18,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        char: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
-        rotation: Math.random() * 360,
-        spin: (Math.random() - 0.5) * 12,
-        opacity: 1,
-      });
-    }
-    setParticles((prev) => [...prev, ...nextParticles]);
-  };
-
-  const launchGlyphFountain = (originX: number, originY: number) => {
-    setToast({
-      title: "🌟 Secret Discovered: Multilingual Glyph Fountain!",
-      subtitle: "Tapped logo 5 times · Indic language glyph burst unlocked",
-      icon: "wand",
-    });
-    window.setTimeout(() => setToast(null), 3800);
-
-    const count = reduce ? 12 : 45;
-    const nextParticles: Particle[] = [];
-    for (let i = 0; i < count; i++) {
-      const speed = 5 + Math.random() * 8;
-      const spread = (Math.random() - 0.5) * 6;
+      const speed = 4 + Math.random() * 8;
       nextParticles.push({
         id: Math.random() + Date.now() + i,
-        x: originX,
-        y: originY,
-        vx: spread,
-        vy: -speed,
-        size: 15 + Math.random() * 16,
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 3,
+        vy: Math.sin(angle) * speed - (2 + Math.random() * 4),
+        size: 16 + Math.random() * 16,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
         char: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
         rotation: Math.random() * 360,
@@ -249,7 +234,38 @@ export function HiddenEasterEggs() {
         opacity: 1,
       });
     }
-    setParticles((prev) => [...prev, ...nextParticles]);
+    // Cleanly replace particle buffer so bursts never pile up into laggy stacks
+    setParticles(nextParticles);
+  };
+
+  const launchGlyphFountain = (originX: number, originY: number) => {
+    showToast({
+      title: "🌟 Secret Discovered: Multilingual Glyph Fountain!",
+      subtitle: "Tapped logo 5 times · Indic language glyph burst unlocked",
+      icon: "wand",
+    }, 3600);
+
+    const count = reduce ? 10 : 32;
+    const nextParticles: Particle[] = [];
+    for (let i = 0; i < count; i++) {
+      const speed = 4 + Math.random() * 7;
+      const spread = (Math.random() - 0.5) * 5;
+      nextParticles.push({
+        id: Math.random() + Date.now() + i,
+        x: originX,
+        y: originY,
+        vx: spread,
+        vy: -speed,
+        size: 15 + Math.random() * 14,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        char: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+        rotation: Math.random() * 360,
+        spin: (Math.random() - 0.5) * 8,
+        opacity: 1,
+      });
+    }
+    // Cleanly replace particle buffer to prevent multiple animations stacking
+    setParticles(nextParticles);
   };
 
   // Particle Physics Animation Loop
@@ -258,18 +274,19 @@ export function HiddenEasterEggs() {
 
     let frameId: number;
     const tick = () => {
-      setParticles((current) =>
-        current
+      setParticles((current) => {
+        if (current.length === 0) return current;
+        return current
           .map((p) => ({
             ...p,
             x: p.x + p.vx,
             y: p.y + p.vy,
             vy: p.vy + 0.22, // gravity
             rotation: p.rotation + p.spin,
-            opacity: p.opacity - 0.012, // fade out
+            opacity: p.opacity - 0.015, // crisp fade out
           }))
-          .filter((p) => p.opacity > 0 && p.y < window.innerHeight + 60),
-      );
+          .filter((p) => p.opacity > 0 && p.y < window.innerHeight + 50);
+      });
       frameId = requestAnimationFrame(tick);
     };
 
@@ -290,7 +307,7 @@ export function HiddenEasterEggs() {
                 fontSize: `${p.size}px`,
                 color: p.color,
                 opacity: p.opacity,
-                textShadow: `0 0 12px ${p.color}88, 0 0 24px ${p.color}44`,
+                textShadow: `0 0 10px ${p.color}88`,
               }}
               className="absolute left-0 top-0 font-display font-bold leading-none will-change-transform"
             >
@@ -300,10 +317,11 @@ export function HiddenEasterEggs() {
         </div>
       )}
 
-      {/* Secret Toast / Achievement Banner */}
-      <AnimatePresence>
+      {/* Secret Toast / Achievement Banner with mode="wait" to eliminate overlapping banners */}
+      <AnimatePresence mode="wait">
         {toast && (
           <motion.div
+            key={toast.title}
             initial={{ opacity: 0, y: -24, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.94 }}

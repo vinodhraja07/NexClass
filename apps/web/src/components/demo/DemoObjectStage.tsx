@@ -46,14 +46,26 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
   const [measuring, setMeasuring] = useState(false);
   const [angle, setAngle] = useState(32);
   const [hologramActive, setHologramActive] = useState(false);
+  const hologramTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handleHologram = () => {
+      if (hologramTimerRef.current !== null) {
+        window.clearTimeout(hologramTimerRef.current);
+      }
       setHologramActive(true);
-      window.setTimeout(() => setHologramActive(false), 4500);
+      hologramTimerRef.current = window.setTimeout(() => {
+        setHologramActive(false);
+        hologramTimerRef.current = null;
+      }, 4200);
     };
     window.addEventListener("nexclass:hologram-scan", handleHologram);
-    return () => window.removeEventListener("nexclass:hologram-scan", handleHologram);
+    return () => {
+      window.removeEventListener("nexclass:hologram-scan", handleHologram);
+      if (hologramTimerRef.current !== null) {
+        window.clearTimeout(hologramTimerRef.current);
+      }
+    };
   }, []);
 
   const applyTransform = useCallback((value: number) => {

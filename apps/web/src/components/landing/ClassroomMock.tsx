@@ -35,18 +35,18 @@ function Waveform({ accent = false }: { accent?: boolean }) {
       className="cursor-pointer transition-transform active:scale-95 select-none"
     >
       {mode === "rings" ? (
-        <span className="relative flex h-6 w-6 items-center justify-center" aria-hidden="true">
+        <span className="relative flex h-6 w-6 items-center justify-center overflow-hidden rounded-full" aria-hidden="true">
           <motion.span
-            animate={{ scale: [0.8, 1.8], opacity: [0.9, 0] }}
+            animate={{ scale: [0.8, 1.45], opacity: [0.9, 0] }}
             transition={{ repeat: Infinity, duration: 1.1, ease: "easeOut" }}
-            className="absolute h-6 w-6 rounded-full border border-accent-400"
+            className="absolute h-5 w-5 rounded-full border border-accent-400"
           />
           <span className="h-2 w-2 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(46,224,168,0.9)]" />
         </span>
       ) : mode === "pulsar" ? (
-        <span className="relative flex h-6 w-6 items-center justify-center text-accent-300 font-bold text-sm" aria-hidden="true">
+        <span className="relative flex h-6 w-6 items-center justify-center overflow-hidden text-accent-300 font-bold text-sm" aria-hidden="true">
           <motion.span
-            animate={{ rotate: 360, scale: [0.9, 1.25, 0.9] }}
+            animate={{ rotate: 360, scale: [0.9, 1.15, 0.9] }}
             transition={{ rotate: { repeat: Infinity, duration: 3, ease: "linear" }, scale: { repeat: Infinity, duration: 0.8, ease: "easeInOut" } }}
           >
             ✦

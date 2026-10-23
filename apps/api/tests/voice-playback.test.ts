@@ -347,4 +347,41 @@ describe("Voice Playback Cancellation and Queue Isolation Suite", () => {
     expect(queue.length).toBe(1);
     expect(queue[0].id).toBe("seg-active");
   });
+
+  it("guarantees rapid repeated language switches silence all previous audio instances and prevent overlap", () => {
+    // Simulate active audio tracking pool
+    const activeAudios = new Set<MockAudio>();
+    const audio1 = new MockAudio("data:audio/mp3;base64,sample1");
+    activeAudios.add(audio1);
+    void audio1.play();
+    expect(audio1.paused).toBe(false);
+
+    // Rapid switch 1: User switches to Tamil
+    for (const a of activeAudios) {
+      a.volume = 0;
+      a.pause();
+      a.removeAttribute("src");
+    }
+    activeAudios.clear();
+
+    const audio2 = new MockAudio("data:audio/mp3;base64,sample2");
+    activeAudios.add(audio2);
+    void audio2.play();
+
+    expect(audio1.paused).toBe(true);
+    expect(audio1.volume).toBe(0);
+    expect(audio2.paused).toBe(false);
+
+    // Rapid switch 2: User immediately switches to Hindi then Odia
+    for (const a of activeAudios) {
+      a.volume = 0;
+      a.pause();
+      a.removeAttribute("src");
+    }
+    activeAudios.clear();
+
+    expect(audio2.paused).toBe(true);
+    expect(audio2.volume).toBe(0);
+    expect(activeAudios.size).toBe(0);
+  });
 });

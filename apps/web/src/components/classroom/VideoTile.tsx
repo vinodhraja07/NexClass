@@ -201,28 +201,28 @@ export function VideoTile({
                 toggleVisualizer();
               }}
               title="Speaking · Easter Egg: Click to cycle secret visualizer modes!"
-              className="group/vis relative flex items-center justify-center cursor-pointer p-0.5 rounded transition-transform active:scale-90"
+              className="group/vis relative flex h-4 w-4 shrink-0 items-center justify-center cursor-pointer rounded overflow-hidden transition-transform active:scale-90"
             >
               {visualizerMode === "rings" ? (
-                /* Kinetic Neon Rings Easter Egg */
-                <span className="relative flex h-3.5 w-3.5 items-center justify-center" aria-hidden="true">
+                /* Kinetic Neon Rings Easter Egg (safely bounded) */
+                <span className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center overflow-hidden" aria-hidden="true">
                   <motion.span
-                    animate={reduced ? {} : { scale: [0.8, 1.8], opacity: [0.9, 0] }}
+                    animate={reduced ? {} : { scale: [0.8, 1.45], opacity: [0.9, 0] }}
                     transition={{ repeat: Infinity, duration: 1.1, ease: "easeOut" }}
-                    className="absolute h-3.5 w-3.5 rounded-full border border-emerald-400"
+                    className="absolute h-3 w-3 rounded-full border border-emerald-400"
                   />
                   <motion.span
-                    animate={reduced ? {} : { scale: [0.6, 1.4], opacity: [0.9, 0] }}
+                    animate={reduced ? {} : { scale: [0.5, 1.15], opacity: [0.9, 0] }}
                     transition={{ repeat: Infinity, duration: 1.1, delay: 0.45, ease: "easeOut" }}
-                    className="absolute h-3 w-3 rounded-full border border-teal-300"
+                    className="absolute h-2.5 w-2.5 rounded-full border border-teal-300"
                   />
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
                 </span>
               ) : visualizerMode === "pulsar" ? (
-                /* Radiant Quantum Pulsar Easter Egg */
-                <span className="relative flex h-3.5 w-3.5 items-center justify-center" aria-hidden="true">
+                /* Radiant Quantum Pulsar Easter Egg (safely bounded) */
+                <span className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center overflow-hidden" aria-hidden="true">
                   <motion.span
-                    animate={reduced ? {} : { rotate: 360, scale: [0.9, 1.15, 0.9] }}
+                    animate={reduced ? {} : { rotate: 360, scale: [0.85, 1.1, 0.85] }}
                     transition={{ rotate: { repeat: Infinity, duration: 3, ease: "linear" }, scale: { repeat: Infinity, duration: 0.8, ease: "easeInOut" } }}
                     className="absolute flex items-center justify-center text-[10px] text-emerald-300"
                   >
@@ -231,7 +231,7 @@ export function VideoTile({
                 </span>
               ) : (
                 /* Standard Dynamic Equalizer Bars with glow */
-                <span className="flex items-end gap-[3px] h-3.5 px-0.5" aria-hidden="true">
+                <span className="flex items-end gap-[3px] h-3.5 px-0.5 shrink-0" aria-hidden="true">
                   {[
                     { id: 0, scaleY: [0.3, 0.85, 0.45, 1.0, 0.35, 0.7, 0.3], duration: 0.78, delay: 0 },
                     { id: 1, scaleY: [0.45, 1.0, 0.35, 0.8, 0.55, 0.95, 0.45], duration: 0.64, delay: 0.1 },

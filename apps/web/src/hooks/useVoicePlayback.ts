@@ -163,6 +163,8 @@ export function useVoicePlayback({
   const playingRef = useRef(false);
   const pumpRunningRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const activeAudiosRef = useRef<Set<HTMLAudioElement>>(new Set());
+  const langDebounceTimerRef = useRef<number | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const voiceWaitTimerRef = useRef<number | null>(null);
@@ -183,7 +185,43 @@ export function useVoicePlayback({
     // 1. Advance playback generation to invalidate in-flight async operations
     playbackGenerationRef.current += 1;
 
-    // 2. Immediately resolve any pending playback promise to prevent hanging async pumps
+    // 2. Immediately stop, mute, and discard ALL active HTMLAudioElements tracked
+    for (const audio of activeAudiosRef.current) {
+      try {
+        audio.muted = true;
+        audio.volume = 0;
+        audio.onended = null;
+        audio.onerror = null;
+        audio.onpause = null;
+        audio.oncanplay = null;
+        audio.onplaying = null;
+        audio.pause();
+        audio.currentTime = 0;
+        audio.removeAttribute("src");
+        audio.src = "";
+        audio.load();
+      } catch {
+        /* ignore */
+      }
+    }
+    activeAudiosRef.current.clear();
+
+    if (audioRef.current) {
+      try {
+        audioRef.current.muted = true;
+        audioRef.current.volume = 0;
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.removeAttribute("src");
+        audioRef.current.src = "";
+        audioRef.current.load();
+      } catch {
+        /* ignore */
+      }
+      audioRef.current = null;
+    }
+
+    // 3. Immediately resolve any pending playback promise to prevent hanging async pumps
     if (cancelActivePlaybackRef.current) {
       try {
         cancelActivePlaybackRef.current();
@@ -193,7 +231,7 @@ export function useVoicePlayback({
       cancelActivePlaybackRef.current = null;
     }
 
-    // 3. Abort any active speech network fetch
+    // 4. Abort any active speech network fetch
     if (abortControllerRef.current) {
       try {
         abortControllerRef.current.abort();
@@ -203,7 +241,7 @@ export function useVoicePlayback({
       abortControllerRef.current = null;
     }
 
-    // 4. Cancel any pending voice resolution wait timer or listener
+    // 5. Cancel any pending voice resolution wait timer or listener
     if (voiceWaitTimerRef.current !== null) {
       window.clearTimeout(voiceWaitTimerRef.current);
       voiceWaitTimerRef.current = null;
@@ -217,33 +255,10 @@ export function useVoicePlayback({
       voiceWaitCleanupRef.current = null;
     }
 
-    // 5. Immediately pause, detach listeners, clear src, and discard HTMLAudioElement
-    if (audioRef.current) {
-      const audio = audioRef.current;
-      audioRef.current = null;
-      audio.onended = null;
-      audio.onerror = null;
-      audio.onpause = null;
-      audio.oncanplay = null;
-      audio.onplaying = null;
-      try {
-        audio.pause();
-        audio.currentTime = 0;
-      } catch {
-        /* ignore */
-      }
-      try {
-        audio.removeAttribute("src");
-        audio.src = "";
-        audio.load();
-      } catch {
-        /* ignore */
-      }
-    }
-
     // 6. Cancel Web SpeechSynthesis immediately and discard active utterance
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       try {
+        window.speechSynthesis.pause();
         window.speechSynthesis.cancel();
       } catch {
         /* ignore */
@@ -384,6 +399,7 @@ export function useVoicePlayback({
           }
 
           const audio = new Audio(voice.audioUrl!);
+          activeAudiosRef.current.add(audio);
           audioRef.current = audio;
           audio.volume = volumeRef.current;
 
@@ -395,6 +411,14 @@ export function useVoicePlayback({
             audio.onended = null;
             audio.onerror = null;
             audio.onpause = null;
+            try {
+              audio.muted = true;
+              audio.volume = 0;
+              audio.pause();
+            } catch {
+              /* ignore */
+            }
+            activeAudiosRef.current.delete(audio);
             if (audioRef.current === audio) {
               audioRef.current = null;
             }
@@ -402,6 +426,13 @@ export function useVoicePlayback({
           };
 
           cancelActivePlaybackRef.current = () => {
+            try {
+              audio.muted = true;
+              audio.volume = 0;
+              audio.pause();
+            } catch {
+              /* ignore */
+            }
             settle();
           };
 
@@ -501,6 +532,16 @@ export function useVoicePlayback({
             /* ignore */
           }
 
+          // Ensure any pending Audio instances are stopped before synthesis starts
+          for (const a of activeAudiosRef.current) {
+            try {
+              a.muted = true;
+              a.pause();
+            } catch {
+              /* ignore */
+            }
+          }
+
           const utterance = new SpeechSynthesisUtterance(spokenText);
           utteranceRef.current = utterance;
           if (voiceMatch) utterance.voice = voiceMatch;
@@ -521,11 +562,22 @@ export function useVoicePlayback({
           };
 
           cancelActivePlaybackRef.current = () => {
+            try {
+              synthesis.pause();
+              synthesis.cancel();
+            } catch {
+              /* ignore */
+            }
             settle();
           };
 
           utterance.onend = settle;
           utterance.onerror = settle;
+
+          if (generation !== playbackGenerationRef.current) {
+            settle();
+            return;
+          }
 
           try {
             synthesis.speak(utterance);
@@ -608,8 +660,8 @@ export function useVoicePlayback({
   }, [playSegment]);
 
   // When voice language or audio mode changes: immediately silence previous audio,
-  // cancel speech synthesis, flush pending queues, and queue the active segment
-  // in the newly selected language/mode without overlap.
+  // cancel speech synthesis, flush pending queues, and debounce resuming playback
+  // for the newly selected language so rapid clicks/switches never overlap.
   useEffect(() => {
     const langChanged = languageRef.current !== voiceLanguage;
     const modeChanged = voiceMode !== undefined && voiceModeRef.current !== voiceMode;
@@ -620,7 +672,7 @@ export function useVoicePlayback({
         voiceModeRef.current = voiceMode;
       }
 
-      // Immediately halt any currently playing or in-flight audio/speech
+      // 1. Immediately halt and silence any currently playing or in-flight audio/speech
       stopAllAudio();
 
       setState((current) => ({
@@ -632,39 +684,59 @@ export function useVoicePlayback({
         browserFallback: false,
       }));
 
-      // Find if there is a currently active segment in the lecture
-      const now = Date.now();
-      const currentLang = voiceLanguage;
-
-      const currentActive = [...segmentsRef.current]
-        .reverse()
-        .find(
-          (seg) =>
-            now >= seg.startTime &&
-            now <= (seg.endTime || seg.startTime + 6_000) + 2_500,
-        );
-
-      // Mark all past segments as seen for the new language so they never replay
-      segmentsRef.current.forEach((seg) => {
-        seenRef.current.add(`${currentLang}:${seg.id}`);
-      });
-
-      // If there is an active segment and playback is enabled and active, queue ONLY that segment
-      if (currentActive && enabledRef.current && activeRef.current) {
-        const voice = currentActive.voices[currentLang];
-        const hasText =
-          Boolean(currentActive.translations[currentLang]?.text?.trim()) ||
-          (currentLang === currentActive.originalLanguage &&
-            Boolean(currentActive.originalText?.trim()));
-
-        if (hasText && (!voice || voice.status !== "failed")) {
-          queueRef.current.push(currentActive);
-          setState((current) => ({ ...current, queued: 1 }));
-          void pump();
-        }
+      // 2. Clear any pending language switch debounce timer
+      if (langDebounceTimerRef.current !== null) {
+        window.clearTimeout(langDebounceTimerRef.current);
+        langDebounceTimerRef.current = null;
       }
+
+      // 3. Debounce resuming playback for the new language by 140ms so repeatedly clicking
+      // or scrolling through languages does not fire overlapping async fetches or audio streams
+      langDebounceTimerRef.current = window.setTimeout(() => {
+        langDebounceTimerRef.current = null;
+        const now = Date.now();
+        const currentLang = voiceLanguage;
+
+        // Mark all past segments as seen for the new language so they never replay
+        segmentsRef.current.forEach((seg) => {
+          seenRef.current.add(`${currentLang}:${seg.id}`);
+        });
+
+        // Find if there is a currently active segment in the lecture
+        const currentActive = [...segmentsRef.current]
+          .reverse()
+          .find(
+            (seg) =>
+              now >= seg.startTime &&
+              now <= (seg.endTime || seg.startTime + 6_000) + 2_500,
+          );
+
+        // If there is an active segment and playback is enabled and active, queue ONLY that segment
+        if (currentActive && enabledRef.current && activeRef.current) {
+          const voice = currentActive.voices[currentLang];
+          const hasText =
+            Boolean(currentActive.translations[currentLang]?.text?.trim()) ||
+            (currentLang === currentActive.originalLanguage &&
+              Boolean(currentActive.originalText?.trim()));
+
+          if (hasText && (!voice || voice.status !== "failed")) {
+            queueRef.current = [currentActive];
+            setState((current) => ({ ...current, queued: 1 }));
+            void pump();
+          }
+        }
+      }, 140);
     }
   }, [voiceLanguage, voiceMode, stopAllAudio, pump]);
+
+  useEffect(() => {
+    return () => {
+      if (langDebounceTimerRef.current !== null) {
+        window.clearTimeout(langDebounceTimerRef.current);
+        langDebounceTimerRef.current = null;
+      }
+    };
+  }, []);
 
   // Manage incoming segments and enabled/active toggles
   useEffect(() => {
