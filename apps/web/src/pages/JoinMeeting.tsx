@@ -366,39 +366,6 @@ export default function JoinMeeting() {
                     Create Free Account
                   </Button>
                 </div>
-
-                {/* 1-click test demo sign-in */}
-                <div className="mt-3.5 pt-3 border-t border-ink-700/60">
-                  <p className="text-3xs text-ivory-400 uppercase tracking-wider font-semibold mb-2">
-                    Or 1-click test with demo credentials:
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          await login("student@nexclass.com", "password123");
-                        } catch {}
-                      }}
-                      className="nc-focus inline-flex items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-2.5 py-1 text-2xs font-semibold text-ivory-200 hover:border-lime-400/40 hover:text-lime-200 transition-colors"
-                    >
-                      <UserRound className="h-3 w-3 text-lime-400" />
-                      <span>Arjun (Student)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          await login("teacher@nexclass.com", "password123");
-                        } catch {}
-                      }}
-                      className="nc-focus inline-flex items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-2.5 py-1 text-2xs font-semibold text-ivory-200 hover:border-accent-400/40 hover:text-accent-200 transition-colors"
-                    >
-                      <GraduationCap className="h-3 w-3 text-accent-300" />
-                      <span>Dr. Meera (Teacher)</span>
-                    </button>
-                  </div>
-                </div>
               </div>
             ) : (
               /* If LOGGED IN: Show the verified student entry form */
