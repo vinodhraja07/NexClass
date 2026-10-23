@@ -102,40 +102,38 @@ export default function Demo() {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-ink-900 text-ivory-100">
       {/* demo overview banner */}
-      <div className="border-b border-ink-700/70 bg-ink-850/60 px-3.5 py-3 sm:px-5">
-        <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center gap-2.5">
+      <div className="border-b border-ink-700/70 bg-ink-850/60 px-3.5 py-2 sm:px-5">
+        <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-2.5">
           <Badge tone="warn">
             <CircleAlert className="h-3 w-3" aria-hidden="true" />
             Demo 1 - captions &amp; voice translation
           </Badge>
-          <p className="min-w-0 flex-1 text-balance text-2xs leading-relaxed text-ivory-300">
-            A prepared lecture with simulated students. Your captions and translated voice are separate from
-            everyone else&apos;s with live Indic typography and terminology protection.
-          </p>
 
-          {/* Prominent Direct Button to Demo 2 */}
-          <Link
-            to="/demo/room"
-            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-accent-400 px-3.5 text-[13px] font-semibold text-ink-900 transition-all hover:bg-accent-300 shadow-md shadow-accent-400/25 active:scale-95"
-          >
-            <Boxes className="h-4 w-4" aria-hidden="true" />
-            <span>Directly Move to Demo 2</span>
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </Link>
+          <div className="flex items-center gap-2">
+            {/* Prominent Direct Button to Demo 2 */}
+            <Link
+              to="/demo/room"
+              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1.5 rounded-xl bg-accent-400 px-3 text-xs font-semibold text-ink-900 transition-all hover:bg-accent-300 shadow-md shadow-accent-400/25 active:scale-95"
+            >
+              <Boxes className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Directly Move to Demo 2</span>
+              <ArrowRight className="h-3 w-3" aria-hidden="true" />
+            </Link>
 
-          <Link
-            to="/demo"
-            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1 rounded-lg border border-ink-500 bg-ink-800/80 px-3 text-[13px] font-medium text-ivory-100 transition-colors hover:border-accent-400/50"
-          >
-            All demos
-          </Link>
-          <Link
-            to="/register"
-            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-ink-500 bg-ink-800/80 px-3 text-[13px] font-semibold text-ivory-100 transition-colors hover:border-accent-400/50"
-          >
-            <Rocket className="h-3.5 w-3.5" aria-hidden="true" />
-            Create real classroom
-          </Link>
+            <Link
+              to="/demo"
+              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border border-ink-500 bg-ink-800/80 px-2.5 text-xs font-medium text-ivory-100 transition-colors hover:border-accent-400/50"
+            >
+              All demos
+            </Link>
+            <Link
+              to="/register"
+              className="nc-focus inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-ink-500 bg-ink-800/80 px-2.5 text-xs font-semibold text-ivory-100 transition-colors hover:border-accent-400/50"
+            >
+              <Rocket className="h-3 w-3" aria-hidden="true" />
+              Create real classroom
+            </Link>
+          </div>
         </div>
       </div>
 
