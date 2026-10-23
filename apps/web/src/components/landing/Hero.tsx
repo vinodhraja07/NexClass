@@ -65,130 +65,134 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      <Container className="relative pt-16 pb-20 sm:pt-24 lg:pt-28 lg:pb-28">
-        <div className="max-w-[860px]">
-          <motion.div {...fade(0)}>
-            <Eyebrow>Live multilingual classroom</Eyebrow>
-          </motion.div>
+      <Container className="relative pt-12 pb-16 sm:pt-20 lg:pt-24 lg:pb-24 max-w-[1440px]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14 items-center">
+          {/* Left Column: Heading, intro, quick join & actions */}
+          <div className="lg:col-span-7 xl:col-span-6 flex flex-col justify-center">
+            <motion.div {...fade(0)}>
+              <Eyebrow>Live multilingual classroom</Eyebrow>
+            </motion.div>
 
-          <motion.h1
-            {...fade(0.06)}
-            className="mt-6 text-balance font-display text-[38px] leading-[1.03] font-semibold tracking-[-0.035em] text-ivory-50 sm:text-[54px] lg:text-[68px]"
-          >
-            One teacher.
-            <br />
-            One live classroom.
-            <br />
-            <span className="bg-gradient-to-r from-accent-300 via-lime-300 to-accent-400 bg-clip-text text-transparent">
-              Every student in their own language.
-            </span>
-          </motion.h1>
+            <motion.h1
+              {...fade(0.06)}
+              className="mt-5 text-balance font-display text-[34px] leading-[1.04] font-semibold tracking-[-0.035em] text-ivory-50 sm:text-[46px] lg:text-[52px] xl:text-[58px]"
+            >
+              One teacher.
+              <br />
+              One live classroom.
+              <br />
+              <span className="bg-gradient-to-r from-accent-300 via-lime-300 to-accent-400 bg-clip-text text-transparent">
+                Every student in their own language.
+              </span>
+            </motion.h1>
 
-          <motion.p
-            {...fade(0.12)}
-            className="mt-7 max-w-[640px] text-balance text-[16px] leading-relaxed text-ivory-300 sm:text-[18px]"
-          >
-            NexClass is a real-time meeting room where live speech becomes captions
-            and a translated voice in the language each participant picks — English,
-            Tamil, Hindi, Bengali, Marathi or Odia. The teacher&apos;s original
-            transcript is kept exactly as spoken.
-          </motion.p>
+            <motion.p
+              {...fade(0.12)}
+              className="mt-5 max-w-[560px] text-balance text-[15px] leading-relaxed text-ivory-300 sm:text-[17px]"
+            >
+              NexClass is a real-time meeting room where live speech becomes captions
+              and a translated voice in the language each participant picks — English,
+              Tamil, Hindi, Bengali, Marathi or Odia. The teacher&apos;s original
+              transcript is kept exactly as spoken.
+            </motion.p>
 
-          {/* Quick Launch & Join Deck - Makes handling the app effortless */}
-          <motion.div
-            {...fade(0.18)}
-            className="mt-9 rounded-2xl border border-ink-600/90 bg-ink-850/85 p-4 sm:p-5 backdrop-blur-xl shadow-panel max-w-[660px]"
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <label
-                  htmlFor="hero-quick-join"
-                  className="block text-2xs font-semibold uppercase tracking-wider text-accent-300"
-                >
-                  Join a Live Class (No Account Required)
-                </label>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <input
-                    id="hero-quick-join"
-                    type="text"
-                    maxLength={6}
-                    placeholder="Enter 6-char code (e.g. 7KQ2MD)"
-                    value={joinCode}
-                    onChange={(e) =>
-                      setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && joinCode.trim().length === 6) {
-                        navigate(`/join?code=${joinCode.trim()}`);
-                      }
-                    }}
-                    className="nc-focus h-11 w-full rounded-xl border border-ink-600 bg-ink-900/90 px-3.5 font-mono text-[15px] font-semibold tracking-wider text-ivory-50 placeholder:text-ivory-400/40 transition-colors focus:border-accent-400"
-                  />
-                  <Button
-                    size="md"
-                    disabled={joinCode.trim().length !== 6}
-                    onClick={() => navigate(`/join?code=${joinCode.trim()}`)}
-                    trailing={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
+            {/* Quick Launch & Join Deck - Makes handling the app effortless */}
+            <motion.div
+              {...fade(0.18)}
+              className="mt-7 rounded-2xl border border-ink-600/90 bg-ink-850/85 p-4 sm:p-5 backdrop-blur-xl shadow-panel max-w-[580px]"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <label
+                    htmlFor="hero-quick-join"
+                    className="block text-2xs font-semibold uppercase tracking-wider text-accent-300"
                   >
-                    Join
+                    Join a Live Class (No Account Required)
+                  </label>
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <input
+                      id="hero-quick-join"
+                      type="text"
+                      maxLength={6}
+                      placeholder="Enter 6-char code (e.g. 7KQ2MD)"
+                      value={joinCode}
+                      onChange={(e) =>
+                        setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && joinCode.trim().length === 6) {
+                          navigate(`/join?code=${joinCode.trim()}`);
+                        }
+                      }}
+                      className="nc-focus h-11 w-full rounded-xl border border-ink-600 bg-ink-900/90 px-3.5 font-mono text-[15px] font-semibold tracking-wider text-ivory-50 placeholder:text-ivory-400/40 transition-colors focus:border-accent-400"
+                    />
+                    <Button
+                      size="md"
+                      disabled={joinCode.trim().length !== 6}
+                      onClick={() => navigate(`/join?code=${joinCode.trim()}`)}
+                      trailing={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
+                    >
+                      Join
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3.5 border-t border-ink-700/60 flex flex-wrap items-center justify-between gap-2.5">
+                <span className="text-2xs text-ivory-400">Want to host or explore?</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate("/demo")}
+                    icon={<Play className="h-3.5 w-3.5" aria-hidden="true" />}
+                  >
+                    Try Interactive Demo
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => navigate("/dashboard")}
+                    trailing={<Radio className="h-3.5 w-3.5 text-accent-300" aria-hidden="true" />}
+                  >
+                    Create a Classroom
                   </Button>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="mt-4 pt-3.5 border-t border-ink-700/60 flex flex-wrap items-center justify-between gap-2.5">
-              <span className="text-2xs text-ivory-400">Want to host or explore?</span>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/demo")}
-                  icon={<Play className="h-3.5 w-3.5" aria-hidden="true" />}
-                >
-                  Try Interactive Demo
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => navigate("/dashboard")}
-                  trailing={<Radio className="h-3.5 w-3.5 text-accent-300" aria-hidden="true" />}
-                >
-                  Create a Classroom
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+            <motion.div {...fade(0.24)} className="mt-7">
+              <ul className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
+                {FACTS.map((fact, index) => (
+                  <li key={fact} className="flex items-center gap-2.5">
+                    {index > 0 ? (
+                      <span className="hidden h-3 w-px bg-ink-600 sm:block" aria-hidden="true" />
+                    ) : null}
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" aria-hidden="true" />
+                    <span className="text-[13px] text-ivory-300">{fact}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3.5 flex items-start gap-2 text-[12px] leading-relaxed text-ivory-400 max-w-[560px]">
+                <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-400/80" aria-hidden="true" />
+                <span>
+                  Live rooms translate the teacher as they speak. Technical terms such as
+                  torque and eigenvalue are locked before translation so they survive intact.
+                </span>
+              </p>
+            </motion.div>
+          </div>
 
-          <motion.div {...fade(0.24)} className="mt-10">
-            <ul className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
-              {FACTS.map((fact, index) => (
-                <li key={fact} className="flex items-center gap-2.5">
-                  {index > 0 ? (
-                    <span className="hidden h-3 w-px bg-ink-600 sm:block" aria-hidden="true" />
-                  ) : null}
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" aria-hidden="true" />
-                  <span className="text-[13px] text-ivory-300">{fact}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 flex items-start gap-2 text-[12.5px] leading-relaxed text-ivory-400">
-              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-400/80" aria-hidden="true" />
-              <span>
-                Live rooms translate the teacher as they speak. Technical terms such as
-                torque and eigenvalue are locked before translation so they survive intact.
-              </span>
-            </p>
+          {/* Right Column: Interactive Classroom Mock (Eliminates the empty gap) */}
+          <motion.div
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: reduce ? 0.3 : 0.85, delay: reduce ? 0 : 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+            className="lg:col-span-5 xl:col-span-6 w-full"
+          >
+            <ClassroomMock />
           </motion.div>
         </div>
-
-        <motion.div
-          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduce ? 0.3 : 0.9, delay: reduce ? 0 : 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-          className="mt-14 lg:mt-20"
-        >
-          <ClassroomMock />
-        </motion.div>
       </Container>
     </div>
   );

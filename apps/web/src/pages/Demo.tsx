@@ -40,6 +40,13 @@ export default function Demo() {
   }, [transport]);
 
   const togglePlayback = useCallback(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        /* ignore */
+      }
+    }
     if (transport.playing) {
       transport.pausePlayback();
       setPlaying(false);
@@ -50,9 +57,19 @@ export default function Demo() {
   }, [transport]);
 
   const restart = useCallback(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        /* ignore */
+      }
+    }
     transport.resetPlayback();
-    transport.startPlayback();
-    setPlaying(true);
+    setPlaying(false);
+    window.setTimeout(() => {
+      transport.startPlayback();
+      setPlaying(true);
+    }, 50);
   }, [transport]);
 
   return (

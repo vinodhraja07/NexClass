@@ -160,6 +160,7 @@ export function ClassroomShell({
   const voice = useVoicePlayback({
     segments: classroom.segments,
     voiceLanguage: activeVoiceLanguage,
+    voiceMode: prefs.preferences.voiceMode,
     enabled: isVoiceEnabled,
     muted: prefs.preferences.voiceMuted,
     volume: prefs.preferences.voiceVolume,
@@ -256,6 +257,7 @@ export function ClassroomShell({
   };
 
   const handleToggleVoiceMode = () => {
+    voice.stop();
     const next = prefs.preferences.voiceMode === "translated" ? "original" : "translated";
     prefs.setVoiceMode(next);
     pushToast(
@@ -484,12 +486,18 @@ export function ClassroomShell({
               }}
               languageHubProps={{
                 voiceMode: prefs.preferences.voiceMode,
-                onVoiceModeChange: prefs.setVoiceMode,
+                onVoiceModeChange: (mode) => {
+                  voice.stop();
+                  prefs.setVoiceMode(mode);
+                },
                 captionLanguage: classroom.captionLanguage,
                 voiceLanguage: classroom.voiceLanguage,
                 availableLanguages,
                 onCaptionLanguage: classroom.setCaptionLanguage,
-                onVoiceLanguage: classroom.setVoiceLanguage,
+                onVoiceLanguage: (lang) => {
+                  voice.stop();
+                  classroom.setVoiceLanguage(lang);
+                },
                 voice,
                 voiceMuted: prefs.preferences.voiceMuted,
                 onVoiceMuted: prefs.setVoiceMuted,

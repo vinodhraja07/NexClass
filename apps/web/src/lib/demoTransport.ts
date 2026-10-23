@@ -216,6 +216,13 @@ export class DemoTransport implements MeetingTransport {
     this.chatTimers.forEach((timer) => window.clearTimeout(timer));
     this.chatTimers = [];
     this.playing = false;
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        /* ignore */
+      }
+    }
     this.setStatus("disconnected");
   }
 
@@ -320,6 +327,13 @@ export class DemoTransport implements MeetingTransport {
     }
     this.timers.forEach((timer) => window.clearTimeout(timer));
     this.timers = [];
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        /* ignore */
+      }
+    }
   }
 
   resetPlayback() {

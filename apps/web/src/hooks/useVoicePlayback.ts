@@ -17,6 +17,8 @@ export interface VoicePlaybackState {
   error: string | null;
   /** True when the browser is the voice source (local fallback, not a provider). */
   browserFallback: boolean;
+  /** Immediately halt and cancel all audio and speech synthesis playback. */
+  stop: () => void;
 }
 
 /** Segments older than this are dropped instead of being played late. */
@@ -27,6 +29,8 @@ const MAX_PENDING_SEGMENTS = 2;
 export interface UseVoicePlaybackOptions {
   segments: CaptionSegmentPayload[];
   voiceLanguage: LanguageCode;
+  /** Optional audio voice mode (e.g. original vs translated) to detect mode changes */
+  voiceMode?: VoiceMode;
   /** Translated voice only runs in the translated voice mode. */
   enabled: boolean;
   muted: boolean;
@@ -64,22 +68,62 @@ function pickVoice(lang: string): SpeechSynthesisVoice | null {
   return voices.find((voice) => voice.lang?.toLowerCase().startsWith(prefix)) ?? null;
 }
 
-function waitForVoices(lang: string): Promise<SpeechSynthesisVoice | null> {
+function waitForVoices(
+  lang: string,
+  generation: number,
+  generationRef: React.MutableRefObject<number>,
+  timerRef: React.MutableRefObject<number | null>,
+  cleanupRef: React.MutableRefObject<(() => void) | null>,
+): Promise<SpeechSynthesisVoice | null> {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    return Promise.resolve(null);
+  }
+  if (generation !== generationRef.current) {
     return Promise.resolve(null);
   }
   const immediate = pickVoice(lang);
   if (immediate) return Promise.resolve(immediate);
+
   return new Promise((resolve) => {
-    const timer = window.setTimeout(() => {
-      window.speechSynthesis.removeEventListener("voiceschanged", handler);
-      resolve(pickVoice(lang));
-    }, 700);
+    let settled = false;
+    const cleanup = () => {
+      if (settled) return;
+      settled = true;
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      try {
+        window.speechSynthesis.removeEventListener("voiceschanged", handler);
+      } catch {
+        /* ignore */
+      }
+      cleanupRef.current = null;
+    };
+
     function handler() {
-      window.clearTimeout(timer);
-      window.speechSynthesis.removeEventListener("voiceschanged", handler);
-      resolve(pickVoice(lang));
+      cleanup();
+      if (generation !== generationRef.current) {
+        resolve(null);
+      } else {
+        resolve(pickVoice(lang));
+      }
     }
+
+    cleanupRef.current = () => {
+      cleanup();
+      resolve(null);
+    };
+
+    timerRef.current = window.setTimeout(() => {
+      cleanup();
+      if (generation !== generationRef.current) {
+        resolve(null);
+      } else {
+        resolve(pickVoice(lang));
+      }
+    }, 700);
+
     window.speechSynthesis.addEventListener("voiceschanged", handler);
   });
 }
@@ -87,14 +131,15 @@ function waitForVoices(lang: string): Promise<SpeechSynthesisVoice | null> {
 /**
  * Serialised playback of the translated voice.
  *
- * Only one segment is ever spoken at a time. Segments that arrive more than
- * 20 seconds late are dropped instead of being played out of sequence, and
- * browser speech synthesis is always labelled as a local fallback rather than
- * as a translation provider.
+ * Only one segment is ever spoken at a time. When language or audio mode changes,
+ * any currently playing audio (HTMLAudioElement, AudioContext, speech synthesis)
+ * is immediately stopped and discarded, and pending queues are flushed cleanly
+ * so that no overlapping audio tracks ever play concurrently.
  */
 export function useVoicePlayback({
   segments,
   voiceLanguage,
+  voiceMode,
   enabled,
   muted,
   volume,
@@ -110,44 +155,127 @@ export function useVoicePlayback({
     volume,
     error: null,
     browserFallback: false,
+    stop: () => undefined,
   });
 
   const queueRef = useRef<CaptionSegmentPayload[]>([]);
   const seenRef = useRef<Set<string>>(new Set());
   const playingRef = useRef(false);
+  const pumpRunningRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const voiceWaitTimerRef = useRef<number | null>(null);
+  const voiceWaitCleanupRef = useRef<(() => void) | null>(null);
+  const cancelActivePlaybackRef = useRef<(() => void) | null>(null);
+  const activeSegmentRef = useRef<CaptionSegmentPayload | null>(null);
+  const playbackGenerationRef = useRef(0);
+
   const segmentsRef = useRef(segments);
   const languageRef = useRef(voiceLanguage);
+  const voiceModeRef = useRef(voiceMode);
   const mutedRef = useRef(muted);
   const volumeRef = useRef(volume);
   const enabledRef = useRef(enabled);
   const activeRef = useRef(active);
 
-  const stopCurrent = useCallback(() => {
+  const stopAllAudio = useCallback(() => {
+    // 1. Advance playback generation to invalidate in-flight async operations
+    playbackGenerationRef.current += 1;
+
+    // 2. Immediately resolve any pending playback promise to prevent hanging async pumps
+    if (cancelActivePlaybackRef.current) {
+      try {
+        cancelActivePlaybackRef.current();
+      } catch {
+        /* ignore */
+      }
+      cancelActivePlaybackRef.current = null;
+    }
+
+    // 3. Abort any active speech network fetch
+    if (abortControllerRef.current) {
+      try {
+        abortControllerRef.current.abort();
+      } catch {
+        /* ignore */
+      }
+      abortControllerRef.current = null;
+    }
+
+    // 4. Cancel any pending voice resolution wait timer or listener
+    if (voiceWaitTimerRef.current !== null) {
+      window.clearTimeout(voiceWaitTimerRef.current);
+      voiceWaitTimerRef.current = null;
+    }
+    if (voiceWaitCleanupRef.current) {
+      try {
+        voiceWaitCleanupRef.current();
+      } catch {
+        /* ignore */
+      }
+      voiceWaitCleanupRef.current = null;
+    }
+
+    // 5. Immediately pause, detach listeners, clear src, and discard HTMLAudioElement
     if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      const audio = audioRef.current;
       audioRef.current = null;
+      audio.onended = null;
+      audio.onerror = null;
+      audio.onpause = null;
+      audio.oncanplay = null;
+      audio.onplaying = null;
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
+      try {
+        audio.removeAttribute("src");
+        audio.src = "";
+        audio.load();
+      } catch {
+        /* ignore */
+      }
     }
+
+    // 6. Cancel Web SpeechSynthesis immediately and discard active utterance
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        /* ignore */
+      }
     }
+    if (utteranceRef.current) {
+      utteranceRef.current.onend = null;
+      utteranceRef.current.onerror = null;
+      utteranceRef.current = null;
+    }
+
+    // 7. If any global AudioContext was registered, ensure it is suspended
+    if (typeof window !== "undefined") {
+      const globalCtx = (window as unknown as { __nexclass_audio_ctx__?: AudioContext }).__nexclass_audio_ctx__;
+      if (globalCtx && globalCtx.state !== "closed") {
+        try {
+          void globalCtx.suspend();
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+
+    // 8. Cleanly flush queue and active segment references
+    queueRef.current = [];
+    activeSegmentRef.current = null;
+    playingRef.current = false;
   }, []);
 
   useEffect(() => {
     segmentsRef.current = segments;
   }, [segments]);
-  useEffect(() => {
-    if (languageRef.current !== voiceLanguage) {
-      languageRef.current = voiceLanguage;
-      // When switching languages (e.g. original <-> translated), stop previous speech immediately
-      stopCurrent();
-      playingRef.current = false;
-      queueRef.current = [];
-      // Clear seen cache so the currently active sentence can be spoken in the new voice language
-      seenRef.current.clear();
-    }
-  }, [voiceLanguage, stopCurrent]);
   useEffect(() => {
     mutedRef.current = muted;
   }, [muted]);
@@ -162,12 +290,19 @@ export function useVoicePlayback({
   }, [active]);
 
   const playSegment = useCallback(
-    async (segment: CaptionSegmentPayload): Promise<{
+    async (
+      segment: CaptionSegmentPayload,
+      generation: number,
+    ): Promise<{
       provider: string | null;
       latencyMs: number;
       error?: string;
       browserFallback: boolean;
     }> => {
+      if (generation !== playbackGenerationRef.current) {
+        return { provider: null, latencyMs: 0, browserFallback: false };
+      }
+
       const language = languageRef.current;
       let voice = segment.voices[language];
       const latencyMs = Math.max(0, Date.now() - (segment.endTime || Date.now()));
@@ -177,14 +312,18 @@ export function useVoicePlayback({
         (language === segment.originalLanguage ? segment.originalText.trim() : "");
 
       // If no audio asset came with the segment (e.g. keyless classroom or prefetch timeout),
-      // fetch real synthesized audio on demand from the fallback speech endpoint so regional
-      // languages like Odia ("or") speak crystal-clear audio rather than failing silently on desktop OSs.
+      // fetch real synthesized audio on demand from the fallback speech endpoint.
       if ((!voice?.audioUrl || voice.provider === "browser-speech-synthesis") && text) {
         try {
+          const controller = new AbortController();
+          abortControllerRef.current = controller;
           const res = await fetch(
             `/api/demo/speech?lang=${encodeURIComponent(language)}&text=${encodeURIComponent(text)}`,
-            { signal: AbortSignal.timeout(6_000) },
+            { signal: controller.signal },
           );
+          if (generation !== playbackGenerationRef.current) {
+            return { provider: null, latencyMs, browserFallback: false };
+          }
           if (res.ok) {
             const data = (await res.json()) as { audioUrl?: string; provider?: string };
             if (data.audioUrl) {
@@ -198,7 +337,13 @@ export function useVoicePlayback({
           }
         } catch {
           // Degrades to browser speech synthesis below
+        } finally {
+          abortControllerRef.current = null;
         }
+      }
+
+      if (generation !== playbackGenerationRef.current) {
+        return { provider: null, latencyMs, browserFallback: false };
       }
 
       if (!voice) {
@@ -215,7 +360,6 @@ export function useVoicePlayback({
       }
       if (voice.status !== "complete") {
         if (text) {
-          // If the backend voice failed or is pending, degrade gracefully to browser speech
           voice = {
             provider: "browser-speech-synthesis",
             status: "complete",
@@ -234,21 +378,40 @@ export function useVoicePlayback({
 
       if (voice.audioUrl) {
         await new Promise<void>((resolve) => {
+          if (generation !== playbackGenerationRef.current) {
+            resolve();
+            return;
+          }
+
           const audio = new Audio(voice.audioUrl!);
           audioRef.current = audio;
           audio.volume = volumeRef.current;
-          // "pause" fires when playback is stopped as well as when it ends
-          // naturally, so a paused segment still settles and never wedges
-          // the serialised queue.
+
+          let settled = false;
           const settle = () => {
-            audioRef.current = null;
+            if (settled) return;
+            settled = true;
+            cancelActivePlaybackRef.current = null;
+            audio.onended = null;
+            audio.onerror = null;
+            audio.onpause = null;
+            if (audioRef.current === audio) {
+              audioRef.current = null;
+            }
             resolve();
           };
+
+          cancelActivePlaybackRef.current = () => {
+            settle();
+          };
+
           audio.onended = settle;
           audio.onerror = settle;
           audio.onpause = settle;
+
           void audio.play().catch(settle);
         });
+
         return { provider: voice.provider, latencyMs, browserFallback: false };
       }
 
@@ -261,26 +424,53 @@ export function useVoicePlayback({
             browserFallback: true,
           };
         }
-        // Walk every TTS tag of the language (ta-IN, hi-IN, ...) and pick the
-        // first voice the browser actually has. Indic voices are rare on
-        // desktop browsers, so a miss is reported instead of silently playing
-        // the wrong language.
+
+        if (generation !== playbackGenerationRef.current) {
+          return { provider: voice.provider, latencyMs, browserFallback: true };
+        }
+
         const tags = LANGUAGES.find((item) => item.code === language)?.ttsTags ?? [defaultTtsTag(language)];
         let voiceMatch: SpeechSynthesisVoice | null = null;
         for (const tag of tags) {
-          voiceMatch = await waitForVoices(tag);
+          if (generation !== playbackGenerationRef.current) break;
+          voiceMatch = await waitForVoices(
+            tag,
+            generation,
+            playbackGenerationRef,
+            voiceWaitTimerRef,
+            voiceWaitCleanupRef,
+          );
           if (voiceMatch) break;
         }
 
-        // For Odia or other regional languages without an exact OS speech pack,
-        // fall back to available Indic voices (hi-IN, bn-IN) with phonetic transliteration
-        // so audio is spoken naturally rather than failing silently.
+        if (generation !== playbackGenerationRef.current) {
+          return { provider: voice.provider, latencyMs, browserFallback: true };
+        }
+
         let spokenText = text;
         if (!voiceMatch && language === "or") {
-          voiceMatch = (await waitForVoices("hi-IN")) || (await waitForVoices("bn-IN"));
+          voiceMatch =
+            (await waitForVoices(
+              "hi-IN",
+              generation,
+              playbackGenerationRef,
+              voiceWaitTimerRef,
+              voiceWaitCleanupRef,
+            )) ||
+            (await waitForVoices(
+              "bn-IN",
+              generation,
+              playbackGenerationRef,
+              voiceWaitTimerRef,
+              voiceWaitCleanupRef,
+            ));
           spokenText = odiaToDevanagariPhonetic(text);
         } else if (voiceMatch && voiceMatch.lang.startsWith("hi") && language === "or") {
           spokenText = odiaToDevanagariPhonetic(text);
+        }
+
+        if (generation !== playbackGenerationRef.current) {
+          return { provider: voice.provider, latencyMs, browserFallback: true };
         }
 
         if (!voiceMatch) {
@@ -295,20 +485,55 @@ export function useVoicePlayback({
 
         const lang = voiceMatch.lang ?? defaultTtsTag(language);
         await new Promise<void>((resolve) => {
-          if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+          if (
+            generation !== playbackGenerationRef.current ||
+            typeof window === "undefined" ||
+            !("speechSynthesis" in window)
+          ) {
             resolve();
             return;
           }
+
           const synthesis = window.speechSynthesis;
-          synthesis.cancel();
+          try {
+            synthesis.cancel();
+          } catch {
+            /* ignore */
+          }
+
           const utterance = new SpeechSynthesisUtterance(spokenText);
+          utteranceRef.current = utterance;
           if (voiceMatch) utterance.voice = voiceMatch;
           utterance.lang = lang;
           utterance.volume = volumeRef.current;
-          utterance.onend = () => resolve();
-          utterance.onerror = () => resolve();
-          synthesis.speak(utterance);
+
+          let settled = false;
+          const settle = () => {
+            if (settled) return;
+            settled = true;
+            cancelActivePlaybackRef.current = null;
+            utterance.onend = null;
+            utterance.onerror = null;
+            if (utteranceRef.current === utterance) {
+              utteranceRef.current = null;
+            }
+            resolve();
+          };
+
+          cancelActivePlaybackRef.current = () => {
+            settle();
+          };
+
+          utterance.onend = settle;
+          utterance.onerror = settle;
+
+          try {
+            synthesis.speak(utterance);
+          } catch {
+            settle();
+          }
         });
+
         return { provider: "browser-speech-synthesis", latencyMs, browserFallback: true };
       }
 
@@ -323,43 +548,128 @@ export function useVoicePlayback({
   );
 
   const pump = useCallback(async () => {
-    if (playingRef.current) return;
-    while (queueRef.current.length > 0 && enabledRef.current && activeRef.current) {
-      const segment = queueRef.current.shift();
-      if (!segment) break;
-      setState((current) => ({ ...current, queued: queueRef.current.length }));
+    if (pumpRunningRef.current) return;
+    pumpRunningRef.current = true;
 
-      const age = Date.now() - (segment.endTime || segment.startTime);
-      if (age > STALE_LIMIT_MS) {
-        // Stale segment - the lecture moved on while we were buffering.
-        continue;
-      }
-      if (mutedRef.current) {
-        continue;
-      }
+    try {
+      while (enabledRef.current && activeRef.current) {
+        const currentGeneration = playbackGenerationRef.current;
+        const segment = queueRef.current.shift();
+        if (!segment) break;
 
-      playingRef.current = true;
-      setState((current) => ({ ...current, playing: true, error: null }));
-      const result = await playSegment(segment);
+        if (currentGeneration !== playbackGenerationRef.current) {
+          continue;
+        }
+
+        setState((current) => ({ ...current, queued: queueRef.current.length }));
+
+        const age = Date.now() - (segment.endTime || segment.startTime);
+        if (age > STALE_LIMIT_MS) {
+          continue;
+        }
+        if (mutedRef.current) {
+          continue;
+        }
+
+        playingRef.current = true;
+        activeSegmentRef.current = segment;
+        setState((current) => ({ ...current, playing: true, error: null }));
+
+        const result = await playSegment(segment, currentGeneration);
+
+        if (currentGeneration !== playbackGenerationRef.current) {
+          // Playback was cancelled or language changed during this segment;
+          // continue loop to process newly queued segments without stale state bleed
+          continue;
+        }
+
+        playingRef.current = false;
+        activeSegmentRef.current = null;
+        setState((current) => ({
+          ...current,
+          playing: false,
+          provider: result.provider,
+          language: languageRef.current,
+          latencyMs: result.latencyMs,
+          error: result.error ?? null,
+          browserFallback: result.browserFallback,
+        }));
+      }
+    } finally {
+      pumpRunningRef.current = false;
       playingRef.current = false;
+      activeSegmentRef.current = null;
       setState((current) => ({
         ...current,
         playing: false,
-        provider: result.provider,
-        language: languageRef.current,
-        latencyMs: result.latencyMs,
-        error: result.error ?? null,
-        browserFallback: result.browserFallback,
+        queued: queueRef.current.length,
       }));
     }
-    setState((current) => ({ ...current, playing: false, queued: queueRef.current.length }));
   }, [playSegment]);
 
+  // When voice language or audio mode changes: immediately silence previous audio,
+  // cancel speech synthesis, flush pending queues, and queue the active segment
+  // in the newly selected language/mode without overlap.
+  useEffect(() => {
+    const langChanged = languageRef.current !== voiceLanguage;
+    const modeChanged = voiceMode !== undefined && voiceModeRef.current !== voiceMode;
+
+    if (langChanged || modeChanged) {
+      languageRef.current = voiceLanguage;
+      if (voiceMode !== undefined) {
+        voiceModeRef.current = voiceMode;
+      }
+
+      // Immediately halt any currently playing or in-flight audio/speech
+      stopAllAudio();
+
+      setState((current) => ({
+        ...current,
+        playing: false,
+        queued: 0,
+        provider: null,
+        error: null,
+        browserFallback: false,
+      }));
+
+      // Find if there is a currently active segment in the lecture
+      const now = Date.now();
+      const currentLang = voiceLanguage;
+
+      const currentActive = [...segmentsRef.current]
+        .reverse()
+        .find(
+          (seg) =>
+            now >= seg.startTime &&
+            now <= (seg.endTime || seg.startTime + 6_000) + 2_500,
+        );
+
+      // Mark all past segments as seen for the new language so they never replay
+      segmentsRef.current.forEach((seg) => {
+        seenRef.current.add(`${currentLang}:${seg.id}`);
+      });
+
+      // If there is an active segment and playback is enabled and active, queue ONLY that segment
+      if (currentActive && enabledRef.current && activeRef.current) {
+        const voice = currentActive.voices[currentLang];
+        const hasText =
+          Boolean(currentActive.translations[currentLang]?.text?.trim()) ||
+          (currentLang === currentActive.originalLanguage &&
+            Boolean(currentActive.originalText?.trim()));
+
+        if (hasText && (!voice || voice.status !== "failed")) {
+          queueRef.current.push(currentActive);
+          setState((current) => ({ ...current, queued: 1 }));
+          void pump();
+        }
+      }
+    }
+  }, [voiceLanguage, voiceMode, stopAllAudio, pump]);
+
+  // Manage incoming segments and enabled/active toggles
   useEffect(() => {
     if (!enabled) {
-      queueRef.current = [];
-      seenRef.current = new Set();
-      stopCurrent();
+      stopAllAudio();
       setState((current) => ({
         ...current,
         playing: false,
@@ -372,12 +682,8 @@ export function useVoicePlayback({
     }
 
     if (!active) {
-      // The lecture (demo) is paused: stop the audio at once and drop what is
-      // still pending, but keep the "already voiced" memory so that resuming
-      // never replays lines the learner has already heard. The voice then
-      // resumes together with the next caption line, in sync.
-      queueRef.current = [];
-      stopCurrent();
+      // The lecture is paused: stop audio at once and drop pending queue
+      stopAllAudio();
       setState((current) => ({
         ...current,
         playing: false,
@@ -412,10 +718,6 @@ export function useVoicePlayback({
       added += 1;
     });
 
-    // Synthesized speech is slower than the caption cadence, so the queue
-    // would drift further behind the teacher indefinitely. The two most
-    // recent segments are enough: older lines are skipped, the voice keeps
-    // pace with the newest speech, and captions still carry the full text.
     if (queueRef.current.length > MAX_PENDING_SEGMENTS) {
       queueRef.current = [...queueRef.current]
         .sort((a, b) => b.startTime - a.startTime)
@@ -427,15 +729,15 @@ export function useVoicePlayback({
       setState((current) => ({ ...current, queued: queueRef.current.length }));
       void pump();
     }
-  }, [enabled, active, pump, segments, stopCurrent, voiceLanguage]);
+  }, [enabled, active, pump, segments, stopAllAudio]);
 
   // Muting or changing the volume applies to the segment that is playing now.
   useEffect(() => {
-    if (muted) stopCurrent();
+    if (muted) stopAllAudio();
     if (audioRef.current) audioRef.current.volume = volume;
-  }, [muted, stopCurrent, volume]);
+  }, [muted, stopAllAudio, volume]);
 
-  useEffect(() => () => stopCurrent(), [stopCurrent]);
+  useEffect(() => () => stopAllAudio(), [stopAllAudio]);
 
-  return { ...state, muted, volume };
+  return { ...state, muted, volume, stop: stopAllAudio };
 }

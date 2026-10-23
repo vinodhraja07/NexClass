@@ -99,9 +99,9 @@ export function ClassroomMock() {
         </span>
       </div>
 
-      <div className="grid gap-0 lg:grid-cols-[1fr_1.05fr]">
+      <div className="grid gap-0 xl:grid-cols-[1fr_1.05fr]">
         {/* ---------------------------- video strip --------------------------- */}
-        <div className="border-b border-ink-700/70 p-3 sm:p-4 lg:border-b-0 lg:border-r">
+        <div className="border-b border-ink-700/70 p-3 sm:p-4 xl:border-b-0 xl:border-r">
           <div className="overflow-hidden rounded-xl border border-ink-600/70 bg-ink-900">
             <div className="relative flex aspect-[16/9] flex-col items-center justify-center gap-4 bg-[radial-gradient(120%_120%_at_50%_0%,#16203a_0%,#080d18_72%)] overflow-hidden">
               <motion.span
