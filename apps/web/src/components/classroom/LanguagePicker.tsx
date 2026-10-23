@@ -118,21 +118,21 @@ export function LanguagePicker({
         aria-labelledby={`${id}-label ${id}`}
         onClick={() => (open ? setOpen(false) : openMenu())}
         className={clsx(
-          "nc-focus flex h-11 w-full items-center gap-2 rounded-xl border border-ink-600 bg-ink-900/70 px-3 text-left text-sm text-ivory-50 transition-colors",
-          "hover:border-ink-500 disabled:opacity-50",
+          "nc-focus flex h-10 w-full items-center gap-2 rounded-xl border border-border/70 bg-background/80 px-3 text-left text-xs text-text-primary transition-all",
+          "hover:border-primary/50 hover:bg-background disabled:opacity-50 shadow-xs",
         )}
       >
-        <Globe2 className="h-4 w-4 shrink-0 text-accent-300" aria-hidden="true" />
+        <Globe2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
         <span className="min-w-0 flex-1 truncate">
-          <span lang={current.code} className="font-medium">
+          <span lang={current.code} className="font-semibold text-text-primary">
             {current.nativeName}
           </span>
-          <span className="ml-1.5 text-2xs text-ivory-400">{current.name}</span>
+          <span className="ml-1.5 text-2xs text-text-secondary">({current.name})</span>
         </span>
         <motion.span
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: reduced ? 0 : 0.18 }}
-          className="text-ivory-400"
+          className="text-text-secondary"
         >
           <ChevronDown className="h-4 w-4" aria-hidden="true" />
         </motion.span>
@@ -149,7 +149,7 @@ export function LanguagePicker({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
               transition={{ duration: reduced ? 0 : 0.16, ease: [0.2, 0.8, 0.2, 1] }}
-              className="nc-focus fixed z-50 overflow-y-auto rounded-xl border border-ink-600 bg-ink-850 p-1.5 shadow-lift"
+              className="nc-focus fixed z-50 overflow-y-auto rounded-xl border border-border bg-surface p-1.5 shadow-xl backdrop-blur-xl"
               style={{
                 top: menuCoords.top,
                 left: menuCoords.left,
@@ -171,17 +171,19 @@ export function LanguagePicker({
                       }}
                       className={clsx(
                         "nc-focus flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
-                        selected ? "bg-accent-400/12 text-ivory-50" : "text-ivory-200 hover:bg-ink-750",
+                        selected
+                          ? "bg-primary/15 text-text-primary font-semibold"
+                          : "text-text-secondary hover:bg-muted hover:text-text-primary",
                       )}
                     >
                       <span className="flex-1">
-                        <span lang={language.code} className="block text-[13px] font-medium">
+                        <span lang={language.code} className="block text-[13px] font-medium text-text-primary">
                           {language.nativeName}
                         </span>
-                        <span className="block text-2xs text-ivory-400">{language.name}</span>
+                        <span className="block text-2xs text-text-secondary">{language.name}</span>
                       </span>
                       {selected ? (
-                        <Check className="h-4 w-4 shrink-0 text-accent-300" aria-hidden="true" />
+                        <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                       ) : null}
                     </button>
                   </li>
@@ -193,7 +195,7 @@ export function LanguagePicker({
         document.body,
       )}
 
-      {note ? <p className="mt-1.5 text-2xs text-ivory-400">{note}</p> : null}
+      {note ? <p className="mt-1 text-2xs text-text-secondary">{note}</p> : null}
       <span className="sr-only">Currently {languageName(value)}</span>
     </div>
   );

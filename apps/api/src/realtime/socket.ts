@@ -1,4 +1,4 @@
-﻿import type { Server as HttpServer } from "node:http";
+import type { Server as HttpServer } from "node:http";
 import { Server, type Socket } from "socket.io";
 import type { LanguageCode } from "@nexclass/shared";
 import { env } from "../config/env";
@@ -71,8 +71,8 @@ async function resolveParticipant(
     : identity.userId
       ? await ParticipantModel.findOne({
           meetingCode: meeting.code,
-          userId: identity.userId,
           leftAt: null,
+          $or: [{ userId: identity.userId }, { id: identity.userId }, { _id: identity.userId }],
         })
       : null;
 

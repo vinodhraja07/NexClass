@@ -13,20 +13,20 @@ export interface VoiceModeOption {
 export const VOICE_MODES: VoiceModeOption[] = [
   {
     id: "original",
-    label: "Original audio",
-    description: "You hear the teacher's own microphone. Nothing is translated.",
+    label: "Original Audio",
+    description: "Listen directly to the teacher's original microphone. Untranslated.",
     icon: Headphones,
   },
   {
     id: "translated",
-    label: "Translated voice",
-    description: "The teacher is muted and the translated speech is read to you instead.",
+    label: "Translated Voice",
+    description: "Teacher's original audio is replaced with live AI speech in your language.",
     icon: Volume2,
   },
   {
     id: "original-captions",
-    label: "Original + captions",
-    description: "The teacher's original audio stays, with translated captions underneath.",
+    label: "Original + Captions",
+    description: "Hear natural audio while reading real-time translated subtitles.",
     icon: Captions,
   },
 ];
@@ -34,17 +34,13 @@ export const VOICE_MODES: VoiceModeOption[] = [
 export interface VoiceModeSwitchProps {
   value: VoiceMode;
   onChange: (mode: VoiceMode) => void;
-  /** Shown under the control - explains what the current mode does. */
   hint?: string;
   compact?: boolean;
   className?: string;
 }
 
 /**
- * The three voice modes every participant can choose between.
- *
- * Switching back to the original audio is always one click away, whatever
- * happens with the translation provider.
+ * Apple-inspired Segmented Voice Mode Switch.
  */
 export function VoiceModeSwitch({
   value,
@@ -60,8 +56,8 @@ export function VoiceModeSwitch({
     <div className={className}>
       <div
         role="radiogroup"
-        aria-label="Voice mode"
-        className="flex flex-wrap gap-1 rounded-xl border border-ink-600 bg-ink-900/60 p-1"
+        aria-label="Voice playback mode"
+        className="flex flex-wrap gap-1 rounded-xl border border-border/70 bg-background/80 p-1 shadow-inner"
       >
         {VOICE_MODES.map((mode) => {
           const selected = mode.id === value;
@@ -74,36 +70,37 @@ export function VoiceModeSwitch({
               aria-checked={selected}
               onClick={() => onChange(mode.id)}
               className={clsx(
-                "nc-focus relative flex flex-auto items-center justify-center gap-1.5 rounded-lg px-2.5 text-2xs font-medium transition-colors",
+                "nc-focus relative flex flex-auto items-center justify-center gap-1.5 rounded-lg px-2.5 text-2xs font-semibold transition-colors select-none",
                 compact ? "h-8" : "h-9",
-                selected ? "text-ink-900" : "text-ivory-300 hover:text-ivory-50",
+                selected ? "text-background" : "text-text-secondary hover:text-text-primary",
               )}
             >
-              {selected ? (
+              {selected && (
                 <motion.span
                   layoutId="voice-mode-indicator"
-                  className="absolute inset-0 rounded-lg bg-accent-400"
+                  className="absolute inset-0 rounded-lg bg-primary shadow-xs"
                   transition={
                     reduced
                       ? { duration: 0 }
-                      : { type: "spring", stiffness: 420, damping: 34 }
+                      : { type: "spring", stiffness: 450, damping: 36 }
                   }
                 />
-              ) : null}
-              <Icon className="relative h-3.5 w-3.5" aria-hidden="true" />
-              <span className="relative whitespace-nowrap">{mode.label}</span>
+              )}
+              <Icon className="relative z-10 h-3.5 w-3.5" aria-hidden="true" />
+              <span className="relative z-10 whitespace-nowrap">{mode.label}</span>
             </button>
           );
         })}
       </div>
+
       <AnimatePresence mode="wait" initial={false}>
         <motion.p
           key={active.id}
-          initial={reduced ? { opacity: 1 } : { opacity: 0, y: -4 }}
+          initial={reduced ? { opacity: 1 } : { opacity: 0, y: -3 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={reduced ? { opacity: 1 } : { opacity: 0, y: 4 }}
-          transition={{ duration: reduced ? 0 : 0.18 }}
-          className="mt-1.5 text-2xs leading-relaxed text-ivory-400"
+          exit={reduced ? { opacity: 1 } : { opacity: 0, y: 3 }}
+          transition={{ duration: reduced ? 0 : 0.16 }}
+          className="mt-1.5 text-2xs leading-relaxed text-text-secondary"
         >
           {hint ?? active.description}
         </motion.p>

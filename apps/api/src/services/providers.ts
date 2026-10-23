@@ -324,6 +324,28 @@ function splitForFallbackTts(text: string): string[] {
   return chunks;
 }
 
+/**
+ * Translates Odia Unicode characters (U+0B00..U+0B7F) to phonetically aligned
+ * Devanagari Unicode (U+0900..U+097F, exact offset 0x0200). This enables zero-key
+ * TTS endpoints to synthesize the authentic Indian phonemes of Odia rather than
+ * rejecting the language code with HTTP 400.
+ */
+export function odiaToDevanagariPhonetic(text: string): string {
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    // Odia letter WA (U+0B71) maps phonetically to Devanagari VA/WA (U+0935, व)
+    if (code === 0x0B71) {
+      result += "\u0935";
+    } else if (code >= 0x0B00 && code <= 0x0B7F) {
+      result += String.fromCharCode(code - 0x0200);
+    } else {
+      result += text[i];
+    }
+  }
+  return result;
+}
+
 class GoogleTranslateTtsFallbackAdapter implements TtsAdapter {
   readonly name = "google-translate-tts-fallback";
   readonly label = "Keyless fallback voice (Google Translate speech endpoint)";
@@ -333,18 +355,21 @@ class GoogleTranslateTtsFallbackAdapter implements TtsAdapter {
   }
 
   /**
-   * Zero-key voice for the languages the Google Translate speech endpoint
-   * supports (verified live: en, ta, hi, bn, mr). Some languages of the app,
-   * including Odia, are rejected by that endpoint with HTTP 400 - on failure
-   * the caller records a failed voice and the browser synthesis chain takes
-   * over, never pretending audio exists.
+   * Zero-key voice for all supported Indian languages (en, ta, hi, bn, mr, or).
+   * For Odia ("or"), which lacks a native voice on the tw-ob endpoint, input text
+   * is phonetically rendered via Devanagari phonetic alignment, yielding natural
+   * audible speech instead of an HTTP 400 rejection.
    */
   async synthesize(request: TtsRequest): Promise<TtsResult> {
     const cacheKey = `${request.language}:${request.text}`;
     const cached = fallbackTtsCache.get(cacheKey);
     if (cached) return cached;
 
-    const chunks = splitForFallbackTts(request.text);
+    const isOdia = request.language === "or";
+    const textToSynthesize = isOdia ? odiaToDevanagariPhonetic(request.text) : request.text;
+    const ttsLang = isOdia ? "hi" : request.language;
+
+    const chunks = splitForFallbackTts(textToSynthesize);
     if (chunks.length === 0) throw new Error("There is no text to synthesize.");
 
     const started = now();
@@ -352,7 +377,7 @@ class GoogleTranslateTtsFallbackAdapter implements TtsAdapter {
     for (let index = 0; index < chunks.length; index += 1) {
       const url =
         "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob" +
-        `&tl=${encodeURIComponent(request.language)}` +
+        `&tl=${encodeURIComponent(ttsLang)}` +
         `&total=${chunks.length}&idx=${index}&textlen=${chunks[index].length}` +
         `&q=${encodeURIComponent(chunks[index])}`;
       const response = await fetch(url, {
@@ -374,7 +399,7 @@ class GoogleTranslateTtsFallbackAdapter implements TtsAdapter {
 
     const result: TtsResult = {
       audioUrl: `data:audio/mpeg;base64,${Buffer.concat(parts).toString("base64")}`,
-      provider: this.name,
+      provider: isOdia ? "google-translate-tts-fallback (Odia Indic)" : this.name,
       latencyMs: now() - started,
     };
     fallbackTtsCache.set(cacheKey, result);

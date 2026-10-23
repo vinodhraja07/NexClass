@@ -28,13 +28,21 @@ function Waveform({ accent = false }: { accent?: boolean }) {
   return (
     <div className="flex h-6 items-end gap-[3px]" aria-hidden="true">
       {BAR_HEIGHTS.map((height, index) => (
-        <span
+        <motion.span
           key={index}
           className={clsx(
-            "w-[3px] origin-bottom animate-wave-bar rounded-full",
-            accent ? "bg-accent-400/80" : "bg-ivory-400/45",
+            "w-[3px] rounded-full",
+            accent ? "bg-accent-400" : "bg-ivory-400/45",
           )}
-          style={{ height, animationDelay: `${(index % 6) * 110}ms` }}
+          animate={{
+            height: [`${Math.max(4, height * 0.35)}px`, `${Math.max(6, height)}px`, `${Math.max(4, height * 0.35)}px`],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 0.75 + (index % 4) * 0.15,
+            ease: "easeInOut",
+          }}
+          style={{ height }}
         />
       ))}
     </div>
@@ -64,7 +72,11 @@ export function ClassroomMock() {
   const language = LANGUAGES.find((item) => item.code === lang) ?? LANGUAGES[0];
 
   return (
-    <figure className="nc-panel overflow-hidden shadow-lift">
+    <figure className="nc-panel relative overflow-hidden shadow-lift border border-ink-600/80 hover:border-accent-400/30 transition-all duration-500 group">
+      {/* ambient glow gradient */}
+      <div className="absolute -top-24 -right-24 w-72 h-72 bg-accent-400/10 rounded-full blur-3xl pointer-events-none group-hover:bg-accent-400/15 transition-all duration-700" />
+      <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-lime-400/5 rounded-full blur-3xl pointer-events-none" />
+
       <figcaption className="sr-only">
         A NexClass live classroom with one teacher and four students. The caption panel
         shows the same spoken sentence in the language chosen by the viewer.
@@ -91,12 +103,20 @@ export function ClassroomMock() {
         {/* ---------------------------- video strip --------------------------- */}
         <div className="border-b border-ink-700/70 p-3 sm:p-4 lg:border-b-0 lg:border-r">
           <div className="overflow-hidden rounded-xl border border-ink-600/70 bg-ink-900">
-            <div className="relative flex aspect-[16/9] flex-col items-center justify-center gap-4 bg-[radial-gradient(120%_120%_at_50%_0%,#16203a_0%,#080d18_72%)]">
-              <span
-                className="absolute h-32 w-32 rounded-full border border-accent-400/10"
+            <div className="relative flex aspect-[16/9] flex-col items-center justify-center gap-4 bg-[radial-gradient(120%_120%_at_50%_0%,#16203a_0%,#080d18_72%)] overflow-hidden">
+              <motion.span
+                className="absolute h-36 w-36 rounded-full border border-accent-400/20 pointer-events-none"
+                animate={{ scale: [1, 1.25, 1], opacity: [0.3, 0.7, 0.3] }}
+                transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
                 aria-hidden="true"
               />
-              <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-accent-400/30 bg-accent-400/10 font-display text-[20px] font-semibold tracking-wide text-accent-300">
+              <motion.span
+                className="absolute h-48 w-48 rounded-full border border-accent-400/10 pointer-events-none"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.45, 0.15] }}
+                transition={{ repeat: Infinity, duration: 4.5, delay: 0.8, ease: "easeInOut" }}
+                aria-hidden="true"
+              />
+              <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-accent-400/40 bg-accent-400/15 font-display text-[20px] font-semibold tracking-wide text-accent-300 shadow-lg shadow-accent-400/20">
                 MK
               </span>
               <Waveform accent />
@@ -114,9 +134,10 @@ export function ClassroomMock() {
 
           <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {PEOPLE.slice(1).map((person) => (
-              <li
+              <motion.li
                 key={person.name}
-                className="flex items-center gap-2 rounded-lg border border-ink-700/70 bg-ink-850/80 px-2 py-1.5"
+                whileHover={{ y: -2 }}
+                className="flex items-center gap-2 rounded-lg border border-ink-700/70 bg-ink-850/80 px-2 py-1.5 transition-colors hover:border-accent-400/30"
               >
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-ink-700 font-mono text-[10px] text-ivory-300">
                   {person.initials}
@@ -124,7 +145,7 @@ export function ClassroomMock() {
                 <span className="truncate text-[11.5px] text-ivory-300">
                   {person.name.split(" ")[0]}
                 </span>
-              </li>
+              </motion.li>
             ))}
           </ul>
         </div>
@@ -156,13 +177,20 @@ export function ClassroomMock() {
                   }}
                   aria-pressed={active}
                   className={clsx(
-                    "nc-focus rounded-lg border px-2.5 py-1 text-[11.5px] font-medium transition-colors duration-200",
+                    "nc-focus relative rounded-lg border px-2.5 py-1 text-[11.5px] font-medium transition-colors duration-200",
                     active
-                      ? "border-accent-400/50 bg-accent-400/12 text-accent-200"
+                      ? "text-accent-200 border-accent-400/50"
                       : "border-ink-600 bg-ink-850 text-ivory-400 hover:text-ivory-100",
                   )}
                 >
-                  {item?.nativeName ?? code}
+                  {active && (
+                    <motion.span
+                      layoutId="mockActiveLangPill"
+                      className="absolute inset-0 rounded-lg bg-accent-400/15 border border-accent-400/40 -z-10 shadow-sm shadow-accent-400/20"
+                      transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative z-10">{item?.nativeName ?? code}</span>
                 </button>
               );
             })}

@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CircleAlert, RefreshCw, X } from "lucide-react";
 import clsx from "clsx";
@@ -76,6 +76,20 @@ export function ClassroomShell({
   const classroom = useClassroom(transport, null, null, joinContext);
   const prefs = useClassroomPreferences();
   const compact = useIsCompact();
+
+  const [showQuickGuide, setShowQuickGuide] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("nexclass_dismiss_guide") !== "true";
+  });
+
+  const dismissQuickGuide = () => {
+    setShowQuickGuide(false);
+    try {
+      localStorage.setItem("nexclass_dismiss_guide", "true");
+    } catch {
+      /* ignore storage errors */
+    }
+  };
 
   const meetingRef = useRef(classroom.meeting);
   useEffect(() => {
@@ -298,7 +312,7 @@ export function ClassroomShell({
   ].filter((entry): entry is { text: string; header: string } => entry !== null);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-ink-900 text-ivory-100">
+    <div className="flex h-full min-h-0 flex-col bg-background text-text-primary">
       <ClassroomHeader
         title={classroom.meeting?.title ?? (simulated ? "Demo classroom" : "NexClass classroom")}
         code={classroom.meeting?.code ?? meetingCode.toUpperCase()}
@@ -307,7 +321,7 @@ export function ClassroomShell({
         demo={simulated}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto p-3 md:p-4 xl:grid-cols-[minmax(0,1fr)_380px] xl:overflow-hidden">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto p-3 md:p-4 xl:grid-cols-[minmax(0,1fr)_390px] xl:overflow-hidden">
         <div className="flex min-h-0 min-w-0 flex-col gap-3 overflow-y-auto xl:pr-1">
           {/* banners */}
           <AnimatePresence initial={false}>
@@ -327,7 +341,7 @@ export function ClassroomShell({
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-semibold text-signal-warn">{entry.header}</p>
-                  <p className="text-2xs leading-relaxed text-ivory-200">{entry.text}</p>
+                  <p className="text-2xs leading-relaxed text-text-secondary">{entry.text}</p>
                 </div>
                 {entry.header === "Camera / microphone" ? (
                   <button
@@ -346,12 +360,48 @@ export function ClassroomShell({
                     else classroom.dismissError();
                   }}
                   aria-label="Dismiss alert"
-                  className="nc-focus grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ivory-300 hover:text-ivory-50"
+                  className="nc-focus grid h-7 w-7 shrink-0 place-items-center rounded-lg text-text-secondary hover:text-text-primary"
                 >
                   <X className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               </motion.div>
             ))}
+          </AnimatePresence>
+
+          {/* Quick onboarding guide for intuitive handling */}
+          <AnimatePresence>
+            {showQuickGuide ? (
+              <motion.div
+                initial={reduced ? { opacity: 1 } : { opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
+                className="flex items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/[0.06] px-4 py-2.5 text-xs text-text-primary shadow-xs"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-primary/20 text-primary">
+                    💡
+                  </span>
+                  <div className="text-2xs leading-relaxed sm:text-xs">
+                    {classroom.isHost ? (
+                      <>
+                        <strong className="text-primary font-semibold">Host Guide:</strong> Speak into your microphone. Your lecture is translated live into each student&apos;s chosen language. Invite learners with code <span className="rounded bg-surface px-1.5 py-0.5 font-mono font-bold text-primary select-all border border-border/60">{classroom.meeting?.code ?? meetingCode}</span>.
+                      </>
+                    ) : (
+                      <>
+                        <strong className="text-primary font-semibold">Student Guide:</strong> Select your preferred language in the bottom tray to read and hear translated speech. Click any underlined technical term for pronunciation & definitions.
+                      </>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={dismissQuickGuide}
+                  className="nc-focus shrink-0 rounded-lg border border-primary/40 bg-primary/15 px-2.5 py-1 text-2xs font-semibold text-primary hover:bg-primary/25 transition-colors"
+                >
+                  Got it
+                </button>
+              </motion.div>
+            ) : null}
           </AnimatePresence>
 
           <Stage
@@ -474,10 +524,10 @@ export function ClassroomShell({
               exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6 }}
               transition={{ duration: reduced ? 0 : 0.2, ease: [0.2, 0.8, 0.2, 1] }}
               className={clsx(
-                "pointer-events-auto w-full rounded-xl border px-3.5 py-2 text-center text-[13px] shadow-lift backdrop-blur",
+                "pointer-events-auto w-full rounded-xl border px-3.5 py-2 text-center text-[13px] shadow-xl backdrop-blur-md",
                 toast.tone === "warn"
-                  ? "border-signal-warn/40 bg-ink-800/95 text-signal-warn"
-                  : "border-accent-400/35 bg-ink-800/95 text-ivory-100",
+                  ? "border-signal-warn/40 bg-surface/95 text-signal-warn"
+                  : "border-primary/40 bg-surface/95 text-text-primary",
               )}
             >
               {toast.text}

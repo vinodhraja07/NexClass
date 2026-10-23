@@ -45,18 +45,18 @@ export function ProblemSection() {
           </div>
 
           <div className="min-w-0">
-            <Stagger as="ol" className="divide-y divide-ink-700/60 border-y border-ink-700/60">
+            <Stagger as="ol" className="space-y-3">
               {FRICTIONS.map((item, index) => (
                 <StaggerItem
                   as="li"
                   key={item.title}
-                  className="grid gap-3 py-7 sm:grid-cols-[56px_minmax(0,1fr)] sm:gap-6 lg:py-9"
+                  className="group grid gap-3 rounded-2xl border border-ink-700/60 bg-ink-850/50 p-6 transition-all duration-200 hover:-translate-y-1 hover:border-ink-500 hover:bg-ink-800/80 hover:shadow-panel sm:grid-cols-[56px_minmax(0,1fr)] sm:gap-6"
                 >
-                  <span className="font-mono text-[12px] tracking-[0.16em] text-ivory-400/70">
+                  <span className="font-mono text-[12px] font-bold tracking-[0.16em] text-ivory-400/70 transition-colors duration-200 group-hover:text-accent-300">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <div>
-                    <h3 className="text-[17px] font-semibold text-ivory-50 sm:text-[19px]">
+                    <h3 className="text-[17px] font-semibold text-ivory-50 transition-colors duration-200 group-hover:text-white sm:text-[19px]">
                       {item.title}
                     </h3>
                     <p className="mt-2.5 max-w-[640px] text-[14.5px] leading-relaxed text-ivory-300/85 sm:text-[15.5px]">

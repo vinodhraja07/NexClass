@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Play, ShieldCheck } from "lucide-react";
+import { ArrowRight, Play, Radio, ShieldCheck, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui";
 import { Container, Eyebrow } from "./Primitives";
@@ -14,6 +15,7 @@ const FACTS = [
 export function Hero() {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
+  const [joinCode, setJoinCode] = useState("");
 
   const fade = (delay: number) => ({
     initial: reduce ? { opacity: 0 } : { opacity: 0, y: 16 },
@@ -23,8 +25,39 @@ export function Hero() {
 
   return (
     <div id="top" className="relative overflow-hidden">
+      {/* Animated kinetic background glow orbs */}
+      <motion.div
+        animate={
+          reduce
+            ? undefined
+            : {
+                scale: [1, 1.22, 0.96, 1],
+                x: ["-50%", "-47%", "-53%", "-50%"],
+                y: [0, -20, 10, 0],
+                opacity: [0.22, 0.35, 0.25, 0.22],
+              }
+        }
+        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+        className="pointer-events-none absolute -top-36 left-1/2 w-[760px] h-[450px] bg-gradient-to-tr from-accent-400/25 via-lime-400/18 to-teal-500/10 blur-[130px] rounded-full"
+        aria-hidden="true"
+      />
+      <motion.div
+        animate={
+          reduce
+            ? undefined
+            : {
+                scale: [0.95, 1.15, 0.95],
+                x: [0, 30, -20, 0],
+                y: [0, 25, -15, 0],
+                opacity: [0.12, 0.28, 0.12],
+              }
+        }
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+        className="pointer-events-none absolute top-36 -right-20 w-[450px] h-[450px] bg-gradient-to-bl from-accent-500/18 via-lime-400/12 to-transparent blur-[120px] rounded-full"
+        aria-hidden="true"
+      />
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-mesh-dark opacity-70"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-mesh-dark opacity-75"
         aria-hidden="true"
       />
       <div
@@ -46,7 +79,9 @@ export function Hero() {
             <br />
             One live classroom.
             <br />
-            <span className="text-accent-300">Every student in their own language.</span>
+            <span className="bg-gradient-to-r from-accent-300 via-lime-300 to-accent-400 bg-clip-text text-transparent">
+              Every student in their own language.
+            </span>
           </motion.h1>
 
           <motion.p
@@ -59,22 +94,69 @@ export function Hero() {
             transcript is kept exactly as spoken.
           </motion.p>
 
-          <motion.div {...fade(0.18)} className="mt-9 flex flex-wrap items-center gap-3">
-            <Button
-              size="lg"
-              onClick={() => navigate("/demo")}
-              icon={<Play className="h-4 w-4" aria-hidden="true" />}
-            >
-              Try the interactive demo
-            </Button>
-            <Button
-              size="lg"
-              variant="secondary"
-              onClick={() => navigate("/register")}
-              trailing={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
-            >
-              Create a classroom
-            </Button>
+          {/* Quick Launch & Join Deck - Makes handling the app effortless */}
+          <motion.div
+            {...fade(0.18)}
+            className="mt-9 rounded-2xl border border-ink-600/90 bg-ink-850/85 p-4 sm:p-5 backdrop-blur-xl shadow-panel max-w-[660px]"
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <label
+                  htmlFor="hero-quick-join"
+                  className="block text-2xs font-semibold uppercase tracking-wider text-accent-300"
+                >
+                  Join a Live Class (No Account Required)
+                </label>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <input
+                    id="hero-quick-join"
+                    type="text"
+                    maxLength={6}
+                    placeholder="Enter 6-char code (e.g. 7KQ2MD)"
+                    value={joinCode}
+                    onChange={(e) =>
+                      setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && joinCode.trim().length === 6) {
+                        navigate(`/join?code=${joinCode.trim()}`);
+                      }
+                    }}
+                    className="nc-focus h-11 w-full rounded-xl border border-ink-600 bg-ink-900/90 px-3.5 font-mono text-[15px] font-semibold tracking-wider text-ivory-50 placeholder:text-ivory-400/40 transition-colors focus:border-accent-400"
+                  />
+                  <Button
+                    size="md"
+                    disabled={joinCode.trim().length !== 6}
+                    onClick={() => navigate(`/join?code=${joinCode.trim()}`)}
+                    trailing={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
+                  >
+                    Join
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3.5 border-t border-ink-700/60 flex flex-wrap items-center justify-between gap-2.5">
+              <span className="text-2xs text-ivory-400">Want to host or explore?</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/demo")}
+                  icon={<Play className="h-3.5 w-3.5" aria-hidden="true" />}
+                >
+                  Try Interactive Demo
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => navigate("/dashboard")}
+                  trailing={<Radio className="h-3.5 w-3.5 text-accent-300" aria-hidden="true" />}
+                >
+                  Create a Classroom
+                </Button>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div {...fade(0.24)} className="mt-10">

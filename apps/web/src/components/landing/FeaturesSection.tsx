@@ -68,14 +68,21 @@ export function FeaturesSection() {
           </Reveal>
         </div>
 
-        <Stagger className="mt-12 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-y-12">
+        <Stagger className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
-            <StaggerItem key={feature.title} className="border-t border-ink-700/70 pt-6">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-ink-600/70 bg-ink-850 text-accent-300">
-                <feature.icon className="h-[18px] w-[18px]" aria-hidden="true" />
+            <StaggerItem
+              key={feature.title}
+              className="group relative overflow-hidden rounded-2xl border border-ink-700/60 bg-ink-900/40 p-6 transition-all duration-300 hover:border-accent-400/45 hover:bg-ink-850/80 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-1.5"
+            >
+              <div className="pointer-events-none absolute -right-6 -top-6 h-32 w-32 rounded-full bg-accent-400/5 blur-2xl transition-all duration-500 group-hover:bg-accent-400/20 group-hover:scale-125" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-ink-600/70 bg-ink-850 text-accent-300 shadow-sm transition-all duration-300 group-hover:border-accent-400/50 group-hover:bg-accent-400/20 group-hover:text-accent-200 group-hover:scale-110">
+                <feature.icon className="h-5 w-5" aria-hidden="true" />
               </span>
-              <h3 className="mt-5 text-[16.5px] font-semibold text-ivory-50">{feature.title}</h3>
-              <p className="mt-2.5 text-[14px] leading-relaxed text-ivory-300/80">{feature.body}</p>
+              <h3 className="mt-5 text-[16.5px] font-semibold text-ivory-50 group-hover:text-accent-200 transition-colors">
+                {feature.title}
+              </h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-ivory-300/80">{feature.body}</p>
             </StaggerItem>
           ))}
         </Stagger>

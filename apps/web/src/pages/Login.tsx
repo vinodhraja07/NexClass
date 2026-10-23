@@ -98,7 +98,8 @@ export default function Login() {
       ]}
       stage={<CaptionStage />}
     >
-      <div className="nc-panel p-6 sm:p-8">
+      <div className="nc-panel relative overflow-hidden p-6 sm:p-8 border border-ink-600/80 shadow-lift backdrop-blur-xl">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-accent-400/8 blur-3xl" />
         <p className="nc-eyebrow">Welcome back</p>
         <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ivory-50">
           Sign in to NexClass

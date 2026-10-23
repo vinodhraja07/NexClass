@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import { Link, useNavigate } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import {
+  ChevronDown,
   KeyRound,
   Languages,
   LogOut,
@@ -11,6 +12,7 @@ import {
   Plus,
   Radio,
   RefreshCw,
+  Settings,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -132,8 +134,44 @@ export default function Dashboard() {
   const [captionsOn, setCaptionsOn] = useState(true);
   const [voiceOn, setVoiceOn] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [creatingInstant, setCreatingInstant] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [created, setCreated] = useState<MeetingPublic | null>(null);
+
+  async function handleInstantCreate() {
+    setCreatingInstant(true);
+    setCreateError(null);
+    try {
+      const today = new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      const result = await api.createMeeting({
+        title: `${firstName(user?.name ?? "Teacher")}'s Live Class (${today})`,
+        speakerLanguage: user?.preferredLanguage ?? "en",
+        availableLanguages: ALL_LANGUAGE_CODES,
+        participantPermissions: {
+          canUnmute: true,
+          canShareScreen: true,
+          canChat: true,
+        },
+        captionsEnabledByDefault: true,
+        voiceEnabledByDefault: false,
+      });
+      setCreated(result.meeting);
+      void loadMeetings();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setCreateError(
+          error.status === 403
+            ? "Only teacher accounts can create meetings."
+            : error.message,
+        );
+      } else {
+        setCreateError("Meeting server is unreachable - start the API with npm run dev:api.");
+      }
+    } finally {
+      setCreatingInstant(false);
+    }
+  }
 
   useEffect(() => {
     setAvailableLanguages((previous) =>
@@ -326,8 +364,36 @@ export default function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-ink-900">
+    <div className="relative min-h-screen bg-ink-900 overflow-hidden">
       <div className="pointer-events-none fixed inset-0 bg-mesh-dark opacity-60" aria-hidden="true" />
+      {/* Ambient breathing background glow orbs */}
+      <motion.div
+        animate={
+          reduced
+            ? undefined
+            : {
+                scale: [1, 1.18, 0.96, 1],
+                x: ["-45%", "-40%", "-48%", "-45%"],
+                opacity: [0.15, 0.28, 0.18, 0.15],
+              }
+        }
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        className="pointer-events-none fixed -top-32 left-1/2 h-[520px] w-[750px] rounded-full bg-gradient-to-tr from-accent-400/20 via-lime-400/12 to-teal-500/10 blur-[140px]"
+        aria-hidden="true"
+      />
+      <motion.div
+        animate={
+          reduced
+            ? undefined
+            : {
+                scale: [0.95, 1.15, 0.95],
+                opacity: [0.10, 0.22, 0.10],
+              }
+        }
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="pointer-events-none fixed top-1/2 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-accent-500/15 via-teal-400/10 to-transparent blur-[130px]"
+        aria-hidden="true"
+      />
 
       <header className="relative sticky top-0 z-20 border-b border-ink-700/70 bg-ink-900/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-4 gap-y-3 px-5 py-3.5 sm:px-8">
@@ -414,7 +480,8 @@ export default function Dashboard() {
             className="scroll-mt-28"
           >
             {isTeacher ? (
-              <div className="nc-panel p-5 sm:p-6">
+              <div className="nc-panel relative overflow-hidden p-5 sm:p-6 border border-ink-600/80 shadow-panel hover:border-accent-400/30 transition-all duration-300">
+                <div className="pointer-events-none absolute -right-20 -top-20 h-44 w-44 rounded-full bg-accent-400/6 blur-3xl" />
                 {created ? (
                   <motion.div
                     initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12 }}
@@ -432,11 +499,16 @@ export default function Dashboard() {
                       Share this code with your learners. It works for anyone, account or not.
                     </p>
 
-                    <div className="mt-5 rounded-2xl border border-accent-400/25 bg-accent-400/6 px-5 py-4 text-center">
+                    <div className="mt-5 rounded-2xl border border-accent-400/30 bg-accent-400/8 px-5 py-5 text-center shadow-lg shadow-accent-400/10">
                       <p className="nc-eyebrow">Meeting code</p>
-                      <p className="mt-1.5 font-mono text-[40px] font-semibold leading-none tracking-[0.28em] text-accent-300">
+                      <motion.p
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        className="mt-2 font-mono text-[42px] font-bold leading-none tracking-[0.28em] text-accent-300 select-all"
+                      >
                         {created.code}
-                      </p>
+                      </motion.p>
                     </div>
 
                     <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -478,16 +550,44 @@ export default function Dashboard() {
                   </motion.div>
                 ) : (
                   <>
-                    <div className="flex items-start justify-between gap-3">
+                    {/* Instant 1-Click Meeting for maximum ease of use */}
+                    <div className="mb-6 rounded-2xl border border-accent-400/35 bg-gradient-to-r from-accent-400/12 via-ink-850 to-ink-850 p-4 sm:p-5 shadow-panel">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-400/20 px-2.5 py-0.5 text-2xs font-bold text-accent-300">
+                              ⚡ 1-Click Quick Class
+                            </span>
+                            <span className="text-2xs text-ivory-400">Zero setup needed</span>
+                          </div>
+                          <h3 className="mt-2 text-sm sm:text-base font-semibold text-ivory-50">
+                            Start teaching immediately
+                          </h3>
+                          <p className="mt-0.5 text-2xs sm:text-xs text-ivory-300">
+                            Generates an instant classroom with all 6 languages enabled. Get your code and start in 1 second.
+                          </p>
+                        </div>
+                        <Button
+                          size="md"
+                          loading={creatingInstant}
+                          onClick={handleInstantCreate}
+                          icon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
+                        >
+                          Start Instant Class
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start justify-between gap-3 border-t border-ink-700/60 pt-5">
                       <div>
                         <h2
                           id="create-meeting-heading"
                           className="font-display text-lg font-semibold text-ivory-50"
                         >
-                          Create meeting
+                          Custom meeting
                         </h2>
                         <p className="mt-1 text-2xs text-ivory-400">
-                          Set the language defaults once - every learner inherits them.
+                          Customize your title and language defaults.
                         </p>
                       </div>
                       <Badge tone="neutral">Hosting</Badge>
@@ -535,93 +635,118 @@ export default function Dashboard() {
                         />
                       </fieldset>
 
-                      <fieldset className="space-y-2">
-                        <legend className="text-[13px] font-medium text-ivory-200">
-                          Available caption languages
-                        </legend>
-                        <LanguageChips
-                          mode="multiple"
-                          value={availableLanguages}
-                          onChange={setAvailableLanguages}
-                          codes={ALL_LANGUAGE_CODES}
-                          label="Available caption languages"
-                          requiredCodes={[speakerLanguage]}
-                          description="Learners can switch between these. The speaker language is always included."
-                        />
-                      </fieldset>
+                      {/* Advanced Settings Accordion */}
+                      <div className="border-t border-ink-700/70 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAdvanced((prev) => !prev)}
+                          className="flex items-center justify-between w-full py-2.5 px-3.5 rounded-xl border border-ink-700/80 bg-ink-900/50 text-xs font-semibold text-ivory-300 hover:text-ivory-100 hover:border-ink-500 transition-colors"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Settings className="h-3.5 w-3.5 text-accent-300" aria-hidden="true" />
+                            <span>Advanced Settings (Languages, Passwords &amp; Permissions)</span>
+                          </span>
+                          <ChevronDown
+                            className={clsx(
+                              "h-4 w-4 transition-transform duration-200 text-ivory-400",
+                              showAdvanced && "rotate-180 text-accent-300",
+                            )}
+                            aria-hidden="true"
+                          />
+                        </button>
 
-                      <div className="space-y-2">
-                        <Toggle
-                          id="meeting-password-toggle"
-                          label="Require a meeting password"
-                          description="Only people with the password can join."
-                          checked={passwordEnabled}
-                          onChange={(next) => {
-                            setPasswordEnabled(next);
-                            if (!next) setPasswordError(undefined);
-                          }}
-                        />
-                        {passwordEnabled ? (
-                          <FormField
-                            id="meeting-password"
-                            label="Meeting password"
-                            error={passwordError}
-                            hint="At least 4 characters"
-                          >
-                            <Input
-                              id="meeting-password"
-                              name="password"
-                              type="text"
-                              autoComplete="off"
-                              placeholder="shared-secret"
-                              value={password}
-                              invalid={Boolean(passwordError)}
-                              aria-describedby={passwordError ? "meeting-password-error" : undefined}
-                              onChange={(event) => {
-                                setPassword(event.target.value);
-                                if (passwordError) setPasswordError(undefined);
-                              }}
-                            />
-                          </FormField>
+                        {showAdvanced ? (
+                          <div className="mt-4 space-y-5 rounded-xl border border-ink-700/60 bg-ink-900/30 p-4">
+                            <fieldset className="space-y-2">
+                              <legend className="text-[13px] font-medium text-ivory-200">
+                                Available caption languages
+                              </legend>
+                              <LanguageChips
+                                mode="multiple"
+                                value={availableLanguages}
+                                onChange={setAvailableLanguages}
+                                codes={ALL_LANGUAGE_CODES}
+                                label="Available caption languages"
+                                requiredCodes={[speakerLanguage]}
+                                description="Learners can switch between these. The speaker language is always included."
+                              />
+                            </fieldset>
+
+                            <div className="space-y-2">
+                              <Toggle
+                                id="meeting-password-toggle"
+                                label="Require a meeting password"
+                                description="Only people with the password can join."
+                                checked={passwordEnabled}
+                                onChange={(next) => {
+                                  setPasswordEnabled(next);
+                                  if (!next) setPasswordError(undefined);
+                                }}
+                              />
+                              {passwordEnabled ? (
+                                <FormField
+                                  id="meeting-password"
+                                  label="Meeting password"
+                                  error={passwordError}
+                                  hint="At least 4 characters"
+                                >
+                                  <Input
+                                    id="meeting-password"
+                                    name="password"
+                                    type="text"
+                                    autoComplete="off"
+                                    placeholder="shared-secret"
+                                    value={password}
+                                    invalid={Boolean(passwordError)}
+                                    aria-describedby={passwordError ? "meeting-password-error" : undefined}
+                                    onChange={(event) => {
+                                      setPassword(event.target.value);
+                                      if (passwordError) setPasswordError(undefined);
+                                    }}
+                                  />
+                                </FormField>
+                              ) : null}
+                            </div>
+
+                            <fieldset className="space-y-2">
+                              <legend className="text-[13px] font-medium text-ivory-200">
+                                Participant permissions
+                              </legend>
+                              <div className="grid gap-2 sm:grid-cols-3">
+                                <Toggle
+                                  id="perm-unmute"
+                                  label="Can unmute"
+                                  checked={canUnmute}
+                                  onChange={setCanUnmute}
+                                />
+                                <Toggle
+                                  id="perm-screen"
+                                  label="Can share screen"
+                                  checked={canShareScreen}
+                                  onChange={setCanShareScreen}
+                                />
+                                <Toggle id="perm-chat" label="Can chat" checked={canChat} onChange={setCanChat} />
+                              </div>
+                            </fieldset>
+
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <Toggle
+                                id="default-captions"
+                                label="Captions on by default"
+                                description="Every learner starts with captions visible."
+                                checked={captionsOn}
+                                onChange={setCaptionsOn}
+                              />
+                              <Toggle
+                                id="default-voice"
+                                label="Translated voice by default"
+                                description="Needs a configured text-to-speech provider."
+                                checked={voiceOn}
+                                onChange={setVoiceOn}
+                              />
+                            </div>
+                          </div>
                         ) : null}
-                      </div>
-
-                      <fieldset className="space-y-2">
-                        <legend className="text-[13px] font-medium text-ivory-200">
-                          Participant permissions
-                        </legend>
-                        <div className="grid gap-2 sm:grid-cols-3">
-                          <Toggle
-                            id="perm-unmute"
-                            label="Can unmute"
-                            checked={canUnmute}
-                            onChange={setCanUnmute}
-                          />
-                          <Toggle
-                            id="perm-screen"
-                            label="Can share screen"
-                            checked={canShareScreen}
-                            onChange={setCanShareScreen}
-                          />
-                          <Toggle id="perm-chat" label="Can chat" checked={canChat} onChange={setCanChat} />
-                        </div>
-                      </fieldset>
-
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <Toggle
-                          id="default-captions"
-                          label="Captions on by default"
-                          description="Every learner starts with captions visible."
-                          checked={captionsOn}
-                          onChange={setCaptionsOn}
-                        />
-                        <Toggle
-                          id="default-voice"
-                          label="Translated voice by default"
-                          description="Needs a configured text-to-speech provider."
-                          checked={voiceOn}
-                          onChange={setVoiceOn}
-                        />
                       </div>
 
                       <Button
@@ -638,7 +763,8 @@ export default function Dashboard() {
                 )}
               </div>
             ) : (
-              <div className="nc-panel p-5 sm:p-6">
+              <div className="nc-panel relative overflow-hidden p-5 sm:p-6 border border-ink-600/80 shadow-panel hover:border-accent-400/30 transition-all duration-300">
+                <div className="pointer-events-none absolute -right-20 -top-20 h-44 w-44 rounded-full bg-accent-400/6 blur-3xl" />
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h2

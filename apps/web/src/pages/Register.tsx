@@ -163,7 +163,8 @@ export default function Register() {
       ]}
       stage={<CaptionStage focus={language} showSwitcher={false} />}
     >
-      <div className="nc-panel p-6 sm:p-8">
+      <div className="nc-panel relative overflow-hidden p-6 sm:p-8 border border-ink-600/80 shadow-lift backdrop-blur-xl">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-accent-400/8 blur-3xl" />
         <p className="nc-eyebrow">Get started</p>
         <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ivory-50">
           Create your account
@@ -307,11 +308,18 @@ export default function Register() {
                         : "border-ink-600 bg-ink-900/50 hover:border-ink-500"
                     }`}
                   >
+                    {active && (
+                      <motion.span
+                        layoutId="registerRoleSelectionPill"
+                        className="absolute inset-0 rounded-xl bg-accent-400/10 border border-accent-400/40 -z-10 shadow-sm shadow-accent-400/20"
+                        transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                      />
+                    )}
                     <Icon
-                      className={`mt-0.5 h-4 w-4 shrink-0 ${active ? "text-accent-300" : "text-ivory-400"}`}
+                      className={`relative z-10 mt-0.5 h-4 w-4 shrink-0 ${active ? "text-accent-300" : "text-ivory-400"}`}
                       aria-hidden="true"
                     />
-                    <span className="min-w-0">
+                    <span className="relative z-10 min-w-0">
                       <span
                         className={`block text-[13px] font-medium ${active ? "text-ivory-50" : "text-ivory-200"}`}
                       >

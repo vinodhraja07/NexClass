@@ -110,8 +110,8 @@ async function requireParticipant(meetingCode: string, userId: string) {
   }
   const participant = await ParticipantModel.findOne({
     meetingCode,
-    userId,
     leftAt: null,
+    $or: [{ userId }, { id: userId }, { _id: userId }],
   });
   if (!participant) {
     throw new HttpError(403, "You are not a participant in this meeting.", "not_a_participant");
@@ -333,8 +333,8 @@ router.post("/meetings/:code/leave", requireAuth, async (req, res, next) => {
     const meeting = await findMeeting(req.params.code);
     const participant = await ParticipantModel.findOne({
       meetingCode: meeting.code,
-      userId: req.auth!.sub,
       leftAt: null,
+      $or: [{ userId: req.auth!.sub }, { id: req.auth!.sub }, { _id: req.auth!.sub }],
     });
     if (!participant) {
       res.json({ ok: true });

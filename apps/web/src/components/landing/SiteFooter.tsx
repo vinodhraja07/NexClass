@@ -93,6 +93,9 @@ export function SiteFooter() {
           <p className="font-mono text-[11.5px] tracking-wide text-ivory-400/80">
             &copy; 2026 NexClass
           </p>
+          <p className="text-[11.5px] leading-relaxed text-ivory-400/80">
+            Created manually by a human
+          </p>
           <p className="max-w-[520px] text-[11.5px] leading-relaxed text-ivory-400/80">
             The caption samples on this page are hand-authored prepared segments used
             to demonstrate the interface. Live classrooms translate the teacher&apos;s

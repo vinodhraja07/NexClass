@@ -68,11 +68,11 @@ async function fetchDemoSpeech(language: LanguageCode, text: string): Promise<st
   }
 }
 
-/** Never let synthesis hold the demo hostage; a slow answer is a none-answer. */
+/** Never let synthesis hold the demo hostage; ample timeout ensures regional fallback voices succeed. */
 function raceRequest(promise: Promise<string | null>): Promise<string | null> {
   return Promise.race([
     promise,
-    new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 2500)),
+    new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 7500)),
   ]);
 }
 

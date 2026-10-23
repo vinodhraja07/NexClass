@@ -42,7 +42,15 @@ export function MeetingListItem({
   const actionLabel = isLive ? "Resume" : isEnded ? "Reopen" : "Enter";
 
   return (
-    <article className="flex flex-col gap-3 rounded-xl border border-ink-700 bg-ink-900/40 p-4 transition-colors duration-200 hover:border-ink-500 sm:flex-row sm:items-center sm:justify-between">
+    <article
+      className={clsx(
+        "group relative flex flex-col gap-3 rounded-2xl border p-4 sm:p-5 transition-all duration-300 sm:flex-row sm:items-center sm:justify-between overflow-hidden",
+        isLive
+          ? "border-signal-live/50 bg-signal-live/[0.04] shadow-sm shadow-signal-live/10"
+          : "border-ink-700/80 bg-ink-900/50 hover:border-accent-400/40 hover:bg-ink-850/60 hover:shadow-lg hover:shadow-black/40",
+      )}
+    >
+      <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-accent-400/5 blur-2xl transition-colors group-hover:bg-accent-400/10" />
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           {statusOverride ? (

@@ -15,11 +15,11 @@ function formatDuration(ms: number): string {
 }
 
 const STATUS_META: Record<ConnectionStatus, { label: string; icon: typeof SignalHigh; tone: string }> = {
-  connected: { label: "Connected", icon: SignalHigh, tone: "text-accent-300 border-accent-400/35 bg-accent-400/10" },
+  connected: { label: "Connected", icon: SignalHigh, tone: "text-primary border-primary/35 bg-primary/10" },
   connecting: { label: "Connecting…", icon: SignalMedium, tone: "text-signal-warn border-signal-warn/35 bg-signal-warn/10" },
   reconnecting: { label: "Reconnecting…", icon: SignalLow, tone: "text-signal-warn border-signal-warn/35 bg-signal-warn/10" },
   disconnected: { label: "Disconnected", icon: TriangleAlert, tone: "text-signal-live border-signal-live/35 bg-signal-live/10" },
-  idle: { label: "Idle", icon: SignalLow, tone: "text-ivory-400 border-ink-600 bg-ink-800/60" },
+  idle: { label: "Idle", icon: SignalLow, tone: "text-text-secondary border-border bg-surface" },
 };
 
 export interface ClassroomHeaderProps {
@@ -68,7 +68,7 @@ export function ClassroomHeader({
   return (
     <header
       className={clsx(
-        "flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-ink-700/70 bg-ink-900/85 px-3.5 py-2.5 backdrop-blur-xl sm:px-5",
+        "flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/80 bg-background/90 px-3.5 py-2.5 backdrop-blur-2xl sm:px-5",
         className,
       )}
     >
@@ -77,7 +77,7 @@ export function ClassroomHeader({
           <LiveDot />
           {demo ? "Demo classroom - simulated" : "Live classroom"}
         </p>
-        <h1 className="truncate text-[15px] font-semibold text-ivory-50 sm:text-base">{title}</h1>
+        <h1 className="truncate text-[15px] font-semibold text-text-primary sm:text-base">{title}</h1>
       </div>
 
       {demo ? (
@@ -88,7 +88,7 @@ export function ClassroomHeader({
         <span className="inline-flex items-center gap-1.5 rounded-full border border-signal-live/40 bg-signal-live/10 px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.14em] text-signal-live">
           <LiveDot />
           Live
-          <span className="font-mono normal-case tracking-normal text-ivory-200" aria-label="Meeting duration">
+          <span className="font-mono normal-case tracking-normal text-text-secondary" aria-label="Meeting duration">
             {formatDuration(elapsed)}
           </span>
         </span>
@@ -98,7 +98,7 @@ export function ClassroomHeader({
         type="button"
         onClick={copyCode}
         aria-label={`Copy meeting code ${code}`}
-        className="nc-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-800/70 px-2.5 font-mono text-xs text-ivory-200 transition-colors hover:border-ink-500 hover:text-ivory-50"
+        className="nc-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/70 bg-surface/80 px-2.5 font-mono text-xs text-text-primary transition-colors hover:border-primary/50"
       >
         <AnimatePresence mode="wait" initial={false}>
           {copied ? (
@@ -108,7 +108,7 @@ export function ClassroomHeader({
               animate={{ opacity: 1, scale: 1 }}
               exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
               transition={{ duration: reduced ? 0 : 0.16 }}
-              className="text-accent-300"
+              className="text-primary"
             >
               <Check className="h-3.5 w-3.5" aria-hidden="true" />
             </motion.span>
@@ -138,8 +138,8 @@ export function ClassroomHeader({
         <span className="sr-only sm:not-sr-only">{meta.label}</span>
       </span>
 
-      <span className="hidden items-center gap-1.5 rounded-full border border-ink-600 bg-ink-800/60 px-2.5 py-1 text-2xs text-ivory-300 xl:inline-flex">
-        <Gauge className="h-3 w-3 text-accent-300" aria-hidden="true" />
+      <span className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-surface/70 px-2.5 py-1 text-2xs text-text-secondary xl:inline-flex">
+        <Gauge className="h-3 w-3 text-primary" aria-hidden="true" />
         WebRTC mesh
       </span>
     </header>

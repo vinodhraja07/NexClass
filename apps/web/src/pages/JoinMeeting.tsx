@@ -242,8 +242,9 @@ export default function JoinMeeting() {
           animate={{ opacity: 1, y: 0 }}
           transition={reduced ? { duration: 0 } : { duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
           aria-labelledby="join-heading"
-          className="nc-panel order-1 h-fit p-5 sm:p-7"
+          className="nc-panel relative overflow-hidden order-1 h-fit p-6 sm:p-8 border border-ink-600/80 shadow-lift"
         >
+          <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-accent-400/8 blur-3xl" />
           <p className="nc-eyebrow">Guest access</p>
           <h1
             id="join-heading"

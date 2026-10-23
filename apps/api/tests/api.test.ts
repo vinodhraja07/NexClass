@@ -1,4 +1,4 @@
-﻿import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import type http from "node:http";
 import { default as request } from "supertest";
 
@@ -182,7 +182,9 @@ describe("nexclass REST API", () => {
     expect(created.body.meeting.availableLanguages).toContain("ta");
   });
 
-  it("lets a guest join by code without an account", async () => {
+  let guestToken = "";
+
+  it("lets a guest join by code without an account and participate", async () => {
     const app = await getTestApp();
     const response = await request(app)
       .post(`/api/meetings/${meetingCode}/join`)
@@ -191,6 +193,30 @@ describe("nexclass REST API", () => {
     expect(response.body.participant.role).toBe("student");
     expect(response.body.participant.captionLanguage).toBe("ta");
     expect(response.body.token).toBeTruthy();
+    guestToken = response.body.token;
+
+    // Guest can list participants
+    const participants = await request(app)
+      .get(`/api/meetings/${meetingCode}/participants`)
+      .set("Authorization", `Bearer ${guestToken}`);
+    expect(participants.status).toBe(200);
+    expect(participants.body.participants.some((p: { displayName: string }) => p.displayName === "Kavya")).toBe(true);
+
+    // Guest can participate in chat
+    const chat = await request(app)
+      .post(`/api/meetings/${meetingCode}/chat`)
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ message: "Vanakkam from Kavya" });
+    expect(chat.status).toBe(201);
+    expect(chat.body.message.senderName).toBe("Kavya");
+
+    // Guest can update their own preferences
+    const prefs = await request(app)
+      .patch(`/api/meetings/${meetingCode}/preferences`)
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ captionLanguage: "ta", voiceLanguage: "ta" });
+    expect(prefs.status).toBe(200);
+    expect(prefs.body.participant.captionLanguage).toBe("ta");
   });
 
   it("keeps participant language choices isolated per participant", async () => {

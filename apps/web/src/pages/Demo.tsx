@@ -136,7 +136,30 @@ export default function Demo() {
         <Button
           size="sm"
           variant={playing ? "secondary" : "primary"}
-          icon={playing ? <Pause className="h-3.5 w-3.5" aria-hidden="true" /> : <Play className="h-3.5 w-3.5" aria-hidden="true" />}
+          icon={
+            playing ? (
+              <span className="flex items-center gap-0.5 h-3.5 mr-0.5" aria-hidden="true">
+                {[0.4, 0.9, 1, 0.6].map((scale, i) => (
+                  <motion.span
+                    key={i}
+                    animate={reduced ? {} : { scaleY: [0.25, scale, 0.25] }}
+                    transition={{ repeat: Infinity, duration: 0.65 + i * 0.15, ease: "easeInOut" }}
+                    className="w-0.5 h-3 rounded-full bg-accent-300 origin-bottom"
+                  />
+                ))}
+              </span>
+            ) : (
+              <Play className="h-3.5 w-3.5" aria-hidden="true" />
+            )
+          }
+          className={
+            playing
+              ? clsx(
+                  "border-accent-400/50 bg-accent-400/15 text-accent-200 shadow-sm shadow-accent-400/20",
+                  !reduced && "animate-pulse",
+                )
+              : "shadow-md shadow-accent-400/25"
+          }
           onClick={togglePlayback}
         >
           {playing ? "Pause lecture" : "Play lecture"}

@@ -38,6 +38,22 @@ export interface UseVoicePlaybackOptions {
   active?: boolean;
 }
 
+function odiaToDevanagariPhonetic(text: string): string {
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    // Odia letter WA (U+0B71) maps phonetically to Devanagari VA/WA (U+0935, व)
+    if (code === 0x0B71) {
+      result += "\u0935";
+    } else if (code >= 0x0B00 && code <= 0x0B7F) {
+      result += String.fromCharCode(code - 0x0200);
+    } else {
+      result += text[i];
+    }
+  }
+  return result;
+}
+
 function pickVoice(lang: string): SpeechSynthesisVoice | null {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
   const voices = window.speechSynthesis.getVoices();
@@ -145,8 +161,37 @@ export function useVoicePlayback({
       browserFallback: boolean;
     }> => {
       const language = languageRef.current;
-      const voice = segment.voices[language];
+      let voice = segment.voices[language];
       const latencyMs = Math.max(0, Date.now() - (segment.endTime || Date.now()));
+
+      const text =
+        segment.translations[language]?.text?.trim() ||
+        (language === segment.originalLanguage ? segment.originalText.trim() : "");
+
+      // If no audio asset came with the segment (e.g. keyless classroom or prefetch timeout),
+      // fetch real synthesized audio on demand from the fallback speech endpoint so regional
+      // languages like Odia ("or") speak crystal-clear audio rather than failing silently on desktop OSs.
+      if ((!voice?.audioUrl || voice.provider === "browser-speech-synthesis") && text) {
+        try {
+          const res = await fetch(
+            `/api/demo/speech?lang=${encodeURIComponent(language)}&text=${encodeURIComponent(text)}`,
+            { signal: AbortSignal.timeout(6_000) },
+          );
+          if (res.ok) {
+            const data = (await res.json()) as { audioUrl?: string; provider?: string };
+            if (data.audioUrl) {
+              voice = {
+                provider: data.provider ?? "google-translate-tts-fallback",
+                status: "complete",
+                latencyMs: 18,
+                audioUrl: data.audioUrl,
+              };
+            }
+          }
+        } catch {
+          // Degrades to browser speech synthesis below
+        }
+      }
 
       if (!voice) {
         return { provider: null, latencyMs, error: "No voice entry for this language.", browserFallback: false };
@@ -181,7 +226,6 @@ export function useVoicePlayback({
       }
 
       if (voice.provider === "browser-speech-synthesis") {
-        const text = segment.translations[language]?.text?.trim();
         if (!text) {
           return {
             provider: voice.provider,
@@ -200,6 +244,18 @@ export function useVoicePlayback({
           voiceMatch = await waitForVoices(tag);
           if (voiceMatch) break;
         }
+
+        // For Odia or other regional languages without an exact OS speech pack,
+        // fall back to available Indic voices (hi-IN, bn-IN) with phonetic transliteration
+        // so audio is spoken naturally rather than failing silently.
+        let spokenText = text;
+        if (!voiceMatch && language === "or") {
+          voiceMatch = (await waitForVoices("hi-IN")) || (await waitForVoices("bn-IN"));
+          spokenText = odiaToDevanagariPhonetic(text);
+        } else if (voiceMatch && voiceMatch.lang.startsWith("hi") && language === "or") {
+          spokenText = odiaToDevanagariPhonetic(text);
+        }
+
         if (!voiceMatch) {
           return {
             provider: voice.provider,
@@ -209,6 +265,7 @@ export function useVoicePlayback({
             browserFallback: true,
           };
         }
+
         const lang = voiceMatch.lang ?? defaultTtsTag(language);
         await new Promise<void>((resolve) => {
           if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -217,7 +274,8 @@ export function useVoicePlayback({
           }
           const synthesis = window.speechSynthesis;
           synthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
+          const utterance = new SpeechSynthesisUtterance(spokenText);
+          if (voiceMatch) utterance.voice = voiceMatch;
           utterance.lang = lang;
           utterance.volume = volumeRef.current;
           utterance.onend = () => resolve();

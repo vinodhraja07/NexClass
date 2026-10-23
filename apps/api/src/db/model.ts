@@ -1,4 +1,4 @@
-﻿import mongoose from "mongoose";
+import mongoose from "mongoose";
 
 export interface ModelLike<T extends { id?: string }> {
   create(doc: Partial<T>): Promise<T>;
@@ -113,10 +113,16 @@ export function createMemoryModel<T extends { id?: string }>(
     return doc;
   };
 
-  const normalize = (query: Record<string, unknown> = {}) => {
+  const normalize = (query: Record<string, unknown> = {}): Record<string, unknown> => {
     const out: Record<string, unknown> = {};
     Object.entries(query).forEach(([key, value]) => {
-      out[key === "_id" ? "id" : key] = value;
+      if (key === "$or" && Array.isArray(value)) {
+        out[key] = value.map((sub) =>
+          sub && typeof sub === "object" ? normalize(sub as Record<string, unknown>) : sub,
+        );
+      } else {
+        out[key === "_id" ? "id" : key] = value;
+      }
     });
     return out;
   };

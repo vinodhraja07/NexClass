@@ -80,18 +80,29 @@ export function TopNav() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
+            <Button variant="ghost" size="sm" onClick={() => go("/join")}>
+              Join class
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => go("/login")}>
               Sign in
-            </Button>
-            <Button size="sm" onClick={() => go("/register")}>
-              Get started
             </Button>
             <Button variant="secondary" size="sm" onClick={() => go("/demo")}>
               Try demo
             </Button>
+            <Button size="sm" onClick={() => go("/dashboard")}>
+              Host classroom
+            </Button>
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden"
+              onClick={() => go("/join")}
+            >
+              Join
+            </Button>
             <Button
               variant="secondary"
               size="sm"
@@ -142,8 +153,9 @@ export function TopNav() {
                 </ul>
               </nav>
               <div className="mt-4 grid gap-2 border-t border-ink-700/70 pt-4">
-                <Button onClick={() => go("/demo")}>Try demo</Button>
-                <Button variant="secondary" onClick={() => go("/register")}>
+                <Button onClick={() => go("/join")}>Join a class with code</Button>
+                <Button variant="secondary" onClick={() => go("/demo")}>Try demo</Button>
+                <Button variant="ghost" onClick={() => go("/register")}>
                   Create a classroom
                 </Button>
                 <Button variant="quiet" onClick={() => go("/login")}>

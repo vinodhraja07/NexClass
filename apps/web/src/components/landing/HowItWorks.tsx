@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Container, Eyebrow, Lede, Reveal, Section, SectionTitle } from "./Primitives";
 
@@ -59,36 +60,52 @@ const VOICE_LANE: Step[] = [
 
 function Connector() {
   return (
-    <div className="flex items-center justify-center py-1 lg:px-1 lg:py-0" aria-hidden="true">
-      <ChevronDown className="h-4 w-4 text-ink-500 lg:hidden" />
-      <ChevronRight className="hidden h-4 w-4 text-ink-500 lg:block" />
+    <div className="relative flex items-center justify-center py-2.5 lg:px-2.5 lg:py-0" aria-hidden="true">
+      <div className="relative flex items-center justify-center">
+        <ChevronDown className="h-4 w-4 text-accent-400/70 lg:hidden" />
+        <ChevronRight className="hidden h-4 w-4 text-accent-400/70 lg:block" />
+        <motion.div
+          animate={{ opacity: [0.2, 0.9, 0.2], scale: [0.8, 1.35, 0.8] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          className="pointer-events-none absolute inset-0 rounded-full bg-accent-400/30 blur-xs"
+        />
+      </div>
     </div>
   );
 }
 
 function StepNode({ step, accent = false }: { step: Step; accent?: boolean }) {
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -4, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={[
-        "flex h-full flex-col rounded-xl border px-4 py-4",
+        "group relative flex h-full flex-col rounded-xl border px-4 py-4 transition-all duration-300",
         accent
-          ? "border-accent-400/30 bg-accent-400/[0.05]"
-          : "border-ink-600/70 bg-ink-850/80",
+          ? "border-accent-400/50 bg-accent-400/[0.08] shadow-[0_0_24px_-6px_rgba(46,224,168,0.35)] hover:border-accent-300 hover:shadow-[0_0_30px_-4px_rgba(46,224,168,0.5)]"
+          : "border-ink-600/70 bg-ink-850/80 hover:border-accent-400/40 hover:bg-ink-800/90 hover:shadow-panel",
       ].join(" ")}
     >
-      <span
-        className={[
-          "font-mono text-[11px] tracking-[0.16em]",
-          accent ? "text-accent-300" : "text-ivory-400/70",
-        ].join(" ")}
-      >
-        {step.n}
-      </span>
-      <h3 className="mt-2 text-[14.5px] leading-snug font-semibold text-ivory-50">
+      <div className="flex items-center justify-between">
+        <span
+          className={[
+            "font-mono text-[11px] font-bold tracking-[0.16em]",
+            accent ? "text-accent-300" : "text-ivory-400/70 group-hover:text-ivory-200",
+          ].join(" ")}
+        >
+          {step.n}
+        </span>
+        {accent && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-accent-400/15 px-2 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-accent-300 uppercase">
+            Protected
+          </span>
+        )}
+      </div>
+      <h3 className="mt-2 text-[14.5px] leading-snug font-semibold text-ivory-50 group-hover:text-white">
         {step.title}
       </h3>
       <p className="mt-2 text-[13px] leading-relaxed text-ivory-300/80">{step.body}</p>
-    </div>
+    </motion.div>
   );
 }
 

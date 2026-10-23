@@ -1,0 +1,235 @@
+/* ==========================================================================
+   NEXCLASS OFFICIAL DESIGN SYSTEM — SIGNATURE PALETTE: MIDNIGHT PURPLE
+   Background: #12111E | Surface: #262338 | Primary: #8980BD | Border: #403B56
+   ========================================================================== */
+
+/* Official Midnight Purple Palette as Default Root */
+:root,
+[data-theme="midnight-purple"] {
+  --background: #12111E;
+  --background-secondary: #1B192A;
+  --surface: #262338;
+  --surface-elevated: #302D45;
+  --primary: #8980BD;
+  --secondary-accent: #A89ACF;
+  --ai-accent: #807A9D;
+  --text-primary: #EFEDF5;
+  --text-secondary: #B8B3CB;
+  --border: #403B56;
+  --muted: #201E31;
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --focus-ring: rgba(137, 128, 189, 0.5);
+  --shadow: 0 20px 48px -16px rgba(6, 5, 12, 0.85);
+  --card-gradient: linear-gradient(180deg, #262338 0%, #1B192A 100%);
+
+  /* RGB channels for Tailwind opacity modifiers */
+  --color-bg: 18 17 30;
+  --color-bg-secondary: 27 25 42;
+  --color-surface: 38 35 56;
+  --color-surface-elevated: 48 45 69;
+  --color-primary: 137 128 189;
+  --color-secondary-accent: 168 154 207;
+  --color-ai-accent: 128 122 157;
+  --color-text-primary: 239 237 245;
+  --color-text-secondary: 184 179 203;
+  --color-border: 64 59 86;
+  --color-muted: 32 30 49;
+
+  /* Legacy variable alignment */
+  --nc-ink: 18 17 30;
+  --nc-surface: 38 35 56;
+  --nc-raised: 48 45 69;
+  --nc-line: 64 59 86;
+  --nc-accent: 137 128 189;
+  --nc-lime: 168 154 207;
+  --nc-ivory: 239 237 245;
+  --nc-muted: 184 179 203;
+}
+
+/* Theme 02: Earth Sand */
+[data-theme="earth-sand"] {
+  --background: #1A1714;
+  --background-secondary: #211D19;
+  --surface: #302820;
+  --surface-elevated: #3A3027;
+  --primary: #C9A17A;
+  --secondary-accent: #D4BD75;
+  --ai-accent: #A9A08D;
+  --text-primary: #F3EBDD;
+  --text-secondary: #BDB1A1;
+  --border: #514438;
+  --muted: #28221D;
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --focus-ring: rgba(201, 161, 122, 0.5);
+  --shadow: 0 20px 48px -16px rgba(10, 8, 7, 0.85);
+  --card-gradient: linear-gradient(180deg, #302820 0%, #211D19 100%);
+
+  --color-bg: 26 23 20;
+  --color-bg-secondary: 33 29 25;
+  --color-surface: 48 40 32;
+  --color-surface-elevated: 58 48 39;
+  --color-primary: 201 161 122;
+  --color-secondary-accent: 212 189 117;
+  --color-ai-accent: 169 160 141;
+  --color-text-primary: 243 235 221;
+  --color-text-secondary: 189 177 161;
+  --color-border: 81 68 56;
+  --color-muted: 40 34 29;
+
+  --nc-ink: 26 23 20;
+  --nc-surface: 48 40 32;
+  --nc-raised: 58 48 39;
+  --nc-line: 81 68 56;
+  --nc-accent: 201 161 122;
+  --nc-lime: 212 189 117;
+  --nc-ivory: 243 235 221;
+  --nc-muted: 189 177 161;
+}
+
+/* Theme 03: Forest Moderne */
+[data-theme="forest-moderne"] {
+  --background: #101A16;
+  --background-secondary: #17231D;
+  --surface: #1D3028;
+  --surface-elevated: #294034;
+  --primary: #78A98B;
+  --secondary-accent: #C4B887;
+  --ai-accent: #9B9B78;
+  --text-primary: #E9EFE8;
+  --text-secondary: #ACBCAF;
+  --border: #34483B;
+  --muted: #1A2A21;
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --focus-ring: rgba(120, 169, 139, 0.5);
+  --shadow: 0 20px 48px -16px rgba(5, 10, 8, 0.85);
+  --card-gradient: linear-gradient(180deg, #1D3028 0%, #17231D 100%);
+
+  --color-bg: 16 26 22;
+  --color-bg-secondary: 23 35 29;
+  --color-surface: 29 48 40;
+  --color-surface-elevated: 41 64 52;
+  --color-primary: 120 169 139;
+  --color-secondary-accent: 196 184 135;
+  --color-ai-accent: 155 155 120;
+  --color-text-primary: 233 239 232;
+  --color-text-secondary: 172 188 175;
+  --color-border: 52 72 59;
+  --color-muted: 26 42 33;
+
+  --nc-ink: 16 26 22;
+  --nc-surface: 29 48 40;
+  --nc-raised: 41 64 52;
+  --nc-line: 52 72 59;
+  --nc-accent: 120 169 139;
+  --nc-lime: 196 184 135;
+  --nc-ivory: 233 239 232;
+  --nc-muted: 172 188 175;
+}
+
+/* Theme 04: Ocean Blue */
+[data-theme="ocean-blue"] {
+  --background: #0B1724;
+  --background-secondary: #122131;
+  --surface: #192B3A;
+  --surface-elevated: #233A4B;
+  --primary: #438EAC;
+  --secondary-accent: #78B8C9;
+  --ai-accent: #9EACC0;
+  --text-primary: #E8EFF4;
+  --text-secondary: #A8BAC8;
+  --border: #30485A;
+  --muted: #172735;
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --focus-ring: rgba(67, 142, 172, 0.5);
+  --shadow: 0 20px 48px -16px rgba(3, 8, 14, 0.85);
+  --card-gradient: linear-gradient(180deg, #192B3A 0%, #122131 100%);
+
+  --color-bg: 11 23 36;
+  --color-bg-secondary: 18 33 49;
+  --color-surface: 25 43 58;
+  --color-surface-elevated: 35 58 75;
+  --color-primary: 67 142 172;
+  --color-secondary-accent: 120 184 201;
+  --color-ai-accent: 158 172 192;
+  --color-text-primary: 232 239 244;
+  --color-text-secondary: 168 186 200;
+  --color-border: 48 72 90;
+  --color-muted: 23 39 53;
+
+  --nc-ink: 11 23 36;
+  --nc-surface: 25 43 58;
+  --nc-raised: 35 58 75;
+  --nc-line: 48 72 90;
+  --nc-accent: 67 142 172;
+  --nc-lime: 120 184 201;
+  --nc-ivory: 232 239 244;
+  --nc-muted: 168 186 200;
+}
+
+/* Theme 05: Midnight Purple */
+[data-theme="midnight-purple"] {
+  --background: #12111E;
+  --background-secondary: #1B192A;
+  --surface: #262338;
+  --surface-elevated: #302D45;
+  --primary: #8980BD;
+  --secondary-accent: #A89ACF;
+  --ai-accent: #807A9D;
+  --text-primary: #EFEDF5;
+  --text-secondary: #B8B3CB;
+  --border: #403B56;
+  --muted: #201E31;
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --focus-ring: rgba(137, 128, 189, 0.5);
+  --shadow: 0 20px 48px -16px rgba(6, 5, 12, 0.85);
+  --card-gradient: linear-gradient(180deg, #262338 0%, #1B192A 100%);
+
+  --color-bg: 18 17 30;
+  --color-bg-secondary: 27 25 42;
+  --color-surface: 38 35 56;
+  --color-surface-elevated: 48 45 69;
+  --color-primary: 137 128 189;
+  --color-secondary-accent: 168 154 207;
+  --color-ai-accent: 128 122 157;
+  --color-text-primary: 239 237 245;
+  --color-text-secondary: 184 179 203;
+  --color-border: 64 59 86;
+  --color-muted: 32 30 49;
+
+  --nc-ink: 18 17 30;
+  --nc-surface: 38 35 56;
+  --nc-raised: 48 45 69;
+  --nc-line: 64 59 86;
+  --nc-accent: 137 128 189;
+  --nc-lime: 168 154 207;
+  --nc-ivory: 239 237 245;
+  --nc-muted: 184 179 203;
+}
+
+/* Smooth Apple-inspired theme transition applied during theme switching */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 420ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 420ms cubic-bezier(0.4, 0, 0.2, 1),
+              color 420ms cubic-bezier(0.4, 0, 0.2, 1),
+              fill 420ms cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 420ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 420ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}

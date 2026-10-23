@@ -72,17 +72,17 @@ export function AccessibilitySection() {
             </Reveal>
           </div>
 
-          <Stagger className="min-w-0 divide-y divide-ink-700/60 border-y border-ink-700/60">
+          <Stagger className="min-w-0 space-y-3">
             {ITEMS.map((item) => (
               <StaggerItem
                 key={item.title}
-                className="flex gap-5 py-6 sm:gap-6 sm:py-7"
+                className="group flex gap-5 rounded-2xl border border-ink-700/60 bg-ink-850/50 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink-500 hover:bg-ink-800/80 hover:shadow-panel sm:gap-6"
               >
-                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-ink-600/70 bg-ink-850 text-accent-300">
-                  <item.icon className="h-[18px] w-[18px]" aria-hidden="true" />
+                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-ink-600/70 bg-ink-850 text-accent-300 transition-all duration-200 group-hover:border-accent-400/60 group-hover:bg-accent-400/10 group-hover:shadow-[0_0_20px_-4px_rgba(46,224,168,0.4)]">
+                  <item.icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <div>
-                  <h3 className="text-[16px] font-semibold text-ivory-50 sm:text-[17px]">
+                  <h3 className="text-[16px] font-semibold text-ivory-50 transition-colors duration-200 group-hover:text-white sm:text-[17px]">
                     {item.title}
                   </h3>
                   <p className="mt-2 max-w-[560px] text-[14px] leading-relaxed text-ivory-300/80 sm:text-[14.5px]">

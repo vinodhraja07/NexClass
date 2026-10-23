@@ -153,11 +153,11 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
       <svg viewBox="0 0 320 220" className="h-auto w-full" role="img" aria-label={labels.angle} lang={language}>
         <defs>
           <pattern id="nc-room-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(42,58,87,0.55)" strokeWidth="1" />
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--border)" strokeOpacity="0.45" strokeWidth="1" />
           </pattern>
           <linearGradient id="nc-room-body" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="rgba(46,224,168,0.45)" />
-            <stop offset="100%" stopColor="rgba(211,242,92,0.30)" />
+            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="var(--secondary-accent)" stopOpacity="0.35" />
           </linearGradient>
         </defs>
         <rect width="320" height="220" fill="url(#nc-room-grid)" />
@@ -173,8 +173,10 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
                   width="38"
                   height="26"
                   rx="5"
-                  fill="rgba(46,224,168,0.10)"
-                  stroke="rgba(46,224,168,0.35)"
+                  fill="var(--primary)"
+                  fillOpacity="0.12"
+                  stroke="var(--primary)"
+                  strokeOpacity="0.45"
                 />
               )),
             )}
@@ -183,20 +185,22 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
 
         {variant === "pendulum" ? (
           <g>
-            <line x1="160" y1="26" x2="160" y2="52" stroke="rgba(214,204,186,0.5)" strokeWidth="2" />
+            <line x1="160" y1="26" x2="160" y2="52" stroke="var(--text-secondary)" strokeOpacity="0.5" strokeWidth="2" />
             <line
               x1="160"
               y1="52"
               x2={160 + 58 * Math.sin((angle * Math.PI) / 180)}
               y2={52 + 58 * Math.cos((angle * Math.PI) / 180)}
-              stroke="rgba(214,204,186,0.75)"
+              stroke="var(--text-secondary)"
+              strokeOpacity="0.75"
               strokeWidth="2.5"
             />
             <circle
               cx={160 + 58 * Math.sin((angle * Math.PI) / 180)}
               cy={52 + 58 * Math.cos((angle * Math.PI) / 180)}
               r="9"
-              fill="rgba(211,242,92,0.85)"
+              fill="var(--secondary-accent)"
+              fillOpacity="0.9"
             />
           </g>
         ) : null}
@@ -210,25 +214,27 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
                 y1="80"
                 x2={52 + index * 20}
                 y2="110"
-                stroke="rgba(46,224,168,0.65)"
+                stroke="var(--primary)"
+                strokeOpacity="0.7"
                 strokeWidth="2"
               />
             ))}
-            <rect x="280" y="62" width="14" height="66" rx="4" fill="rgba(211,242,92,0.5)" />
+            <rect x="280" y="62" width="14" height="66" rx="4" fill="var(--secondary-accent)" fillOpacity="0.5" />
           </g>
         ) : null}
 
         {variant === "rotating-body" ? (
           <>
-            <circle cx="160" cy="140" r="7" fill="rgba(214,204,186,0.85)" />
-            <path d="M 148 196 L 172 196" stroke="rgba(214,204,186,0.5)" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="160" cy="140" r="7" fill="var(--text-secondary)" fillOpacity="0.85" />
+            <path d="M 148 196 L 172 196" stroke="var(--text-secondary)" strokeOpacity="0.5" strokeWidth="3" strokeLinecap="round" />
             <g ref={bodyRef}>
               <line
                 x1="160"
                 y1="140"
                 x2={160 + LENGTH}
                 y2="140"
-                stroke="rgba(214,204,186,0.55)"
+                stroke="var(--text-secondary)"
+                strokeOpacity="0.55"
                 strokeWidth="3"
               />
               <rect
@@ -238,7 +244,8 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
                 height="24"
                 rx="6"
                 fill="url(#nc-room-body)"
-                stroke="rgba(46,224,168,0.75)"
+                stroke="var(--primary)"
+                strokeOpacity="0.75"
               />
             </g>
             {showVectors ? (
@@ -248,14 +255,14 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
                   y1="140"
                   x2={160 + LENGTH}
                   y2={140 + FORCE}
-                  stroke="rgba(255,77,109,0.9)"
+                  stroke="var(--danger)"
                   strokeWidth="2.5"
                 />
                 <polygon
                   points={`${160 + LENGTH - 5},${140 + FORCE - 8} ${160 + LENGTH + 5},${
                     140 + FORCE - 8
                   } ${160 + LENGTH},${140 + FORCE}`}
-                  fill="rgba(255,77,109,0.9)"
+                  fill="var(--danger)"
                 />
               </g>
             ) : null}
@@ -264,14 +271,15 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
                 <path
                   ref={arcRef}
                   fill="none"
-                  stroke="rgba(211,242,92,0.85)"
+                  stroke="var(--secondary-accent)"
+                  strokeOpacity="0.9"
                   strokeWidth="2"
                   strokeDasharray="4 3"
                 />
                 <text
                   x="212"
                   y="128"
-                  fill="rgba(211,242,92,0.95)"
+                  fill="var(--secondary-accent)"
                   fontSize="12"
                   fontFamily="JetBrains Mono, monospace"
                 >
@@ -282,9 +290,9 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
           </>
         ) : null}
 
-        <text x="16" y="28" fill="rgba(214,204,186,0.6)" fontSize="11" fontFamily="Inter, sans-serif">
+        <text x="16" y="28" fill="var(--text-secondary)" fillOpacity="0.7" fontSize="11" fontFamily="Inter, sans-serif">
           {labels.angle}{" "}
-          <tspan ref={readoutRef} fill="rgba(46,224,168,0.95)"></tspan> {labels.degrees}
+          <tspan ref={readoutRef} fill="var(--primary)"></tspan> {labels.degrees}
         </text>
       </svg>
 

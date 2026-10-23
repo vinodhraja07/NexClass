@@ -48,12 +48,14 @@ export default function DemoRoom() {
         <h1 className="w-full text-2xl font-semibold text-ivory-50 sm:w-auto sm:flex-1">
           Demo 2 - one shared object, one teacher, six languages
         </h1>
-        <Link
-          to="/demo"
-          className="nc-focus inline-flex h-9 shrink-0 items-center gap-1 rounded-lg border border-ink-500 bg-ink-800/80 px-3 text-[13px] font-medium text-ivory-100 transition-colors hover:border-accent-400/50"
-        >
-          All demos
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/demo"
+            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1 rounded-lg border border-ink-500 bg-ink-800/80 px-3 text-[13px] font-medium text-ivory-100 transition-colors hover:border-accent-400/50"
+          >
+            All demos
+          </Link>
+        </div>
       </header>
 
       <p className="max-w-3xl text-sm leading-relaxed text-ivory-300">
@@ -76,7 +78,7 @@ export default function DemoRoom() {
         <div
           role="radiogroup"
           aria-label="Choose the shared object"
-          className="mt-2.5 inline-flex flex-wrap items-center gap-1 rounded-lg border border-ink-600 bg-ink-900/60 p-1"
+          className="mt-2.5 inline-flex flex-wrap items-center gap-1 rounded-xl border border-ink-600 bg-ink-900/60 p-1"
         >
           {SHARED_RESOURCES.map((resource) => {
             const selected = resource.id === resourceId;
@@ -88,11 +90,18 @@ export default function DemoRoom() {
                 aria-checked={selected}
                 onClick={() => setResourceId(resource.id)}
                 className={clsx(
-                  "nc-focus rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-                  selected ? "bg-accent-400 text-ink-900" : "text-ivory-300 hover:text-ivory-50",
+                  "nc-focus relative rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                  selected ? "text-ink-900" : "text-ivory-300 hover:text-ivory-50",
                 )}
               >
-                {translateUi(resource.labelKey, "en")}
+                {selected && (
+                  <motion.span
+                    layoutId="sharedResourceActivePill"
+                    className="absolute inset-0 rounded-lg bg-accent-400 shadow-sm shadow-accent-400/25"
+                    transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                  />
+                )}
+                <span className="relative z-10">{translateUi(resource.labelKey, "en")}</span>
               </button>
             );
           })}

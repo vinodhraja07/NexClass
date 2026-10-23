@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { BookOpenCheck } from "lucide-react";
+import { BookOpenCheck, Volume2 } from "lucide-react";
 import clsx from "clsx";
-import type { LanguageCode } from "@nexclass/shared";
+import { defaultTtsTag, type LanguageCode } from "@nexclass/shared";
 import { describeTerm, detectTerms } from "@nexclass/terminology";
 
 export interface TermTextProps {
@@ -19,9 +19,34 @@ export interface TermTextProps {
  * localised equivalent next to it, so a Tamil reader can look up "torque"
  * without losing the exact wording the teacher used.
  */
+function odiaToDevanagariPhonetic(text: string): string {
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code === 0x0B71) {
+      result += "\u0935";
+    } else if (code >= 0x0B00 && code <= 0x0B7F) {
+      result += String.fromCharCode(code - 0x0200);
+    } else {
+      result += text[i];
+    }
+  }
+  return result;
+}
+
 export function TermText({ text, language, className }: TermTextProps) {
   const reduced = useReducedMotion() ?? false;
   const [selected, setSelected] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   const detections = useMemo(() => detectTerms(text ?? ""), [text]);
 
@@ -94,6 +119,54 @@ export function TermText({ text, language, className }: TermTextProps) {
                     <span lang={language} className="text-accent-200">
                       {selectedTerm.localized}
                     </span>
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (audioRef.current) {
+                          audioRef.current.pause();
+                          audioRef.current = null;
+                        }
+                        const isOdia = language === "or";
+                        const textToSpeak = selectedTerm.localized || selectedTerm.canonical;
+                        try {
+                          const res = await fetch(
+                            `/api/demo/speech?lang=${encodeURIComponent(language)}&text=${encodeURIComponent(textToSpeak)}`,
+                            { signal: AbortSignal.timeout(6_000) },
+                          );
+                          if (res.ok) {
+                            const data = (await res.json()) as { audioUrl?: string };
+                            if (data.audioUrl) {
+                              const audio = new Audio(data.audioUrl);
+                              audioRef.current = audio;
+                              audio.onended = () => {
+                                if (audioRef.current === audio) audioRef.current = null;
+                              };
+                              await audio.play();
+                              return;
+                            }
+                          }
+                        } catch {
+                          // fallback to local SpeechSynthesis
+                        }
+                        if (typeof window !== "undefined" && "speechSynthesis" in window) {
+                          window.speechSynthesis.cancel();
+                          const spoken = isOdia
+                            ? odiaToDevanagariPhonetic(textToSpeak)
+                            : textToSpeak;
+                          const utt = new SpeechSynthesisUtterance(spoken);
+                          utt.lang = isOdia ? "hi-IN" : (defaultTtsTag(language) || language);
+                          utt.rate = 0.9;
+                          window.speechSynthesis.speak(utt);
+                        }
+                      }}
+                      title={`Listen to pronunciation in ${language}`}
+                      aria-label={`Listen to pronunciation of ${selectedTerm.localized}`}
+                      className="nc-focus ml-1.5 inline-flex items-center gap-1 rounded bg-accent-400/15 px-1.5 py-0.5 text-3xs text-accent-300 transition-colors hover:bg-accent-400/25 cursor-pointer"
+                    >
+                      <Volume2 className="h-2.5 w-2.5" aria-hidden="true" />
+                      <span>Hear</span>
+                    </button>
                     {!selectedTerm.verified ? (
                       <span className="text-ivory-400"> (transliteration, still under review)</span>
                     ) : null}

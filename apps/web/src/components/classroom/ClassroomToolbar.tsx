@@ -19,6 +19,7 @@ function IconButton({
   label,
   active,
   danger,
+  mutedWarning,
   badge,
   onClick,
   disabled,
@@ -27,6 +28,7 @@ function IconButton({
   label: string;
   active?: boolean;
   danger?: boolean;
+  mutedWarning?: boolean;
   badge?: string;
   onClick: () => void;
   disabled?: boolean;
@@ -36,47 +38,49 @@ function IconButton({
   return (
     <motion.button
       type="button"
-      whileTap={disabled ? undefined : { y: 2, scale: 0.99 }}
+      whileTap={disabled ? undefined : { scale: 0.96, y: 1 }}
       whileHover={disabled ? undefined : { y: -1 }}
-      transition={{ duration: reduced ? 0 : 0.08 }}
+      transition={{ duration: reduced ? 0 : 0.12, ease: "easeOut" }}
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
       aria-pressed={active}
       title={label}
       className={clsx(
-        "nc-focus group relative inline-flex h-10 shrink-0 select-none items-center gap-2 rounded-xl border pl-2 pr-2 sm:pl-2.5 sm:pr-3.5",
-        // Physical key look: raised face, darker chunky bottom edge and a top
-        // inner highlight that reads as light on the keycap.
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_2px_4px_rgba(0,0,0,0.45)]",
-        "transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40",
+        "nc-focus group relative inline-flex h-10 shrink-0 select-none items-center gap-2 rounded-xl border px-2.5 sm:px-3 text-xs font-semibold transition-all duration-200",
+        "shadow-xs disabled:pointer-events-none disabled:opacity-40",
         danger
-          ? "border-signal-live/60 border-b-signal-live/25 bg-gradient-to-b from-ink-750 to-signal-live/12 text-rose-200 hover:border-signal-live/80"
-          : active
-            ? "border-accent-500/70 border-b-accent-600/50 bg-gradient-to-b from-ink-750 to-accent-400/12 text-accent-100 hover:border-accent-400"
-            : "border-ink-600 border-b-ink-950 bg-gradient-to-b from-ink-750 to-ink-900 text-ivory-100 hover:border-ink-500",
+          ? "border-signal-live/60 bg-signal-live/15 text-rose-200 hover:bg-signal-live/25 hover:border-signal-live active:bg-signal-live/30"
+          : mutedWarning
+            ? "border-signal-live/40 bg-surface/80 text-rose-300 hover:bg-signal-live/10 hover:border-signal-live/70"
+            : active
+              ? "border-primary/60 bg-primary/15 text-primary hover:bg-primary/20 hover:border-primary shadow-xs shadow-primary/20"
+              : "border-border/70 bg-surface/70 text-text-primary hover:bg-surface hover:border-border hover:text-text-primary",
       )}
     >
       <span
         className={clsx(
           "grid h-6 w-6 shrink-0 place-items-center rounded-lg transition-colors duration-150",
           danger
-            ? "bg-signal-live/15 text-rose-300"
-            : active
-              ? "bg-accent-400/20 text-accent-200"
-              : "bg-ink-600/60 text-ivory-200 group-hover:bg-ink-500/60 group-hover:text-ivory-50",
+            ? "bg-signal-live/20 text-rose-300"
+            : mutedWarning
+              ? "bg-signal-live/15 text-rose-300"
+              : active
+                ? "bg-primary/20 text-primary"
+                : "bg-muted/60 text-text-secondary group-hover:text-text-primary",
         )}
       >
         {children}
       </span>
-      <span className="hidden whitespace-nowrap text-[12px] font-semibold tracking-tight sm:inline">{label}</span>
+      <span className="hidden whitespace-nowrap lg:inline text-[12px]">{label}</span>
+
       {badge ? (
         <motion.span
           key={badge}
           initial={reduced ? { scale: 1 } : { scale: 0.6 }}
           animate={{ scale: 1 }}
           transition={{ duration: reduced ? 0 : 0.18, type: "spring", stiffness: 400, damping: 22 }}
-          className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full border border-ink-900 bg-signal-live px-1 font-mono text-[9px] font-bold text-white"
+          className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full border border-background bg-signal-live px-1 font-mono text-[9px] font-bold text-white shadow-xs"
         >
           {badge}
         </motion.span>
@@ -103,10 +107,7 @@ export interface ClassroomToolbarProps {
 }
 
 /**
- * The meeting toolbar.
- *
- * On phones this is an icon-only horizontally scrollable row; on desktop every
- * control shows its label next to the icon.
+ * Premium Apple/Linear-inspired Classroom Toolbar.
  */
 export function ClassroomToolbar({
   audioEnabled,
@@ -125,97 +126,112 @@ export function ClassroomToolbar({
   onEndMeeting,
 }: ClassroomToolbarProps) {
   return (
-    <div className="sticky bottom-0 z-30 border-t border-ink-700/70 bg-ink-900/90 px-2.5 py-2 backdrop-blur-xl sm:px-4">
+    <div className="sticky bottom-0 z-30 border-t border-border/80 bg-background/90 px-3 py-2.5 backdrop-blur-2xl sm:px-4">
       <div
-        className="flex items-center justify-center gap-1.5 overflow-x-auto scrollbar-none"
+        className="mx-auto flex max-w-6xl items-center justify-between gap-2 overflow-x-auto scrollbar-none"
         role="toolbar"
         aria-label="Meeting controls"
       >
-        <IconButton
-          label={audioEnabled ? "Mute microphone" : "Unmute microphone"}
-          active={audioEnabled}
-          onClick={onToggleAudio}
-          disabled={disabled}
-        >
-          {audioEnabled ? (
-            <Mic className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <MicOff className="h-4 w-4" aria-hidden="true" />
-          )}
-        </IconButton>
-
-        <IconButton
-          label={videoEnabled ? "Turn camera off" : "Turn camera on"}
-          active={videoEnabled}
-          onClick={onToggleVideo}
-          disabled={disabled}
-        >
-          {videoEnabled ? (
-            <Video className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <VideoOff className="h-4 w-4" aria-hidden="true" />
-          )}
-        </IconButton>
-
-        <IconButton
-          label={screenSharing ? "Stop screen share" : "Share screen"}
-          active={screenSharing}
-          onClick={onToggleShare}
-          disabled={disabled}
-        >
-          <MonitorUp className="h-4 w-4" aria-hidden="true" />
-        </IconButton>
-
-        <span className="mx-0.5 hidden h-6 w-px shrink-0 bg-ink-600 sm:block" aria-hidden="true" />
-
-        <IconButton label="Participants" active={false} onClick={() => onOpenPanel("participants")}>
-          <Users className="h-4 w-4" aria-hidden="true" />
-        </IconButton>
-
-        <IconButton
-          label={`Chat${unreadChat > 0 ? `, ${unreadChat} unread` : ""}`}
-          active={false}
-          badge={unreadChat > 0 ? String(unreadChat) : undefined}
-          onClick={() => onOpenPanel("chat")}
-        >
-          <MessageSquare className="h-4 w-4" aria-hidden="true" />
-        </IconButton>
-
-        <IconButton
-          label={captionsVisible ? "Hide captions" : "Show captions"}
-          active={captionsVisible}
-          onClick={onToggleCaptions}
-        >
-          {captionsVisible ? (
-            <Captions className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <CaptionsOff className="h-4 w-4" aria-hidden="true" />
-          )}
-        </IconButton>
-
-        <IconButton label="Settings" active={false} onClick={() => onOpenPanel("settings")}>
-          <Settings className="h-4 w-4" aria-hidden="true" />
-        </IconButton>
-
-        <span className="mx-0.5 hidden h-6 w-px shrink-0 bg-ink-600 sm:block" aria-hidden="true" />
-
-        <IconButton
-          label="Leave class"
-          danger
-          onClick={onLeave}
-        >
-          <LogOut className="h-4 w-4" aria-hidden="true" />
-        </IconButton>
-
-        {isHost ? (
+        {/* Group 1: Media Device Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
           <IconButton
-            label="End meeting"
-            danger
-            onClick={onEndMeeting}
+            label={audioEnabled ? "Mute" : "Unmute"}
+            active={audioEnabled}
+            mutedWarning={!audioEnabled}
+            onClick={onToggleAudio}
+            disabled={disabled}
           >
-            <Square className="h-4 w-4" aria-hidden="true" />
+            {audioEnabled ? (
+              <Mic className="h-4 w-4 text-primary" aria-hidden="true" />
+            ) : (
+              <MicOff className="h-4 w-4 text-rose-300" aria-hidden="true" />
+            )}
           </IconButton>
-        ) : null}
+
+          <IconButton
+            label={videoEnabled ? "Stop Video" : "Start Video"}
+            active={videoEnabled}
+            mutedWarning={!videoEnabled}
+            onClick={onToggleVideo}
+            disabled={disabled}
+          >
+            {videoEnabled ? (
+              <Video className="h-4 w-4 text-primary" aria-hidden="true" />
+            ) : (
+              <VideoOff className="h-4 w-4 text-rose-300" aria-hidden="true" />
+            )}
+          </IconButton>
+
+          <IconButton
+            label={screenSharing ? "Stop Sharing" : "Share Screen"}
+            active={screenSharing}
+            onClick={onToggleShare}
+            disabled={disabled}
+          >
+            <MonitorUp className="h-4 w-4" aria-hidden="true" />
+          </IconButton>
+        </div>
+
+        {/* Group 2: Collaboration & Navigation Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <IconButton
+            label="People"
+            active={false}
+            onClick={() => onOpenPanel("participants")}
+          >
+            <Users className="h-4 w-4" aria-hidden="true" />
+          </IconButton>
+
+          <IconButton
+            label={`Chat${unreadChat > 0 ? ` (${unreadChat})` : ""}`}
+            active={false}
+            badge={unreadChat > 0 ? String(unreadChat) : undefined}
+            onClick={() => onOpenPanel("chat")}
+          >
+            <MessageSquare className="h-4 w-4" aria-hidden="true" />
+          </IconButton>
+
+          <IconButton
+            label={captionsVisible ? "Captions ON" : "Captions OFF"}
+            active={captionsVisible}
+            onClick={onToggleCaptions}
+          >
+            {captionsVisible ? (
+              <Captions className="h-4 w-4 text-primary" aria-hidden="true" />
+            ) : (
+              <CaptionsOff className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+            )}
+          </IconButton>
+
+          <IconButton
+            label="Settings"
+            active={false}
+            onClick={() => onOpenPanel("settings")}
+          >
+            <Settings className="h-4 w-4" aria-hidden="true" />
+          </IconButton>
+        </div>
+
+        {/* Group 3: Exit Session Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <IconButton
+            label="Leave"
+            danger
+            onClick={onLeave}
+          >
+            <LogOut className="h-4 w-4" aria-hidden="true" />
+          </IconButton>
+
+          {isHost && (
+            <IconButton
+              label="End Class"
+              danger
+              onClick={onEndMeeting}
+            >
+              <Square className="h-4 w-4" aria-hidden="true" />
+            </IconButton>
+          )}
+        </div>
       </div>
     </div>
   );

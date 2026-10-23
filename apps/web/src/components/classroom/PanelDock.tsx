@@ -13,7 +13,7 @@ import type { SettingsPanelProps } from "./SettingsPanel";
 export type SidePanelTab = "participants" | "chat" | "captions" | "settings";
 
 const TABS: { id: SidePanelTab; label: string; icon: typeof Users }[] = [
-  { id: "participants", label: "Participants", icon: Users },
+  { id: "participants", label: "People", icon: Users },
   { id: "chat", label: "Chat", icon: MessageSquare },
   { id: "captions", label: "Captions", icon: Captions },
   { id: "settings", label: "Settings", icon: SettingsIcon },
@@ -40,11 +40,7 @@ export interface ClassroomPanelProps {
 }
 
 /**
- * The tabbed classroom panel.
- *
- * On narrow screens it becomes a bottom sheet, and on wide screens it docks as
- * a fixed side column. The same four tabs serve both so the toolbar never has
- * to know about screen size.
+ * Premium Apple/Linear-inspired Tabbed Classroom Sidebar & Drawer.
  */
 export function PanelDock({
   panel,
@@ -58,7 +54,7 @@ export function PanelDock({
   const reduced = useReducedMotion() ?? false;
 
   const header = (
-    <div className="flex items-center gap-1 border-b border-ink-700/70 px-2 py-1.5">
+    <div className="flex items-center gap-1 border-b border-border/70 bg-background/80 p-2 backdrop-blur-xl">
       {TABS.map((tab) => {
         const Icon = tab.icon;
         const selected = tab.id === active;
@@ -69,70 +65,93 @@ export function PanelDock({
             onClick={() => onActive(tab.id)}
             aria-pressed={selected}
             className={clsx(
-              "nc-focus relative inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg px-2 text-2xs font-medium transition-colors",
-              selected ? "text-ink-900" : "text-ivory-300 hover:text-ivory-50",
+              "nc-focus relative inline-flex h-8.5 flex-1 items-center justify-center gap-1.5 rounded-xl px-2 text-2xs font-semibold transition-colors select-none",
+              selected ? "text-background" : "text-text-secondary hover:text-text-primary",
             )}
           >
-            {selected ? (
+            {selected && (
               <motion.span
                 layoutId="panel-tab-indicator"
-                className="absolute inset-0 rounded-lg bg-accent-400"
-                transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }}
+                className="absolute inset-0 rounded-xl bg-primary shadow-xs"
+                transition={
+                  reduced
+                    ? { duration: 0 }
+                    : { type: "spring", stiffness: 450, damping: 36 }
+                }
               />
-            ) : null}
-            <Icon className="relative h-3.5 w-3.5" aria-hidden="true" />
-            <span className="relative whitespace-nowrap">{tab.label}</span>
-            {tab.id === "chat" && unreadChat > 0 ? (
-              <span className="relative grid h-4 min-w-4 place-items-center rounded-full bg-signal-live px-1 font-mono text-[9px] font-bold text-white">
+            )}
+            <Icon className="relative z-10 h-3.5 w-3.5" aria-hidden="true" />
+            <span className="relative z-10 whitespace-nowrap">{tab.label}</span>
+            {tab.id === "chat" && unreadChat > 0 && (
+              <motion.span
+                initial={reduced ? { scale: 1 } : { scale: 0.6 }}
+                animate={{ scale: 1 }}
+                className="relative z-10 grid h-4 min-w-4 place-items-center rounded-full bg-signal-live px-1 font-mono text-[9px] font-bold text-white shadow-xs"
+              >
                 {unreadChat}
-              </span>
-            ) : null}
+              </motion.span>
+            )}
           </button>
         );
       })}
-      {compact ? (
+
+      {compact && (
         <button
           type="button"
           onClick={onDismiss}
           aria-label="Close panel"
-          className="nc-focus ml-1 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ivory-300 hover:text-ivory-50"
+          className="nc-focus ml-1 grid h-8 w-8 shrink-0 place-items-center rounded-xl text-text-secondary hover:bg-muted hover:text-text-primary transition-colors"
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>
-      ) : null}
+      )}
     </div>
   );
 
-  const content = active === "participants" ? (
-    <ParticipantsPanel {...panel.participants} />
-  ) : active === "chat" ? (
-    <ChatPanel {...panel.chat} />
-  ) : active === "captions" ? (
-    <CaptionsPanel {...panel.captions} />
-  ) : (
-    <SettingsPanel {...panel.settings} />
-  );
+  const content =
+    active === "participants" ? (
+      <ParticipantsPanel {...panel.participants} />
+    ) : active === "chat" ? (
+      <ChatPanel {...panel.chat} />
+    ) : active === "captions" ? (
+      <CaptionsPanel {...panel.captions} />
+    ) : (
+      <SettingsPanel {...panel.settings} />
+    );
 
   if (compact) {
     return (
       <AnimatePresence>
         {open ? (
-          <motion.aside
-            key="sheet"
-            initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: "100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, y: "100%" }}
-            transition={{ duration: reduced ? 0 : 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-            className="fixed inset-x-0 bottom-0 z-40 flex max-h-[76vh] flex-col rounded-t-2xl border border-b-0 border-ink-600 bg-ink-850 shadow-lift"
-            aria-label="Classroom panels"
-          >
-            <span
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onDismiss}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs"
               aria-hidden="true"
-              className="mx-auto mt-1.5 block h-1 w-10 shrink-0 rounded-full bg-ink-500"
             />
-            {header}
-            <div className="min-h-[220px] flex-1 overflow-y-auto pb-[4.5rem]">{content}</div>
-          </motion.aside>
+            <motion.aside
+              key="sheet"
+              initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduced ? { opacity: 0 } : { opacity: 0, y: "100%" }}
+              transition={{ duration: reduced ? 0 : 0.28, ease: [0.2, 0.8, 0.2, 1] }}
+              className="fixed inset-x-0 bottom-0 z-50 flex max-h-[78vh] flex-col rounded-t-3xl border-t border-border bg-surface shadow-2xl"
+              aria-label="Classroom panels"
+            >
+              <div className="flex justify-center pt-2 pb-1">
+                <span
+                  aria-hidden="true"
+                  className="h-1 w-12 rounded-full bg-text-secondary/40"
+                />
+              </div>
+              {header}
+              <div className="min-h-[220px] flex-1 overflow-y-auto pb-16">{content}</div>
+            </motion.aside>
+          </>
         ) : null}
       </AnimatePresence>
     );
@@ -141,14 +160,14 @@ export function PanelDock({
   return (
     <aside
       aria-label="Classroom panels"
-      className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-ink-600 bg-ink-850/95 shadow-panel"
+      className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface/90 shadow-xl backdrop-blur-xl"
     >
       {header}
       <motion.div
         key={active}
-        initial={reduced ? { opacity: 1 } : { opacity: 0, x: 12 }}
+        initial={reduced ? { opacity: 1 } : { opacity: 0, x: 10 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: reduced ? 0 : 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+        transition={{ duration: reduced ? 0 : 0.2, ease: [0.2, 0.8, 0.2, 1] }}
         className="min-h-0 min-w-0 flex-1 overflow-hidden"
       >
         {content}
