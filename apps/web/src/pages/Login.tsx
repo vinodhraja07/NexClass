@@ -289,6 +289,67 @@ export default function Login() {
                 {submitting ? "Signing in…" : meetingCode ? `Sign in & Enter Classroom` : "Sign in"}
               </Button>
             </form>
+
+            {/* Quick 1-Click Demo Login Bar */}
+            <div className="mt-5 pt-4 border-t border-ink-700/60">
+              <p className="text-3xs font-semibold uppercase tracking-wider text-ivory-400 text-center mb-2.5">
+                ⚡ 1-Click Demo Access
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  disabled={submitting}
+                  onClick={async () => {
+                    setEmail("teacher@nexclass.com");
+                    setPassword("password123");
+                    setSubmitting(true);
+                    setFormError(null);
+                    try {
+                      await login("teacher@nexclass.com", "password123");
+                      if (meetingCode) {
+                        navigate(`/join?code=${meetingCode.toUpperCase()}`, { replace: true });
+                      } else {
+                        navigate("/dashboard", { replace: true });
+                      }
+                    } catch (err) {
+                      setFormError(err instanceof ApiError ? err.message : "Could not sign in as demo teacher");
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                >
+                  👩‍🏫 Teacher
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  disabled={submitting}
+                  onClick={async () => {
+                    setEmail("student@nexclass.com");
+                    setPassword("password123");
+                    setSubmitting(true);
+                    setFormError(null);
+                    try {
+                      await login("student@nexclass.com", "password123");
+                      if (meetingCode) {
+                        navigate(`/join?code=${meetingCode.toUpperCase()}`, { replace: true });
+                      } else {
+                        navigate("/dashboard", { replace: true });
+                      }
+                    } catch (err) {
+                      setFormError(err instanceof ApiError ? err.message : "Could not sign in as demo student");
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                >
+                  🎓 Student
+                </Button>
+              </div>
+            </div>
           </div>
 
           <p className="mt-5 text-center text-xs text-ivory-400">

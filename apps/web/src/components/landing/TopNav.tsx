@@ -2,19 +2,28 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import clsx from "clsx";
 import { Button } from "@/components/ui";
 import { Wordmark } from "./Wordmark";
 import { Container } from "./Primitives";
 
-const LINKS = [
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#features", label: "Features" },
-  { href: "#languages", label: "Language" },
-  { href: "#accessibility", label: "Accessibility" },
-  { href: "#privacy", label: "Privacy" },
-];
+export const NAV_LINKS = [
+  { id: "overview", label: "Overview" },
+  { id: "how-it-works", label: "How it works" },
+  { id: "features", label: "Features" },
+  { id: "languages", label: "Language" },
+  { id: "accessibility", label: "Accessibility" },
+  { id: "privacy", label: "Privacy" },
+] as const;
 
-export function TopNav() {
+export type LandingNavTab = (typeof NAV_LINKS)[number]["id"];
+
+export interface TopNavProps {
+  activeTab?: LandingNavTab;
+  onSelectTab?: (tab: LandingNavTab) => void;
+}
+
+export function TopNav({ activeTab = "overview", onSelectTab }: TopNavProps) {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -41,6 +50,12 @@ export function TopNav() {
     navigate(path);
   };
 
+  const handleLinkClick = (id: LandingNavTab) => {
+    if (onSelectTab) {
+      onSelectTab(id);
+    }
+  };
+
   return (
     <header
       className={[
@@ -52,28 +67,36 @@ export function TopNav() {
     >
       <Container>
         <div className="flex h-16 items-center justify-between gap-6">
-          <a
-            href="#top"
-            onClick={(event) => {
-              event.preventDefault();
+          <button
+            type="button"
+            onClick={() => {
+              if (onSelectTab) {
+                onSelectTab("overview");
+              }
               window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
             }}
-            className="nc-focus rounded-lg"
+            className="nc-focus rounded-lg cursor-pointer"
             aria-label="NexClass home"
           >
             <Wordmark />
-          </a>
+          </button>
 
           <nav aria-label="Primary" className="hidden lg:block">
             <ul className="flex items-center gap-1">
-              {LINKS.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className="nc-focus inline-flex h-9 items-center rounded-lg px-3 text-[13.5px] text-ivory-300 transition-colors duration-200 hover:bg-ink-800 hover:text-ivory-50"
+              {NAV_LINKS.map((link) => (
+                <li key={link.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleLinkClick(link.id)}
+                    className={clsx(
+                      "nc-focus inline-flex h-9 items-center rounded-lg px-3 text-[13.5px] transition-all duration-200 cursor-pointer",
+                      activeTab === link.id
+                        ? "bg-accent-400/15 text-accent-300 font-semibold border border-accent-400/35 shadow-sm"
+                        : "text-ivory-300 hover:bg-ink-800 hover:text-ivory-50 border border-transparent",
+                    )}
                   >
                     {link.label}
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -139,15 +162,23 @@ export function TopNav() {
             <Container className="py-4">
               <nav aria-label="Mobile">
                 <ul className="flex flex-col">
-                  {LINKS.map((link) => (
-                    <li key={link.href}>
-                      <a
-                        href={link.href}
-                        onClick={() => setOpen(false)}
-                        className="nc-focus block rounded-lg px-1 py-3 text-[15px] text-ivory-200 transition-colors hover:text-ivory-50"
+                  {NAV_LINKS.map((link) => (
+                    <li key={link.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleLinkClick(link.id);
+                          setOpen(false);
+                        }}
+                        className={clsx(
+                          "nc-focus block w-full text-left rounded-lg px-3 py-2.5 text-[15px] transition-colors",
+                          activeTab === link.id
+                            ? "bg-accent-400/15 text-accent-300 font-semibold"
+                            : "text-ivory-200 hover:text-ivory-50 hover:bg-ink-850",
+                        )}
                       >
                         {link.label}
-                      </a>
+                      </button>
                     </li>
                   ))}
                 </ul>
