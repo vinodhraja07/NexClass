@@ -7,12 +7,9 @@ import {
   Play,
   Rocket,
   RotateCcw,
-  UserMinus,
-  UserPlus,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import clsx from "clsx";
-import { DEMO_EXTRA_STUDENTS, DEMO_STUDENTS } from "@nexclass/shared";
 import { DemoTransport } from "@/lib/demoTransport";
 import { ClassroomShell } from "@/components/classroom/ClassroomShell";
 import { Button, Badge } from "@/components/ui";
@@ -29,7 +26,6 @@ export default function Demo() {
 
   const transport = useMemo(() => new DemoTransport(), []);
   const [playing, setPlaying] = useState(false);
-  const [students, setStudents] = useState(transport.students.map((student) => student.id));
 
   // Clean up transport on unmount
   useEffect(() => {
@@ -39,8 +35,6 @@ export default function Demo() {
   useEffect(() => {
     const timer = window.setInterval(() => {
       setPlaying(transport.playing);
-      const ids = transport.students.map((student) => student.id);
-      setStudents((current) => (current.join(",") === ids.join(",") ? current : ids));
     }, 700);
     return () => window.clearInterval(timer);
   }, [transport]);
@@ -60,32 +54,6 @@ export default function Demo() {
     transport.startPlayback();
     setPlaying(true);
   }, [transport]);
-
-  const addStudent = useCallback(() => {
-    const candidate = [...DEMO_STUDENTS, ...DEMO_EXTRA_STUDENTS].find(
-      (student) => !transport.students.some((s) => s.id === student.id),
-    );
-    if (!candidate) return;
-    transport.addStudent(candidate);
-    setStudents(transport.students.map((s) => s.id));
-  }, [transport]);
-
-  const removeStudent = useCallback(
-    (studentId: string) => {
-      transport.removeStudent(studentId);
-      setStudents(transport.students.map((s) => s.id));
-    },
-    [transport],
-  );
-
-  const canAddMoreStudents = useMemo(() => {
-    return (
-      students.length < 6 &&
-      [...DEMO_STUDENTS, ...DEMO_EXTRA_STUDENTS].some(
-        (candidate) => !students.includes(candidate.id),
-      )
-    );
-  }, [students]);
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-ink-900 text-ivory-100">
@@ -169,29 +137,6 @@ export default function Demo() {
         >
           Restart
         </Button>
-        <span className="mx-0.5 hidden h-6 w-px bg-ink-600 sm:block" aria-hidden="true" />
-        <Button
-          size="sm"
-          variant="secondary"
-          icon={<UserPlus className="h-3.5 w-3.5" aria-hidden="true" />}
-          disabled={!canAddMoreStudents}
-          onClick={addStudent}
-        >
-          {canAddMoreStudents ? "Add student" : "Room full"}
-        </Button>
-        {students.length > 2 ? (
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<UserMinus className="h-3.5 w-3.5" aria-hidden="true" />}
-            onClick={() => {
-              const last = students[students.length - 1];
-              if (last) removeStudent(last);
-            }}
-          >
-            Remove latest
-          </Button>
-        ) : null}
       </div>
 
       {/* the classroom itself - the identical shell from the live room */}
