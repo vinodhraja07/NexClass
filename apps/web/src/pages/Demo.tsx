@@ -12,12 +12,10 @@ import {
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import clsx from "clsx";
-import type { LanguageCode } from "@nexclass/shared";
-import { DEMO_EXTRA_STUDENTS, DEMO_STUDENTS, languageNativeName } from "@nexclass/shared";
+import { DEMO_EXTRA_STUDENTS, DEMO_STUDENTS } from "@nexclass/shared";
 import { DemoTransport } from "@/lib/demoTransport";
 import { ClassroomShell } from "@/components/classroom/ClassroomShell";
 import { Button, Badge } from "@/components/ui";
-import { meetingLanguagePool } from "@/components/classroom/languagePool";
 
 /**
  * The interactive demo classroom (Demo 1: captions & voice translation).
@@ -32,7 +30,6 @@ export default function Demo() {
   const transport = useMemo(() => new DemoTransport(), []);
   const [playing, setPlaying] = useState(false);
   const [students, setStudents] = useState(transport.students.map((student) => student.id));
-  const [studentLanguages, setStudentLanguages] = useState<Record<string, LanguageCode>>({});
 
   // Clean up transport on unmount
   useEffect(() => {
@@ -90,15 +87,6 @@ export default function Demo() {
     );
   }, [students]);
 
-  // Sync initial student languages
-  useEffect(() => {
-    const refresh: Record<string, LanguageCode> = {};
-    transport.students.forEach((student) => {
-      refresh[student.id] = student.preferredLanguage;
-    });
-    setStudentLanguages((current) => ({ ...current, ...refresh }));
-  }, [transport, students.length]);
-
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-ink-900 text-ivory-100">
       {/* demo overview banner */}
@@ -110,13 +98,13 @@ export default function Demo() {
           </Badge>
 
           <div className="flex items-center gap-2">
-            {/* Prominent Direct Button to Demo 2 */}
+            {/* Direct Button to Demo 2 */}
             <Link
               to="/demo/room"
               className="nc-focus inline-flex h-8 shrink-0 items-center gap-1.5 rounded-xl bg-accent-400 px-3 text-xs font-semibold text-ink-900 transition-all hover:bg-accent-300 shadow-md shadow-accent-400/25 active:scale-95"
             >
               <Boxes className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Directly Move to Demo 2</span>
+              <span>Move to Demo 2</span>
               <ArrowRight className="h-3 w-3" aria-hidden="true" />
             </Link>
 
@@ -191,41 +179,6 @@ export default function Demo() {
         >
           {canAddMoreStudents ? "Add student" : "Room full"}
         </Button>
-        <span className="mx-0.5 hidden h-6 w-px bg-ink-600 sm:block" aria-hidden="true" />
-
-        {/* Students own their language choice. These pills simulate each
-            learner switching her own caption and voice language, so the host
-            never overrides a student's language. */}
-        {transport.students.map((student) => {
-          const languages = meetingLanguagePool(
-            transport.meeting.availableLanguages,
-            studentLanguages[student.id] ?? student.preferredLanguage,
-          );
-          return (
-            <label
-              key={student.id}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-800/70 px-2 py-1 text-2xs text-ivory-200"
-            >
-              <span className="font-medium">{student.displayName.split(" ")[0]} switches</span>
-              <select
-                value={studentLanguages[student.id] ?? student.preferredLanguage}
-                onChange={(event) => {
-                  const language = event.target.value as LanguageCode;
-                  transport.setStudentLanguage(student.id, language);
-                  setStudentLanguages((current) => ({ ...current, [student.id]: language }));
-                }}
-                aria-label={`Simulate ${student.displayName} switching her own caption and voice language`}
-                className="nc-focus max-w-[110px] rounded bg-ink-900 px-1 py-0.5 text-2xs text-ivory-50"
-              >
-                {languages.map((language) => (
-                  <option key={language} value={language} lang={language}>
-                    {languageNativeName(language)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          );
-        })}
         {students.length > 2 ? (
           <Button
             size="sm"
@@ -239,17 +192,6 @@ export default function Demo() {
             Remove latest
           </Button>
         ) : null}
-
-        {/* Control Strip Next Demo Action */}
-        <div className="ml-auto shrink-0 pl-2">
-          <Link
-            to="/demo/room"
-            className="nc-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-accent-400/40 bg-accent-400/10 px-3 text-xs font-semibold text-accent-300 transition-colors hover:bg-accent-400/20"
-          >
-            <span>Demo 2 (3D Room)</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
       </div>
 
       {/* the classroom itself - the identical shell from the live room */}
