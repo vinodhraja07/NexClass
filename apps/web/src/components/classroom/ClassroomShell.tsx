@@ -135,10 +135,31 @@ export function ClassroomShell({
     ),
   });
 
+  const isOriginalAudioMode =
+    prefs.preferences.voiceMode === "original" ||
+    prefs.preferences.voiceMode === "original-captions";
+
+  // In simulated / demo mode, or when in original mode without live peer audio tracks,
+  // the speaker's original language (e.g. "en") is played by useVoicePlayback.
+  // In translated mode, the student's chosen translation language is played.
+  const activeVoiceLanguage: LanguageCode = isOriginalAudioMode
+    ? speakerLanguage
+    : classroom.voiceLanguage;
+
+  const hasRemoteAudioTracks = Object.values(peers.peers).some(
+    (p) => p.stream && p.stream.getAudioTracks().length > 0,
+  );
+
+  const isVoiceEnabled =
+    prefs.preferences.voiceMode === "translated" ||
+    simulated ||
+    transport.kind === "demo" ||
+    (isOriginalAudioMode && !hasRemoteAudioTracks);
+
   const voice = useVoicePlayback({
     segments: classroom.segments,
-    voiceLanguage: classroom.voiceLanguage,
-    enabled: prefs.preferences.voiceMode === "translated",
+    voiceLanguage: activeVoiceLanguage,
+    enabled: isVoiceEnabled,
     muted: prefs.preferences.voiceMuted,
     volume: prefs.preferences.voiceVolume,
     active: voiceActive ?? true,
@@ -350,7 +371,11 @@ export function ClassroomShell({
             localStream={classroom.localStream}
             screenStream={classroom.screenStream}
             activeSpeakerId={peers.activeSpeakerId}
-            audioMuted={prefs.preferences.voiceMode === "translated"}
+            audioMuted={
+              prefs.preferences.voiceMode === "translated" ||
+              simulated ||
+              transport.kind === "demo"
+            }
             className="h-full w-full flex-1"
           />
 

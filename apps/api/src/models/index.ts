@@ -339,3 +339,11 @@ export const ChatMessageModel = registerModel<ChatMessageDoc>("ChatMessage", cha
   message: "",
   createdAt: new Date(),
 }));
+
+export {
+  RecordingModel,
+  toRecordingPublic,
+  type RecordingDoc,
+  type RecordingPublic,
+} from "./recording";
+

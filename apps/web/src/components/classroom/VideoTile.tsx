@@ -108,6 +108,19 @@ export function VideoTile({
           aria-label={`${participant.displayName} video`}
           className="absolute inset-0 h-full w-full object-cover"
         />
+      ) : stream && !isSelf ? (
+        /* Hidden audio element ensuring incoming microphone audio continues when camera is off */
+        <audio
+          ref={(el) => {
+            if (el && el.srcObject !== stream) {
+              el.srcObject = stream;
+              void el.play().catch(() => undefined);
+            }
+          }}
+          autoPlay
+          playsInline
+          muted={audioMuted}
+        />
       ) : null}
 
       {/* Camera-off Avatar Canvas */}

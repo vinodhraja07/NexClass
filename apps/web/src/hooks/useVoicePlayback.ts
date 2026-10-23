@@ -123,12 +123,29 @@ export function useVoicePlayback({
   const enabledRef = useRef(enabled);
   const activeRef = useRef(active);
 
+  const stopCurrent = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  }, []);
+
   useEffect(() => {
     segmentsRef.current = segments;
   }, [segments]);
   useEffect(() => {
-    languageRef.current = voiceLanguage;
-  }, [voiceLanguage]);
+    if (languageRef.current !== voiceLanguage) {
+      languageRef.current = voiceLanguage;
+      // When switching languages (e.g. original <-> translated), stop previous speech immediately
+      stopCurrent();
+      playingRef.current = false;
+      queueRef.current = [];
+    }
+  }, [voiceLanguage, stopCurrent]);
   useEffect(() => {
     mutedRef.current = muted;
   }, [muted]);
@@ -141,17 +158,6 @@ export function useVoicePlayback({
   useEffect(() => {
     activeRef.current = active;
   }, [active]);
-
-  const stopCurrent = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-    }
-  }, []);
 
   const playSegment = useCallback(
     async (segment: CaptionSegmentPayload): Promise<{
