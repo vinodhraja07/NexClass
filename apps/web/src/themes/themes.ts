@@ -1,9 +1,9 @@
 export type ThemeId =
+  | "obsidian-mint"
   | "monsoon-aurora"
   | "earth-sand"
   | "forest-moderne"
-  | "ocean-blue"
-  | "midnight-purple";
+  | "ocean-blue";
 
 export interface ThemeColors {
   background: string;
@@ -44,10 +44,43 @@ export interface ThemeDefinition {
 }
 
 export const THEMES: Record<ThemeId, ThemeDefinition> = {
+  "obsidian-mint": {
+    id: "obsidian-mint",
+    name: "Obsidian & Mint",
+    tagline: "Original Signature · Emerald Mint & Obsidian",
+    personality: ["Signature", "Futuristic", "Luminous", "High-Contrast", "Calm"],
+    description: "The classic NexClass signature: deep obsidian black with luminous emerald mint and lime accents.",
+    colors: {
+      background: "#070B14",
+      backgroundSecondary: "#0A101C",
+      surface: "#0E1524",
+      surfaceElevated: "#172136",
+      primary: "#2EE0A8",
+      secondaryAccent: "#D3F25C",
+      aiAccent: "#5FEAB9",
+      textPrimary: "#FBF8F2",
+      textSecondary: "#A79C8B",
+      border: "#1F2C45",
+      muted: "#121A2C",
+    },
+    rgb: {
+      background: "7 11 20",
+      backgroundSecondary: "10 16 28",
+      surface: "14 21 36",
+      surfaceElevated: "23 33 54",
+      primary: "46 224 168",
+      secondaryAccent: "211 242 92",
+      aiAccent: "95 234 185",
+      textPrimary: "251 248 242",
+      textSecondary: "167 156 139",
+      border: "31 44 69",
+      muted: "18 26 44",
+    },
+  },
   "monsoon-aurora": {
     id: "monsoon-aurora",
     name: "Monsoon Aurora",
-    tagline: "Default · Oceanic Atmospheric",
+    tagline: "Atmospheric Deep Cyan",
     personality: ["Premium", "Futuristic", "Calm", "Intelligent", "Modern"],
     description: "Atmospheric deep navy with luminous cyan and warm amber accents.",
     colors: {
@@ -80,9 +113,9 @@ export const THEMES: Record<ThemeId, ThemeDefinition> = {
   "earth-sand": {
     id: "earth-sand",
     name: "Earth Sand",
-    tagline: "Warm Clay & Dune",
-    personality: ["Minimal", "Warm", "Natural", "Sophisticated", "Comfortable"],
-    description: "Natural terracotta clay and warm stone for comfortable extended reading.",
+    tagline: "Warm Organic Terracotta",
+    personality: ["Warm", "Approachable", "Human", "Grounded", "Harmonious"],
+    description: "Earthy dark espresso base with warm terracotta and golden sand accents.",
     colors: {
       background: "#1A1714",
       backgroundSecondary: "#211D19",
@@ -113,9 +146,9 @@ export const THEMES: Record<ThemeId, ThemeDefinition> = {
   "forest-moderne": {
     id: "forest-moderne",
     name: "Forest Moderne",
-    tagline: "Organic Sage & Moss",
-    personality: ["Natural", "Calm", "Balanced", "Focused", "Organic"],
-    description: "Restrained organic woodland greens providing serene visual focus.",
+    tagline: "Nordic Botanical Emerald",
+    personality: ["Balanced", "Deep", "Organic", "Sophisticated", "Refined"],
+    description: "Deep pine forest darks with sage highlights and muted bronze accents.",
     colors: {
       background: "#101A16",
       backgroundSecondary: "#17231D",
@@ -146,7 +179,7 @@ export const THEMES: Record<ThemeId, ThemeDefinition> = {
   "ocean-blue": {
     id: "ocean-blue",
     name: "Ocean Blue",
-    tagline: "Scientific Maritime Slate",
+    tagline: "Precision Slate Cobalt",
     personality: ["Professional", "Clean", "Trustworthy", "Scientific", "Focused"],
     description: "Deep oceanic slate and cobalt for clean, technical, high-precision clarity.",
     colors: {
@@ -176,44 +209,11 @@ export const THEMES: Record<ThemeId, ThemeDefinition> = {
       muted: "23 39 53",
     },
   },
-  "midnight-purple": {
-    id: "midnight-purple",
-    name: "Midnight Purple",
-    tagline: "Twilight Lavender & Amethyst",
-    personality: ["Elegant", "Immersive", "Premium", "Creative", "Intelligent"],
-    description: "Thoughtful deep violet and refined muted lavender for deep immersion.",
-    colors: {
-      background: "#12111E",
-      backgroundSecondary: "#1B192A",
-      surface: "#262338",
-      surfaceElevated: "#302D45",
-      primary: "#8980BD",
-      secondaryAccent: "#A89ACF",
-      aiAccent: "#807A9D",
-      textPrimary: "#EFEDF5",
-      textSecondary: "#B8B3CB",
-      border: "#403B56",
-      muted: "#201E31",
-    },
-    rgb: {
-      background: "18 17 30",
-      backgroundSecondary: "27 25 42",
-      surface: "38 35 56",
-      surfaceElevated: "48 45 69",
-      primary: "137 128 189",
-      secondaryAccent: "168 154 207",
-      aiAccent: "128 122 157",
-      textPrimary: "239 237 245",
-      textSecondary: "184 179 203",
-      border: "64 59 86",
-      muted: "32 30 49",
-    },
-  },
 };
 
 export const THEME_LIST: ThemeDefinition[] = Object.values(THEMES);
 
-export const DEFAULT_THEME_ID: ThemeId = "midnight-purple";
+export const DEFAULT_THEME_ID: ThemeId = "obsidian-mint";
 
 export function isThemeId(value: unknown): value is ThemeId {
   return typeof value === "string" && value in THEMES;

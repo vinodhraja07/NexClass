@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "motion/react";
 import {
   Boxes,
   Check,
@@ -17,6 +17,7 @@ import {
   LogOut,
   Mic,
   MonitorUp,
+  Palette,
   Play,
   Plus,
   PlusCircle,
@@ -46,8 +47,9 @@ import {
   storeGuestSession,
   storeRecentMeeting,
 } from "@/components/dashboard/guestSession";
-
-type DashboardTab = "classrooms" | "create" | "transcripts";
+import { DashboardSidebar, type DashboardView } from "@/components/dashboard/DashboardSidebar";
+import { DashboardMobileHeader } from "@/components/dashboard/DashboardMobileHeader";
+import { useTheme } from "@/themes/ThemeProvider";
 
 function greetingFor(date: Date): string {
   const hour = date.getHours();
@@ -62,28 +64,45 @@ function firstName(fullName: string): string {
 
 export default function Dashboard() {
   const { user, logout, updateLanguage } = useAuth();
+  const { theme, setTheme, allThemes } = useTheme();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const reduced = useReducedMotion() ?? false;
 
-  const tabParam = searchParams.get("tab") as DashboardTab | null;
-  const [activeTab, setActiveTabState] = useState<DashboardTab>(
-    tabParam && ["classrooms", "create", "transcripts"].includes(tabParam)
-      ? tabParam
-      : "classrooms",
-  );
+  // Sidebar responsive rail state backed by localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem("nexclass_sidebar_collapsed") === "true";
+  });
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-  const setActiveTab = useCallback(
-    (tab: DashboardTab) => {
-      setActiveTabState(tab);
+  // Preference presets state
+  const [prefAutoCaptions, setPrefAutoCaptions] = useState(true);
+  const [prefAutoTTS, setPrefAutoTTS] = useState(true);
+  const [updatingLang, setUpdatingLang] = useState(false);
+
+  // Migrate URL query parameter from ?tab= to ?view= with backward compatibility
+  const rawViewParam = (searchParams.get("view") || searchParams.get("tab")) as DashboardView | null;
+  const initialView: DashboardView = useMemo(() => {
+    if (rawViewParam && ["classrooms", "create", "transcripts", "preferences"].includes(rawViewParam)) {
+      return rawViewParam;
+    }
+    return "classrooms";
+  }, [rawViewParam]);
+
+  const [activeView, setActiveViewState] = useState<DashboardView>(initialView);
+
+  const handleSelectView = useCallback(
+    (view: DashboardView) => {
+      setActiveViewState(view);
       setSearchParams(
         (prev) => {
           const next = new URLSearchParams(prev);
-          if (tab === "classrooms") {
-            next.delete("tab");
+          if (view === "classrooms") {
+            next.delete("view");
           } else {
-            next.set("tab", tab);
+            next.set("view", view);
           }
+          next.delete("tab"); // Clean up legacy tab param
           return next;
         },
         { replace: true },
@@ -92,12 +111,18 @@ export default function Dashboard() {
     [setSearchParams],
   );
 
-  // Sync tab with search params
+  // Synchronize view if URL search parameters change externally
   useEffect(() => {
-    if (tabParam && ["classrooms", "create", "transcripts"].includes(tabParam)) {
-      setActiveTabState(tabParam);
+    const current = (searchParams.get("view") || searchParams.get("tab")) as DashboardView | null;
+    if (current && ["classrooms", "create", "transcripts", "preferences"].includes(current)) {
+      setActiveViewState(current);
+    } else if (!current) {
+      setActiveViewState("classrooms");
     }
-  }, [tabParam]);
+  }, [searchParams]);
+
+  const setActiveTab = handleSelectView;
+  const activeTab = activeView;
 
   const isTeacher = user?.role === "teacher";
 
@@ -397,132 +422,66 @@ export default function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="relative min-h-screen bg-ink-900 overflow-hidden text-ivory-100 flex flex-col justify-between">
-      <div className="pointer-events-none fixed inset-0 bg-mesh-dark opacity-60" aria-hidden="true" />
+    <MotionConfig reducedMotion="user">
+      <div className="relative min-h-screen bg-ink-950 overflow-hidden text-ivory-100 flex">
+        <div className="pointer-events-none fixed inset-0 bg-mesh-dark opacity-60" aria-hidden="true" />
 
-      {/* Ambient Breathing Background Glow Orbs */}
-      <motion.div
-        animate={
-          reduced
-            ? undefined
-            : {
-                scale: [1, 1.18, 0.96, 1],
-                x: ["-45%", "-40%", "-48%", "-45%"],
-                opacity: [0.15, 0.28, 0.18, 0.15],
-              }
-        }
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none fixed -top-32 left-1/2 h-[520px] w-[750px] rounded-full bg-gradient-to-tr from-accent-400/20 via-lime-400/12 to-teal-500/10 blur-[140px]"
-        aria-hidden="true"
-      />
+        {/* Ambient Breathing Background Glow Orbs */}
+        {!reduced && (
+          <motion.div
+            animate={{
+              scale: [1, 1.18, 0.96, 1],
+              x: ["-45%", "-40%", "-48%", "-45%"],
+              opacity: [0.15, 0.28, 0.18, 0.15],
+            }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            className="pointer-events-none fixed -top-32 left-1/2 h-[520px] w-[750px] rounded-full bg-gradient-to-tr from-accent-400/20 via-lime-400/12 to-teal-500/10 blur-[140px]"
+            aria-hidden="true"
+          />
+        )}
 
-      {/* Main Top Header */}
-      <header className="relative sticky top-0 z-30 border-b border-ink-700/70 bg-ink-900/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-3.5 sm:px-8">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="nc-focus inline-flex items-center gap-2.5 rounded-lg text-ivory-50">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent-400/15 text-accent-300">
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <span className="font-display text-[15px] font-semibold tracking-tight">NexClass</span>
-            </Link>
-            <Badge tone={isTeacher ? "accent" : "info"}>
-              {isTeacher ? "Teacher" : "Student"}
-            </Badge>
-          </div>
+        {/* Sleek Left Sidebar Navigation (Desktop Rail & Mobile Slide-Over Drawer) */}
+        <DashboardSidebar
+          currentView={activeView}
+          onSelectView={handleSelectView}
+          user={user}
+          activeClassroomsCount={upcoming.length}
+          completedClassroomsCount={allRecent.length}
+          serverStatus={provider}
+          serverLoading={providerLoading}
+          serverError={providerError}
+          onRefreshServerStatus={loadProvider}
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={() => {
+            setSidebarCollapsed((prev) => {
+              const next = !prev;
+              localStorage.setItem("nexclass_sidebar_collapsed", String(next));
+              return next;
+            });
+          }}
+          isMobileOpen={mobileDrawerOpen}
+          onCloseMobile={() => setMobileDrawerOpen(false)}
+          onLogout={handleSignOut}
+        />
 
-          <div className="hidden md:block">
-            <p className="font-display text-sm font-semibold tracking-tight text-ivory-50">
-              {greeting}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" onClick={() => navigate("/demo")}>
-              Try Demo
-            </Button>
-            {isTeacher && (
-              <Button
-                size="sm"
-                icon={<Plus className="h-3.5 w-3.5" aria-hidden="true" />}
-                onClick={() => setActiveTab("create")}
-              >
-                New Meeting
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              icon={<LogOut className="h-3.5 w-3.5" aria-hidden="true" />}
-            >
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Sub-Navigation Tabs Bar */}
-      <nav aria-label="Dashboard views" className="relative sticky top-[57px] z-20 border-b border-ink-700/60 bg-ink-900/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1400px] items-center gap-1 sm:gap-2 px-5 sm:px-8">
-          <button
-            type="button"
-            onClick={() => setActiveTab("classrooms")}
-            className={clsx(
-              "nc-focus relative flex items-center gap-2 py-3 px-3 text-xs sm:text-sm font-semibold transition-all border-b-2 cursor-pointer select-none",
-              activeTab === "classrooms"
-                ? "border-accent-400 text-accent-300"
-                : "border-transparent text-ivory-400 hover:text-ivory-200 hover:border-ink-600",
-            )}
-          >
-            <LayoutGrid className="h-4 w-4" />
-            <span>My Classrooms</span>
-            {upcoming.length > 0 && (
-              <span className="rounded-full bg-accent-400/20 px-2 py-0.5 font-mono text-3xs text-accent-300 font-bold">
-                {upcoming.length} active
-              </span>
-            )}
-          </button>
-
-          {isTeacher && (
-            <button
-              type="button"
-              onClick={() => setActiveTab("create")}
-              className={clsx(
-                "nc-focus relative flex items-center gap-2 py-3 px-3 text-xs sm:text-sm font-semibold transition-all border-b-2 cursor-pointer select-none",
-                activeTab === "create"
-                  ? "border-accent-400 text-accent-300"
-                  : "border-transparent text-ivory-400 hover:text-ivory-200 hover:border-ink-600",
-              )}
-            >
-              <PlusCircle className="h-4 w-4" />
-              <span>Create Classroom</span>
-            </button>
+        {/* Main Content Area with Responsive Rail Offset */}
+        <div
+          className={clsx(
+            "flex-1 flex flex-col min-w-0 transition-[margin] duration-300 ease-[0.2,0.8,0.2,1]",
+            sidebarCollapsed ? "lg:ml-20" : "lg:ml-64",
           )}
+        >
+          {/* Mobile Sticky Top Header (<1024px) */}
+          <DashboardMobileHeader
+            onOpenMobile={() => setMobileDrawerOpen(true)}
+            user={user}
+            isTeacher={isTeacher}
+            activeView={activeView}
+            onSelectView={handleSelectView}
+          />
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("transcripts")}
-            className={clsx(
-              "nc-focus relative flex items-center gap-2 py-3 px-3 text-xs sm:text-sm font-semibold transition-all border-b-2 cursor-pointer select-none",
-              activeTab === "transcripts"
-                ? "border-accent-400 text-accent-300"
-                : "border-transparent text-ivory-400 hover:text-ivory-200 hover:border-ink-600",
-            )}
-          >
-            <FileText className="h-4 w-4" />
-            <span>Transcripts &amp; History</span>
-            {allRecent.length > 0 && (
-              <span className="rounded-full bg-ink-700/80 px-2 py-0.5 font-mono text-3xs text-ivory-300">
-                {allRecent.length}
-              </span>
-            )}
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Content Area based on Active Tab */}
-      <main className="relative flex-1 mx-auto w-full max-w-[1400px] px-5 py-6 sm:px-8 sm:py-8">
+          {/* Focused View Main Container */}
+          <main className="relative flex-1 mx-auto w-full max-w-[1400px] px-4 sm:px-8 py-6 sm:py-8">
         {offline && (
           <ErrorNotice
             className="mb-5"
@@ -1210,12 +1169,194 @@ export default function Dashboard() {
             </div>
           </motion.div>
         )}
+
+        {/* ==================================================================== */}
+        {/* TAB 4: PREFERENCES & LANGUAGES                                       */}
+        {/* ==================================================================== */}
+        {activeView === "preferences" && (
+          <motion.div
+            key="preferences-tab"
+            initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            transition={{ duration: 0.22 }}
+            className="space-y-6"
+          >
+            <div className="nc-glass-panel p-6 shadow-panel">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-ink-700/60">
+                <div>
+                  <p className="nc-eyebrow text-accent-300">User Configuration</p>
+                  <h2 className="mt-1 font-display text-xl font-bold text-ivory-50">
+                    Preferences &amp; Language Presets
+                  </h2>
+                  <p className="text-xs text-ivory-300 mt-1">
+                    Manage your multilingual defaults, speech recognition language, and visual theme.
+                  </p>
+                </div>
+              </div>
+
+              {/* Grid of Preference Sections */}
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* 1. Preferred Spoken & UI Language */}
+                <div className="nc-glass-card p-5 space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent-400/15 text-accent-300">
+                      <Languages className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <h3 className="font-display text-sm font-semibold text-ivory-100">
+                        Spoken &amp; Preferred Language
+                      </h3>
+                      <p className="text-3xs text-ivory-400">
+                        Default speech recognition and native caption language
+                      </p>
+                    </div>
+                  </div>
+
+                  <LanguageChips
+                    mode="single"
+                    value={[user.preferredLanguage || "en"]}
+                    onChange={async (next) => {
+                      if (next[0]) {
+                        setUpdatingLang(true);
+                        try {
+                          await updateLanguage(next[0]);
+                        } finally {
+                          setUpdatingLang(false);
+                        }
+                      }
+                    }}
+                    label="Preferred language"
+                    description="Select which Indic language or English should be prioritized for your captions and speech translation:"
+                  />
+                  {updatingLang && (
+                    <p className="text-2xs text-accent-300 flex items-center gap-1.5 animate-pulse">
+                      <RefreshCw className="h-3 w-3 animate-spin" /> Saving language preference...
+                    </p>
+                  )}
+                </div>
+
+                {/* 2. Visual Theme Engine (Signature Monsoon Aurora Default) */}
+                <div className="nc-glass-card p-5 space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent-400/15 text-accent-300">
+                      <Palette className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <h3 className="font-display text-sm font-semibold text-ivory-100">
+                        Appearance &amp; Dark Theme
+                      </h3>
+                      <p className="text-3xs text-ivory-400">
+                        Signature Monsoon Aurora oceanic palette
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5 pt-1">
+                    {allThemes.map((t) => {
+                      const isSelected = theme === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setTheme(t.id)}
+                            className={clsx(
+                              "nc-focus flex flex-col items-start gap-1.5 rounded-xl border p-3 text-left transition-all",
+                              isSelected
+                                ? "border-accent-400 bg-accent-400/15 shadow-[0_0_16px_rgba(66,220,197,0.2)]"
+                                : "border-ink-700/60 bg-ink-900/40 hover:border-ink-600 hover:bg-ink-850/60",
+                            )}
+                          >
+                            <div className="flex w-full items-center justify-between">
+                              <span className="text-xs font-semibold text-ivory-100">{t.name}</span>
+                              {isSelected && <Check className="h-3.5 w-3.5 text-accent-300" />}
+                            </div>
+                            <span className="text-3xs text-ivory-400 line-clamp-1">{t.description}</span>
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* 3. In-Classroom Automation Presets */}
+                <div className="nc-glass-card p-5 space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent-400/15 text-accent-300">
+                      <Settings className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <h3 className="font-display text-sm font-semibold text-ivory-100">
+                        Classroom Defaults
+                      </h3>
+                      <p className="text-3xs text-ivory-400">
+                        Default behavior when entering live meetings
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-1">
+                    <Toggle
+                      id="pref-auto-captions"
+                      checked={prefAutoCaptions}
+                      onChange={setPrefAutoCaptions}
+                      label="Auto-enable live captions"
+                      description="Display live synchronized subtitles immediately upon entering any classroom"
+                    />
+                    <Toggle
+                      id="pref-auto-tts"
+                      checked={prefAutoTTS}
+                      onChange={setPrefAutoTTS}
+                      label="Auto-play translated voice"
+                      description="Synthesize foreign teacher speech into your preferred language using neural TTS"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Profile & Identity Summary */}
+                <div className="nc-glass-card p-5 space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent-400/15 text-accent-300">
+                      <Users className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <h3 className="font-display text-sm font-semibold text-ivory-100">
+                        Account &amp; Role Identity
+                      </h3>
+                      <p className="text-3xs text-ivory-400">
+                        Your verified educational credentials
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5 pt-1 text-xs">
+                    <div className="flex items-center justify-between py-1.5 border-b border-ink-700/50">
+                      <span className="text-ivory-400">Full Name</span>
+                      <span className="font-semibold text-ivory-100">{user.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-1.5 border-b border-ink-700/50">
+                      <span className="text-ivory-400">Email Address</span>
+                      <span className="font-mono text-2xs text-ivory-200">{user.email}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-1.5">
+                      <span className="text-ivory-400">Classroom Role</span>
+                      <Badge tone={isTeacher ? "accent" : "info"}>
+                        {isTeacher ? "Teacher (Host)" : "Student (Participant)"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </main>
 
       {/* Clean Global Footer */}
-      <footer className="relative py-4 border-t border-ink-700/40 text-center text-3xs text-ivory-500 bg-ink-900/80">
+      <footer className="relative py-4 border-t border-ink-700/40 text-center text-3xs text-ivory-500 bg-ink-950/80">
         NexClass &copy; {new Date().getFullYear()} · Real-Time Multilingual Classrooms
       </footer>
     </div>
+  </div>
+</MotionConfig>
   );
 }

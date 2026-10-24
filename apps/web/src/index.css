@@ -82,6 +82,36 @@
     @apply border-b border-ink-600/60;
   }
 
+  /* Dark Glassmorphic Panels */
+  .nc-glass-panel {
+    @apply bg-ink-900/70 border border-ink-700/60 rounded-2xl backdrop-blur-xl shadow-[0_16px_40px_-16px_rgba(0,0,0,0.65),inset_0_1px_0_0_rgba(255,255,255,0.06)];
+  }
+
+  /* Interactive Glass Cards with Specular Highlight and Subtle Hover Lift */
+  .nc-glass-card {
+    @apply bg-ink-850/50 border border-ink-700/50 rounded-2xl backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.05)] transition-[border-color,background-color,box-shadow] duration-200 hover:border-accent-400/40 hover:bg-ink-850/75 hover:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.75),inset_0_1px_0_0_rgba(255,255,255,0.08)];
+  }
+
+  /* Sleek Left Sidebar Glass */
+  .nc-glass-sidebar {
+    @apply bg-ink-950/80 border-r border-ink-700/60 backdrop-blur-2xl shadow-[4px_0_24px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.06)];
+  }
+
+  /* Mobile Slide-Over Drawer Glass */
+  .nc-glass-drawer {
+    @apply bg-ink-950/95 border-r border-ink-700/70 backdrop-blur-2xl shadow-[8px_0_40px_rgba(0,0,0,0.75),inset_0_1px_0_0_rgba(255,255,255,0.06)];
+  }
+
+  /* Neon Emerald Live Meeting Glow */
+  .nc-live-glow {
+    @apply border-emerald-400/40 bg-emerald-400/[0.04] shadow-[0_0_24px_-4px_rgba(46,224,168,0.22),inset_0_1px_0_0_rgba(46,224,168,0.12)];
+  }
+
+  /* Signature Mint/Cyan Action Focus Glow */
+  .nc-accent-glow {
+    @apply border-accent-400/40 bg-accent-400/[0.04] shadow-[0_0_24px_-4px_rgba(66,220,197,0.25),inset_0_1px_0_0_rgba(66,220,197,0.15)];
+  }
+
   .nc-focus {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900;
   }
@@ -109,7 +139,7 @@
   }
 }
 
-/* Indic Script Typography & Matra Clipping Prevention (Task 4) */
+/* Indic Script Typography & Matra Clipping Prevention (Task 4 & 5) */
 [lang="hi"],
 [lang="mr"],
 [lang="ta"],
@@ -117,9 +147,11 @@
 [lang="or"],
 .font-indic {
   font-family: "Noto Sans Devanagari", "Noto Sans Tamil", "Noto Sans Bengali", "Noto Sans Oriya", "Nirmala UI", sans-serif;
-  line-height: 1.6 !important;
+  line-height: 1.65 !important;
   text-rendering: optimizeLegibility;
   font-feature-settings: "kern", "liga", "clig";
+  padding-top: 0.05em;
+  padding-bottom: 0.05em;
 }
 
 

@@ -84,7 +84,7 @@ export function LanguageChips({
                   transition={{ type: "spring", stiffness: 420, damping: 34 }}
                 />
               ) : null}
-              <span className="relative text-[13px] font-medium leading-none">
+              <span className="relative text-[13px] font-medium font-indic leading-relaxed">
                 {language.nativeName}
               </span>
               <span className="relative text-[10px] font-semibold uppercase tracking-[0.12em] text-ivory-400">

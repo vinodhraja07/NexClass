@@ -141,7 +141,7 @@ export function VideoTile({
       {/* Camera-off Avatar Canvas */}
       <div
         className={clsx(
-          "absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-[#262338]/80 to-[#12111E]/95",
+          "absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-ink-800/80 to-ink-950/95",
           cameraOn ? "pointer-events-none opacity-0" : "opacity-100",
         )}
       >

@@ -1,94 +1,70 @@
-# Project: NexClass Production Hardening & Feature Hardening
+# Project: NexClass Premium Dashboard Command Center & Left-Sidebar Navigation
 
 ## Architecture
 NexClass is an AI-powered multilingual virtual classroom platform architected as a TypeScript monorepo with `@nexclass/api` (Express, Socket.io, Mongoose, ioredis, WebRTC mesh signaling) and `@nexclass/web` (React 18, Vite, Tailwind CSS, Motion/React, Web Audio API, MediaRecorder).
 
-- **Data Flow**:
-  - Web client connects to API via REST (JSON & binary stream endpoints) and Socket.io realtime transport.
-  - Realtime state: room events, participant state, WebRTC offer/answer/ICE candidate routing, multilingual live captions, chat messages, and recording state broadcast.
-  - Speech synthesis: Multilingual translation pipeline with zero-key phonetic Unicode fallback for Odia (`odiaToDevanagariPhonetic` mapped to Devanagari Hindi Google TTS with in-memory caching).
-  - Recording: Client-side MediaRecorder compositing audio (local mic + remote peer audio + translated TTS audio via Web Audio API) and video (1280x720 canvas stage / screen share with burned-in subtitles), offering instant local download and uploading binary stream to `@nexclass/api` storage.
-  - Deployment: Multi-container production deployment orchestrated via Docker Compose (MongoDB, Redis, API, Nginx Web frontend) with persistent volumes and healthchecks.
+This project phase transforms the NexClass dashboard into a clean, premium, and uncluttered educational command center using a sleek left-sidebar navigation layout with dark glassmorphism, fluid spring motion, and focused responsive views.
+
+- **Theme Palette & Identity (MANDATORY & DEFINITIVE USER DIRECTIVE 2026-10-24T04:11:21Z)**:
+  - User explicitly rejected midnight-purple and any purple/lavender styling.
+  - The exact original signature NexClass palette is **Obsidian Mint**:
+    - **Obsidian Jet Background**: `#070B14` / `#05080F` / `#0A101C`
+    - **Emerald Mint Primary Accent**: `#2EE0A8` / `#5FEAB9`
+    - **Lime Yellow/Green Secondary Accent**: `#D3F25C`
+    - **Warm Ivory Typography**: `#FBF8F2` / `#F4EFE6` / `#A79C8B`
+    - **Border**: `#1F2C45` / `#172136`
+  - `DEFAULT_THEME_ID` is strictly `"obsidian-mint"`.
+  - Tailwind tokens `ink`, `accent`, `lime`, `ivory`, and `signal.live` directly reflect these static hex values.
+- **Navigation & Layout Architecture**:
+  - Replaces the 2-tier horizontal top header with a sleek, collapsible left-sidebar navigation (`DashboardSidebar`).
+  - Brand & user identity: NexClass wordmark with role indicator (`Teacher` / `Student`) and active user profile badge.
+  - 4 Core Navigation Items: `Classrooms` (with real-time active counter pill), `Create Classroom` (quick-action button), `Transcripts & Archive` (past sessions with multilingual badges), `Preferences & Languages` (UI language & caption presets).
+  - Collapsible / Responsive rail: Icon-only collapsed mode (`w-20`) on desktop with floating glass tooltips; smooth slide-over drawer with backdrop blur and escape key dismissal on mobile/tablet (<1024px).
+  - Sidebar Footer: Live WebRTC / STUN / Neural TTS / ASR / Translation server connection status beacon (`api.providerStatus`) with full diagnostics popover and logout trigger.
+  - URL Synchronization: Seamless view switching via `?view=classrooms|create|transcripts|preferences` using `useSearchParams` with zero full-page reloads and layout stability.
+- **Visual Design System**:
+  - Dark glassmorphism with deep velvety dark obsidian backgrounds (`bg-ink-950/90`), translucent panels (`backdrop-blur-xl`), delicate luminous borders (`border-ink-700/60`, `border-accent-400/30`), and subtle specular highlights.
+  - Indic typography: Line-height relaxation (`1.5-1.65`) to prevent clipping on upper matras and lower conjuncts (Hindi, Tamil, Bengali, Marathi, Odia).
+- **Motion & Physics**:
+  - Directional slide and blur cross-fade view transitions wrapped in `<AnimatePresence mode="wait">`.
+  - Staggered cascading entries (`staggerChildren: 0.05s`) for cards, action decks, and metric chips.
+  - Tactile spring micro-interactions (`whileTap={{ scale: 0.97 }}`, `whileHover={{ y: -2 }}`).
+  - Strict accessibility compliance via `<MotionConfig reducedMotion="user">` and `useReducedMotion()`.
+- **Focused Views**:
+  - `ClassroomsView`: Compact Hero Action Deck (Instant 1-Click Meeting launching directly into classroom room, Join by Code with 6-char animated input, Open Demo), Active & Upcoming Classrooms grid, and Recent Sessions drawer.
+  - `CreateClassroomView`: 2-column split configuration with real-time "Meeting Card Preview" updating live as teacher types, language matrix, granular participant permissions, and celebratory post-creation modal with 48px monospace shareable code.
+  - `TranscriptsView`: Search and filter by title, room code, date range, language; multi-language badges; real 1-click "Export TXT" transcript download fetching segments and translations from API; Reopen Session action.
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 1 | Recording Data Model & Storage | Mongoose `Recording` model, disk storage manager in `/app/recordings` with unique IDs | M1 | ORIGINAL_REQUEST §R1 |
-| 2 | Recording Stream Upload Endpoint | `POST /api/meetings/:code/recordings` streaming raw binary WebM/MP4 payload directly to disk | M1 | ORIGINAL_REQUEST §R1 |
-| 3 | Recording List & Stream API | `GET /api/meetings/:code/recordings` and HTTP 206 Partial Content Range streaming | M1 | ORIGINAL_REQUEST §R1 |
-| 4 | Recording Realtime Signaling | Socket.io events `recording:start`, `recording:stop`, `recording:pause`, `recording:resume`, and broadcast `recording:state` | M1 | ORIGINAL_REQUEST §R1, §R4 |
-| 5 | WebRTC Peer Lookup Map | Optimize `peerSockets()` in `realtime/socket.ts` to `O(1)` map lookup for mesh scalability | M1 | Survey Report 1 |
-| 6 | MediaRecorder Compositor Hook | `useMeetingRecording.ts` mixing mic, peer audio, translated TTS audio via Web Audio API, compositing canvas/video stream | M2 | ORIGINAL_REQUEST §R1 |
-| 7 | Instant Local Recording Download | Automatic client-side `.webm` file download upon stopping recording | M2 | ORIGINAL_REQUEST §R1 |
-| 8 | Red REC Header Pill Badge | Animated pulsing red REC pill with elapsed time counter in `ClassroomHeader.tsx` | M2 | ORIGINAL_REQUEST §R4 |
-| 9 | Toolbar Record Button & Modals | Circular Record button in `ClassroomToolbar.tsx` with active indicator and confirmation dialogs | M2 | ORIGINAL_REQUEST §R4 |
-| 10 | MeetSidePanel Recordings Tab | Recordings list in `MeetSidePanel.tsx` Details tab showing completed recording links & downloads | M2 | ORIGINAL_REQUEST §R4 |
-| 11 | Tile Grid Layout Animations | `motion/react` layout springs for tile join, leave, reorder, and pin-to-stage expansion | M3 | ORIGINAL_REQUEST §R3 |
-| 12 | Smooth Active Speaker Cues | Smooth animated audio equalizer wave and subtle accent border transitions without jarring pulse jumps | M3 | ORIGINAL_REQUEST §R3 |
-| 13 | Toolbar Micro-Interactions | Tactile spring clicks (`whileTap`), hover states, and smooth tooltip transitions for circular bottom buttons | M3 | ORIGINAL_REQUEST §R3 |
-| 14 | Floating Captions & Indic Typography | Smooth caption entry transitions, terminology gloss popovers, and Noto Sans Indic font stacks | M3 | ORIGINAL_REQUEST §R3 |
-| 15 | Reduced Motion Compliance | Strict `useReducedMotion()` support across all components disabling spring/scale transformations | M3 | ORIGINAL_REQUEST §R3 |
-| 16 | API Multi-Stage Dockerfile | 3-stage Node 20 Alpine Dockerfile with non-root user `node` and native healthcheck | M4 | ORIGINAL_REQUEST §R2 |
-| 17 | Web Multi-Stage Dockerfile | 2-stage build + Nginx Alpine runner with gzip, SPA routing, 250MB upload limit, and proxy pass | M4 | ORIGINAL_REQUEST §R2 |
-| 18 | Production Docker Compose | Orchestrating MongoDB 7, Redis 7, API, Web with 3 named volumes and healthcheck dependencies | M4 | ORIGINAL_REQUEST §R2 |
-| 19 | Environment Template | Production-ready `.env.example` with security warnings for `JWT_SECRET` and service URLs | M4 | ORIGINAL_REQUEST §R2 |
-| 20 | Multi-Peer Concurrency Simulation | Automated script simulating 8+ concurrent participants joining room, mesh signaling (28 pairs), and 128 chat messages | M5 | ORIGINAL_REQUEST §R5 |
-| 21 | Caption Streaming Fanout Under Load | Verify rapid interim and finalized caption broadcast across 8 concurrent participants without drops | M5 | ORIGINAL_REQUEST §R5 |
-| 22 | Odia TTS Fallback Concurrency & Caching | Stress test zero-key Odia speech synthesis fallback, in-flight promise deduplication, and 150-item FIFO cache boundary | M5 | ORIGINAL_REQUEST §R5 |
-| 23 | Full Vitest & Typecheck Compliance | 100% of Vitest tests pass (`npm test -w @nexclass/api`), `npm run typecheck` passes with 0 errors, `npm run build` succeeds | M6 | ORIGINAL_REQUEST Acceptance Criteria |
+| 1 | Sleek Left Sidebar Navigation | Collapsible left sidebar replacing top tabs, brand & user identity, active counter pills, 4 nav items | M1 | ORIGINAL_REQUEST §R1 |
+| 2 | Responsive Rail & Slide-Over Drawer | Icon-only collapsed desktop rail (`w-20`) with tooltips; mobile/tablet slide-over drawer with backdrop blur & escape dismissal | M1 | ORIGINAL_REQUEST §R1 |
+| 3 | Server Health & Diagnostics Footer | Live WebRTC/STUN/TTS/ASR/Translation server status beacon and logout action in sidebar footer | M1 | ORIGINAL_REQUEST §R1 |
+| 4 | URL Query View Synchronization | Synchronize active view with `?view=classrooms\|create\|transcripts\|preferences` without page reloads | M1 | ORIGINAL_REQUEST §R1, §R5 |
+| 5 | Dark Glassmorphism Design Tokens | `backdrop-blur-xl`, `bg-ink-950/90`, luminous borders, specular inner highlights | M1 | ORIGINAL_REQUEST §R2 |
+| 6 | Obsidian Mint Palette & Theme Default | Set DEFAULT_THEME_ID to obsidian-mint; #070B14 / #2EE0A8 / #D3F25C / #FBF8F2 / #1F2C45 | M1 | User Directive 2026-10-24 |
+| 7 | Indic Typography Legibility | Prevent clipping of matras and conjuncts in language badges and text with relaxed line-height | M1 | ORIGINAL_REQUEST §R2 |
+| 8 | Accessibility & Reduced Motion | Wrap in `MotionConfig reducedMotion="user"`, ensure instant fallback when reduced motion preferred | M1 | ORIGINAL_REQUEST §R3 |
+| 9 | Compact Hero Action Deck | Instant 1-Click Meeting (direct launch to room), Join by Code (6-char animated input), Open Demo | M2 | ORIGINAL_REQUEST §R4 |
+| 10 | Classrooms Glassmorphic Grid | Responsive grid of active & upcoming classrooms with live participant count, enter, copy link, copy code | M2 | ORIGINAL_REQUEST §R4 |
+| 11 | Recent Sessions Quick-Glance Drawer | Collapsible quick-glance drawer of completed sessions with 1-tap jump to Transcripts | M2 | ORIGINAL_REQUEST §R4 |
+| 12 | Create Classroom Form & Controls | Clean card-based config: title, 6 lecture languages, student caption matrix, password, permissions pills | M3 | ORIGINAL_REQUEST §R4 |
+| 13 | Real-Time Meeting Card Live Preview | Interactive card preview updating in real-time as teacher types title, changes language or permissions | M3 | ORIGINAL_REQUEST §R4 |
+| 14 | Celebratory Post-Creation Screen | Large 48px monospace room code, 1-click copy link, direct Enter Classroom action | M3 | ORIGINAL_REQUEST §R4 |
+| 15 | Transcripts Search & Filter | Filter archive by meeting title, room code, date range, and language code | M4 | ORIGINAL_REQUEST §R4 |
+| 16 | Multi-Language Transcript Badges | Visual badges for supported languages (EN, TA, HI, BN, MR, OR) on transcript items | M4 | ORIGINAL_REQUEST §R4 |
+| 17 | Real 1-Click TXT Transcript Export | Download formatted multi-language `.txt` file pulling actual segments and translations from API | M4 | ORIGINAL_REQUEST §R4 |
+| 18 | Reopen Session Action | One-click action to reopen an archived classroom session | M4 | ORIGINAL_REQUEST §R4 |
+| 19 | Preferences & Languages View | Preferred UI language & caption presets management | M4 | ORIGINAL_REQUEST §R1 |
+| 20 | Fluid Spring Motion & View Transitions | Directional slide & cross-fade `<AnimatePresence mode="wait">`, staggered card cascades, tactile spring physics | M5 | ORIGINAL_REQUEST §R3 |
+| 21 | Responsive Layout Hardening & Verification | Verified across mobile (<640px), tablet (640-1024px), desktop (1024-1440px), ultrawide; 0 TypeScript errors; clean production build | M5 | ORIGINAL_REQUEST §R5, Acceptance Criteria |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Backend Recording & Signaling | Features 1, 2, 3, 4, 5 | none | DONE |
-| M2 | Frontend Recording & Meet UI Polish | Features 6, 7, 8, 9, 10 | M1 | DONE |
-| M3 | Advanced UI/UX Animations & Indic Typography | Features 11, 12, 13, 14, 15 | none | DONE |
-| M4 | Docker Production Infrastructure | Features 16, 17, 18, 19 | none | DONE |
-| M5 | Multi-Peer Concurrency Stress Test Suite | Features 20, 21, 22 | M1 | DONE |
-| M6 | Final Verification, Gating & Hardening | Feature 23, full E2E & forensic audit | M1, M2, M3, M4, M5 | DONE |
-
-## Interface Contracts
-
-### Backend ↔ Frontend Recording API
-- `POST /api/meetings/:code/recordings`:
-  - Request headers: `Content-Type: video/webm` (or `video/mp4`), `x-recording-duration: <seconds>`, `x-recording-size: <bytes>`, `x-recorded-by: <participantId>`, `Authorization: Bearer <jwt>`.
-  - Request body: Raw binary media stream.
-  - Response: `{ ok: true, recording: { id: string, meetingCode: string, fileName: string, sizeBytes: number, durationSeconds: number, createdAt: string, downloadUrl: string, streamUrl: string } }`.
-- `GET /api/meetings/:code/recordings`:
-  - Response: `{ ok: true, recordings: RecordingSummary[] }`.
-- `GET /api/meetings/:code/recordings/:id/stream`:
-  - Headers supported: `Range: bytes=start-end`.
-  - Response: HTTP 206 Partial Content (or HTTP 200) with `Content-Range`, `Accept-Ranges: bytes`, `Content-Type: video/webm`.
-- `GET /api/meetings/:code/recordings/:id/download`:
-  - Response: HTTP 200 with `Content-Disposition: attachment; filename="nexclass-recording-..."`.
-
-### Realtime Recording Socket Events
-- Client -> Server:
-  - `recording:start`: `{ meetingCode: string, participantId: string }`
-  - `recording:pause`: `{ meetingCode: string, participantId: string }`
-  - `recording:resume`: `{ meetingCode: string, participantId: string }`
-  - `recording:stop`: `{ meetingCode: string, participantId: string }`
-- Server -> Room Broadcast:
-  - `recording:state`: `{ isRecording: boolean, isPaused: boolean, startedAt: number | null, elapsedSeconds: number, recordedBy: string | null }`
-
-### Concurrency Stress Test Runner Interface
-- Script entrypoint: `scripts/stress-concurrency.ts` (runnable via `npx tsx scripts/stress-concurrency.ts` or `npm run test:stress`).
-- Output: Structured JSON report + console summary reporting peer connection latency, message delivery count, signaling pair count, Odia fallback latency, and memory stability.
-
-## Code Layout
-- `apps/api/src/models/recording.ts`: Mongoose schema & memory store for recordings.
-- `apps/api/src/services/recordings.ts`: Storage file system manager, disk stream writer, HTTP 206 range streamer.
-- `apps/api/src/routes/recordings.ts`: Express routes for recording upload, list, stream, download.
-- `apps/api/src/realtime/socket.ts`: Socket.io handlers for `recording:*` and optimized WebRTC peer map.
-- `apps/web/src/hooks/useMeetingRecording.ts`: MediaRecorder hook with Web Audio API mixer & canvas compositor.
-- `apps/web/src/components/classroom/ClassroomHeader.tsx`: Red REC pill badge with elapsed timer.
-- `apps/web/src/components/classroom/ClassroomToolbar.tsx`: Circular Record button with active state.
-- `apps/web/src/components/classroom/MeetSidePanel.tsx`: Recordings card in Details (`info`) tab.
-- `apps/web/src/components/classroom/Stage.tsx` & `VideoTile.tsx`: Motion layout springs & smooth equalizer.
-- `apps/api/Dockerfile`: 3-stage Node 20 Alpine container.
-- `apps/web/Dockerfile`: 2-stage Vite build + Nginx Alpine container.
-- `apps/web/nginx.conf`: Nginx SPA routing, gzip, 250MB client_max_body_size, proxy pass for `/api` and `/socket.io`.
-- `docker-compose.yml`: Root production Docker Compose service orchestration.
-- `.env.example`: Root environment configuration template.
-- `scripts/stress-concurrency.ts`: Multi-peer concurrency stress testing suite.
-- `apps/api/tests/stress.test.ts`: Vitest test suite integrating stress checks into CI.
+| M1 | Left Sidebar Shell, Responsive Rail & Obsidian Mint Glassmorphism | Features 1, 2, 3, 4, 5, 6, 7, 8 | none | IN_PROGRESS |
+| M2 | Classrooms Command Center View | Features 9, 10, 11 | M1 | PLANNED |
+| M3 | Create Classroom View & Live Preview | Features 12, 13, 14 | M1 | PLANNED |
+| M4 | Transcripts & Archive View with TXT Export | Features 15, 16, 17, 18, 19 | M1 | PLANNED |
+| M5 | Fluid Motion, E2E Integration & Forensic Audit | Features 20, 21 | M2, M3, M4 | PLANNED |

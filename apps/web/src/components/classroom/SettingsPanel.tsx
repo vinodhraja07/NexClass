@@ -101,14 +101,14 @@ export function SettingsPanel({
           <div className="rounded-2xl border border-border/70 bg-surface p-3.5 shadow-xs">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-text-primary">Midnight Purple</p>
-                <p className="text-[11px] text-text-secondary">Official NexClass low-saturation signature palette</p>
+                <p className="text-xs font-semibold text-text-primary">Obsidian & Emerald Mint</p>
+                <p className="text-[11px] text-text-secondary">Official NexClass original signature palette</p>
               </div>
               <div className="flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2.5 py-1">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#12111E] ring-1 ring-border/80" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#262338]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#8980BD]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#A89ACF]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#070B14] ring-1 ring-border/80" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#0E1524]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#2EE0A8]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#D3F25C]" />
                 <span className="ml-1 text-[10px] font-semibold text-primary">Active</span>
               </div>
             </div>
