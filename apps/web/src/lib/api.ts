@@ -3,10 +3,16 @@ import type {
   LanguageCode,
   MeetingPublic,
   ParticipantPublic,
+  TranscriptSegmentPublic,
+  TranslationPublic,
   UserPublic,
 } from "@nexclass/shared";
+import type { RecordingPublic } from "../hooks/useMeetingRecording";
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+const API_BASE =
+  typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL
+    ? String(import.meta.env.VITE_API_URL).replace(/\/$/, "")
+    : "";
 
 export class ApiError extends Error {
   constructor(
@@ -156,7 +162,15 @@ export const api = {
   },
 
   transcripts(code: string) {
-    return request<{ segments: unknown[] }>(`/api/meetings/${code}/transcripts`);
+    return request<{ segments: TranscriptSegmentPublic[] }>(`/api/meetings/${code}/transcripts`);
+  },
+
+  translations(code: string) {
+    return request<{ translations: TranslationPublic[] }>(`/api/meetings/${code}/translations`);
+  },
+
+  recordings(code: string) {
+    return request<{ ok: boolean; recordings: RecordingPublic[] }>(`/api/meetings/${code}/recordings`);
   },
 
   setPreferences(
