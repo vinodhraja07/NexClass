@@ -64,8 +64,8 @@ export default {
           500: "#FF1361",
         },
         signal: {
-          live: "#FF1361", // Neon Rose Live Indicator
-          rec: "#FF1361",
+          "live": "#FF2A7A", // Neon Rose Live Indicator
+          "rec": "var(--danger)",
           mic: "#0284C7", // Cerulean Blue Mic
           muted: "#FF4D6D",
           warn: "#FFB547",
