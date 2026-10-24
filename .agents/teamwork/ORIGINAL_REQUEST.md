@@ -175,3 +175,13 @@ The user explicitly rejected midnight-purple and any purple/lavender styling, an
 - Warm Ivory Typography: #FBF8F2 / #F4EFE6 / #A79C8B
 - Border: #1F2C45 / #172136
 All components, dashboard views, buttons, and layouts must use this exact signature palette. Do not use midnight-purple as default under any circumstances. Ensure DEFAULT_THEME_ID is obsidian-mint and tailwind colors ink/accent/lime/ivory reflect the original static hex values.
+
+
+## Follow-up — 2026-10-24T04:26:15Z
+
+USER DIRECTIVE UPDATE:
+The user explicitly requested changing the primary color design across NexClass to:
+- Canvas / Deep Background: #031211
+- Typography / Text: #E8E4D3
+- Primary Accent: #00AEBB
+All token definitions in tailwind.config.js (ink, ivory, accent), themes.css root variables, button gradients, and dashboard components have been updated to these exact hex values. Ensure all milestone work strictly adheres to #031211, #E8E4D3, and #00AEBB.

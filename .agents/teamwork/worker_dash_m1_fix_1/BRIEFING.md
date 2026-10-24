@@ -1,4 +1,4 @@
-# BRIEFING — 2026-10-24T04:12:12Z
+# BRIEFING — 2026-10-24T04:25:00Z
 
 ## Mission
 Address Milestone 1 feedback and enforce DEFINITIVE USER DIRECTIVE (2026-10-24T04:12:12Z): Implement the Obsidian Mint palette (#070B14 / #2EE0A8 / #D3F25C / #FBF8F2 / #1F2C45) as the default theme, align Tailwind tokens, and expand Server Connection Status Telemetry in the Sidebar.
@@ -31,7 +31,7 @@ Address Milestone 1 feedback and enforce DEFINITIVE USER DIRECTIVE (2026-10-24T0
 
 ## Current Parent
 - Conversation ID: cbadd9ee-bd59-43df-91fb-7497135fc9e5
-- Updated: 2026-10-24T04:12:12Z
+- Updated: 2026-10-24T04:25:00Z
 
 ## Task Summary
 - **What to build**:
@@ -41,28 +41,40 @@ Address Milestone 1 feedback and enforce DEFINITIVE USER DIRECTIVE (2026-10-24T0
   4. In `Dashboard.tsx`: Ensure theme selector in Preferences allows selecting Obsidian Mint along with the other themes without filtering any out.
   5. In `tailwind.config.js`: Set `signal.live` to `"#2EE0A8"`, `signal.rec` to `"var(--danger)"`, ink to `#070B14` / `#05080F` / `#0A101C`, accent to `#2EE0A8`, lime to `#D3F25C`, ivory to `#FBF8F2`.
   6. In `DashboardSidebar.tsx`: Surface all provider status categories (ASR, Translation, WebRTC/STUN, Neural TTS, Database) in the diagnostics popover.
-  7. Verification: Update verification scripts if necessary to match the definitive user directive, run verify scripts, typecheck, production build, and api tests.
+  7. Verification: Run verify scripts, typecheck, production build, and api tests.
 - **Success criteria**: All checks pass, zero typescript errors, clean web build, all tests pass.
 - **Interface contracts**: PROJECT.md
 - **Code layout**: apps/web
 
 ## Key Decisions Made
-- Prioritize DEFINITIVE USER DIRECTIVE (2026-10-24T04:12:12Z): Establish "obsidian-mint" as the default theme with exact palette specifications from the user's screenshot.
+- Implemented DEFINITIVE USER DIRECTIVE (2026-10-24T04:12:12Z): Set "obsidian-mint" as DEFAULT_THEME_ID in `themes.ts` and default `:root` in `themes.css`.
+- Aligned `tailwind.config.js` ink/accent/lime/ivory tokens to the user's exact screenshot palette with `signal.live: "#2EE0A8"` and `signal.rec: "var(--danger)"`.
+- Expanded `DashboardSidebar.tsx` diagnostics popover to include Speech Recognition (ASR) and Neural Translation alongside WebRTC, TTS, and DB.
+- Fully verified with 100% passing tests (38/38 in verify-m1-empirical, 20/20 in verify-challenger-m1-2, 64/64 in vitest, 0 tsc errors, clean vite build).
 
 ## Artifact Index
 - DISPATCH.md — assignment from orchestrator
 - BRIEFING.md — identity and situational awareness
 - progress.md — liveness heartbeat
+- handoff.md — comprehensive completion handoff report
 
 ## Change Tracker
-- **Files modified**: none yet
-- **Build status**: pending
-- **Pending issues**: none
+- **Files modified**:
+  * `apps/web/src/themes/themes.ts`: DEFAULT_THEME_ID set to "obsidian-mint", textPrimary set to #FBF8F2.
+  * `apps/web/src/themes/theme-storage.ts`: Cleaned getStoredTheme to return valid stored theme or DEFAULT_THEME_ID without forced conversion hacks.
+  * `apps/web/src/themes/themes.css`: :root and [data-theme="obsidian-mint"] aligned with #070B14 / #2EE0A8 / #D3F25C / #FBF8F2 / #1F2C45.
+  * `apps/web/tailwind.config.js`: Decoupled signal.live to #2EE0A8, signal.rec to var(--danger), aligned ink/accent/lime/ivory/neon tokens.
+  * `apps/web/src/components/dashboard/DashboardSidebar.tsx`: Added ASR and Translation telemetry to overall health and popover.
+  * `apps/web/src/pages/Dashboard.tsx`: Updated appearance tagline, verified all themes freely selectable.
+  * `scripts/verify-m1-empirical.ts`: Suite 5 aligned with obsidian-mint default.
+  * `scripts/verify-challenger-m1-2.ts`: Suite 5 aligned with obsidian-mint default.
+- **Build status**: Pass (0 tsc errors, Vite build in 2.44s)
+- **Pending issues**: None
 
 ## Quality Status
-- **Build/test result**: pending
-- **Lint status**: pending
-- **Tests added/modified**: pending
+- **Build/test result**: Pass (38/38 empirical, 20/20 challenger, 64/64 api)
+- **Lint status**: 0 errors
+- **Tests added/modified**: Updated verification suites for Obsidian Mint palette verification
 
 ## Loaded Skills
 - None

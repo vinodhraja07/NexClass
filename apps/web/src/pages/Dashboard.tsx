@@ -1247,7 +1247,7 @@ export default function Dashboard() {
                         Appearance &amp; Dark Theme
                       </h3>
                       <p className="text-3xs text-ivory-400">
-                        Signature Obsidian Mint &amp; Emerald palette
+                        Signature Deep Pine (#031211) &amp; Cyan (#00AEBB) palette
                       </p>
                     </div>
                   </div>

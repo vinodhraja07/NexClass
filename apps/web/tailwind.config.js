@@ -6,21 +6,21 @@ export default {
     extend: {
       colors: {
         background: {
-          DEFAULT: "rgb(var(--color-bg, 7 11 20) / <alpha-value>)",
-          secondary: "rgb(var(--color-bg-secondary, 10 16 28) / <alpha-value>)",
+          DEFAULT: "rgb(var(--color-bg, 3 18 17) / <alpha-value>)",
+          secondary: "rgb(var(--color-bg-secondary, 6 26 25) / <alpha-value>)",
         },
         surface: {
-          DEFAULT: "rgb(var(--color-surface, 14 21 36) / <alpha-value>)",
-          elevated: "rgb(var(--color-surface-elevated, 23 33 54) / <alpha-value>)",
-          muted: "rgb(var(--color-muted, 18 26 44) / <alpha-value>)",
+          DEFAULT: "rgb(var(--color-surface, 10 36 34) / <alpha-value>)",
+          elevated: "rgb(var(--color-surface-elevated, 21 60 57) / <alpha-value>)",
+          muted: "rgb(var(--color-muted, 15 47 45) / <alpha-value>)",
         },
         primary: {
-          DEFAULT: "rgb(var(--color-primary, 46 224 168) / <alpha-value>)",
-          accent: "rgb(var(--color-secondary-accent, 211 242 92) / <alpha-value>)",
-          ai: "rgb(var(--color-ai-accent, 95 234 185) / <alpha-value>)",
+          DEFAULT: "rgb(var(--color-primary, 0 174 187) / <alpha-value>)",
+          accent: "rgb(var(--color-secondary-accent, 38 200 214) / <alpha-value>)",
+          ai: "rgb(var(--color-ai-accent, 119 226 235) / <alpha-value>)",
         },
         border: {
-          DEFAULT: "rgb(var(--color-border, 31 44 69) / <alpha-value>)",
+          DEFAULT: "rgb(var(--color-border, 29 77 74) / <alpha-value>)",
         },
         ink: {
           950: "#05080F",
@@ -109,15 +109,15 @@ export default {
         "3xl": "1.5rem",
       },
       boxShadow: {
-        panel: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 24px 60px -30px rgba(0,0,0,0.85)",
+        panel: "0 1px 0 0 rgba(255,255,255,0.05) inset, 0 24px 60px -30px rgba(0,0,0,0.88)",
         lift: "0 30px 80px -40px rgba(0,0,0,0.95)",
-        glow: "0 0 0 1px rgba(46,224,168,0.25), 0 18px 50px -24px rgba(46,224,168,0.45)",
+        glow: "0 0 0 1px rgba(0,174,187,0.35), 0 18px 50px -24px rgba(0,174,187,0.5)",
       },
       backgroundImage: {
         "grid-fade":
-          "linear-gradient(to bottom, rgba(7,11,20,0) 0%, rgba(7,11,20,0.85) 78%, #070B14 100%)",
+          "linear-gradient(to bottom, rgba(3,18,17,0) 0%, rgba(3,18,17,0.85) 78%, #031211 100%)",
         "mesh-dark":
-          "radial-gradient(1200px 600px at 12% -10%, rgba(46,224,168,0.16), transparent 60%), radial-gradient(900px 500px at 88% 0%, rgba(211,242,92,0.10), transparent 62%)",
+          "radial-gradient(1200px 600px at 12% -10%, rgba(0,174,187,0.20), transparent 60%), radial-gradient(900px 500px at 88% 0%, rgba(38,200,214,0.12), transparent 62%)",
       },
       keyframes: {
         "pulse-ring": {

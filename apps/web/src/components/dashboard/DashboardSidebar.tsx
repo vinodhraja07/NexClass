@@ -188,7 +188,7 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                     : "gap-3 px-3.5 py-2.5",
                   isActive
                     ? item.isQuickAction
-                      ? "bg-accent-400/20 text-accent-300 font-semibold shadow-[0_0_20px_-4px_rgba(66,220,197,0.3)] border border-accent-400/40"
+                      ? "bg-accent-400/20 text-accent-300 font-semibold shadow-[0_0_20px_-4px_rgba(0,174,187,0.35)] border border-accent-400/40"
                       : "bg-ink-800/80 text-ivory-50 font-semibold border border-ink-600/70 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
                     : item.isQuickAction
                       ? "bg-accent-400/10 text-accent-300 hover:bg-accent-400/20 hover:text-ivory-50 border border-accent-400/25"
@@ -203,7 +203,7 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                     layoutId={isMobile ? "mobileActiveIndicator" : "desktopActiveIndicator"}
                     className={clsx(
                       "absolute left-0 top-2 bottom-2 w-1 rounded-r-full",
-                      item.isQuickAction ? "bg-accent-400" : "bg-emerald-400",
+                      item.isQuickAction ? "bg-accent-400" : "bg-accent-300",
                     )}
                     transition={{ type: "spring", stiffness: 450, damping: 30 }}
                   />
@@ -299,10 +299,10 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                     <motion.span
                       animate={{ scale: [1, 1.8, 1], opacity: [0.75, 0, 0.75] }}
                       transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute h-full w-full rounded-full bg-emerald-400"
+                      className="absolute h-full w-full rounded-full bg-accent-400"
                     />
                   )}
-                  <span className="relative h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#2EE0A8]" />
+                  <span className="relative h-2 w-2 rounded-full bg-accent-400 shadow-[0_0_8px_#00AEBB]" />
                 </>
               ) : (
                 <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_#FBBF24]" />
