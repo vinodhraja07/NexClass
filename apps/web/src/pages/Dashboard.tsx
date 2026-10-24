@@ -1247,7 +1247,7 @@ export default function Dashboard() {
                         Appearance &amp; Dark Theme
                       </h3>
                       <p className="text-3xs text-ivory-400">
-                        Signature Deep Pine (#031211) &amp; Cyan (#00AEBB) palette
+                        Signature Jet Black, Cerulean Blue (#0284C7) &amp; Neon Rose (#FF2A7A) palette
                       </p>
                     </div>
                   </div>

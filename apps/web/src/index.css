@@ -6,14 +6,14 @@
 
 :root {
   color-scheme: dark;
-  --nc-ink: 3 18 17;
-  --nc-surface: 10 36 34;
-  --nc-raised: 21 60 57;
-  --nc-line: 29 77 74;
-  --nc-accent: 0 174 187;
-  --nc-lime: 38 200 214;
-  --nc-ivory: 232 228 211;
-  --nc-muted: 163 155 124;
+  --nc-ink: 8 9 12;
+  --nc-surface: 18 20 28;
+  --nc-raised: 30 34 48;
+  --nc-line: 40 45 64;
+  --nc-accent: 2 132 199;
+  --nc-lime: 255 42 122;
+  --nc-ivory: 241 245 249;
+  --nc-muted: 148 163 184;
 }
 
 @layer base {
@@ -41,7 +41,7 @@
   }
 
   ::selection {
-    background: rgba(0, 174, 187, 0.28);
+    background: rgba(2, 132, 199, 0.35);
   }
 
   :focus-visible {

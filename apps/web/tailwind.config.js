@@ -6,65 +6,76 @@ export default {
     extend: {
       colors: {
         background: {
-          DEFAULT: "rgb(var(--color-bg, 3 18 17) / <alpha-value>)",
-          secondary: "rgb(var(--color-bg-secondary, 6 26 25) / <alpha-value>)",
+          DEFAULT: "rgb(var(--color-bg, 8 9 12) / <alpha-value>)",
+          secondary: "rgb(var(--color-bg-secondary, 13 14 20) / <alpha-value>)",
         },
         surface: {
-          DEFAULT: "rgb(var(--color-surface, 10 36 34) / <alpha-value>)",
-          elevated: "rgb(var(--color-surface-elevated, 21 60 57) / <alpha-value>)",
-          muted: "rgb(var(--color-muted, 15 47 45) / <alpha-value>)",
+          DEFAULT: "rgb(var(--color-surface, 18 20 28) / <alpha-value>)",
+          elevated: "rgb(var(--color-surface-elevated, 30 34 48) / <alpha-value>)",
+          muted: "rgb(var(--color-muted, 23 26 36) / <alpha-value>)",
         },
         primary: {
-          DEFAULT: "rgb(var(--color-primary, 0 174 187) / <alpha-value>)",
-          accent: "rgb(var(--color-secondary-accent, 38 200 214) / <alpha-value>)",
-          ai: "rgb(var(--color-ai-accent, 119 226 235) / <alpha-value>)",
+          DEFAULT: "rgb(var(--color-primary, 2 132 199) / <alpha-value>)",
+          accent: "rgb(var(--color-secondary-accent, 255 42 122) / <alpha-value>)",
+          ai: "rgb(var(--color-ai-accent, 56 189 248) / <alpha-value>)",
         },
         border: {
-          DEFAULT: "rgb(var(--color-border, 29 77 74) / <alpha-value>)",
+          DEFAULT: "rgb(var(--color-border, 40 45 64) / <alpha-value>)",
         },
+        // Jet Black shades
         ink: {
-          950: "#05080F",
-          900: "#070B14",
-          850: "#0A101C",
-          800: "#0E1524",
-          750: "#121A2C",
-          700: "#172136",
-          600: "#1F2C45",
-          500: "#2A3A57",
+          950: "#050507",
+          900: "#08090C", // Jet Black Canvas Base
+          850: "#0D0E14",
+          800: "#12141C", // Panel/Surface Card
+          750: "#171A24",
+          700: "#1E2230", // Elevated Surface
+          600: "#282D40", // Border
+          500: "#383F57", // Muted
         },
+        // Crisp Ivory / Off-White
         ivory: {
-          50: "#FBF8F2",
-          100: "#F4EFE6",
-          200: "#E8E1D4",
-          300: "#D6CCBA",
-          400: "#A79C8B",
+          50: "#FAFCFF",
+          100: "#F1F5F9", // Typography Primary
+          200: "#E2E8F0",
+          300: "#CBD5E1",
+          400: "#94A3B8", // Typography Secondary
         },
+        // Cerulean Blue
         accent: {
-          50: "#E6FBF3",
-          200: "#9CF3D5",
-          300: "#5FEAB9",
-          400: "#2EE0A8",
-          500: "#14C890",
-          600: "#0AA275",
-          700: "#087C5C",
+          50: "#E0F2FE",
+          200: "#7DD3FC",
+          300: "#38BDF8",
+          400: "#0284C7", // Cerulean Blue Primary Accent
+          500: "#0077B6",
+          600: "#0369A1",
+          700: "#075985",
+        },
+        // Neon Rose
+        rose: {
+          300: "#FF659A",
+          400: "#FF2A7A", // Neon Rose Accent
+          500: "#FF1361",
+          600: "#E0005E",
         },
         lime: {
-          300: "#E4F98A",
-          400: "#D3F25C",
-          500: "#B7DC32",
+          300: "#FF659A",
+          400: "#FF2A7A", // Neon Rose
+          500: "#FF1361",
         },
         signal: {
-          "live": "#2EE0A8",
-          "rec": "var(--danger)",
-          mic: "#2EE0A8",
-          muted: "#FF7A7A",
+          live: "#FF1361", // Neon Rose Live Indicator
+          rec: "#FF1361",
+          mic: "#0284C7", // Cerulean Blue Mic
+          muted: "#FF4D6D",
           warn: "#FFB547",
-          info: "#6FA8FF",
+          info: "#0284C7",
         },
         neon: {
-          emerald: "#2EE0A8",
-          cyan: "#42DCC5",
-          mint: "#2EE0A8",
+          cerulean: "#0284C7",
+          rose: "#FF2A7A",
+          cyan: "#38BDF8",
+          mint: "#0284C7",
         },
       },
       fontFamily: {
@@ -109,15 +120,15 @@ export default {
         "3xl": "1.5rem",
       },
       boxShadow: {
-        panel: "0 1px 0 0 rgba(255,255,255,0.05) inset, 0 24px 60px -30px rgba(0,0,0,0.88)",
+        panel: "0 1px 0 0 rgba(255,255,255,0.05) inset, 0 24px 60px -30px rgba(0,0,0,0.92)",
         lift: "0 30px 80px -40px rgba(0,0,0,0.95)",
-        glow: "0 0 0 1px rgba(0,174,187,0.35), 0 18px 50px -24px rgba(0,174,187,0.5)",
+        glow: "0 0 0 1px rgba(2,132,199,0.35), 0 18px 50px -24px rgba(255,42,122,0.45)",
       },
       backgroundImage: {
         "grid-fade":
-          "linear-gradient(to bottom, rgba(3,18,17,0) 0%, rgba(3,18,17,0.85) 78%, #031211 100%)",
+          "linear-gradient(to bottom, rgba(8,9,12,0) 0%, rgba(8,9,12,0.85) 78%, #08090C 100%)",
         "mesh-dark":
-          "radial-gradient(1200px 600px at 12% -10%, rgba(0,174,187,0.20), transparent 60%), radial-gradient(900px 500px at 88% 0%, rgba(38,200,214,0.12), transparent 62%)",
+          "radial-gradient(1200px 600px at 12% -10%, rgba(2,132,199,0.22), transparent 60%), radial-gradient(900px 500px at 88% 0%, rgba(255,42,122,0.18), transparent 62%)",
       },
       keyframes: {
         "pulse-ring": {

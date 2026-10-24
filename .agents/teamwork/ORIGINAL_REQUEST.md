@@ -185,3 +185,14 @@ The user explicitly requested changing the primary color design across NexClass 
 - Typography / Text: #E8E4D3
 - Primary Accent: #00AEBB
 All token definitions in tailwind.config.js (ink, ivory, accent), themes.css root variables, button gradients, and dashboard components have been updated to these exact hex values. Ensure all milestone work strictly adheres to #031211, #E8E4D3, and #00AEBB.
+
+
+## Follow-up — 2026-10-24T04:31:29Z
+
+USER DIRECTIVE UPDATE:
+The user explicitly requested changing the design system palette to:
+- Jet Black (Canvas Base / Deep background): #08090C / #050507
+- Cerulean Blue (Primary Accent): #0284C7 / #38BDF8
+- Neon Rose (Hero Accent / Energy / Live Signal): #FF2A7A / #FF1361
+- Crisp Typography: #F1F5F9 / #FAFCFF / #94A3B8
+Ensure all workers and upcoming milestones reflect Jet Black, Cerulean Blue, and Neon Rose across all components.

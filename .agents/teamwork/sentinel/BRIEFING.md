@@ -1,10 +1,11 @@
-# BRIEFING — 2026-10-24T04:27:00Z
+# BRIEFING — 2026-10-24T04:32:00Z
 
 ## Mission
-Transform the NexClass dashboard into a clean, premium, and uncluttered educational command center using a sleek left-sidebar navigation layout, strictly adhering to the user's primary color design:
-- Canvas / Deep Background: #031211
-- Typography / Text: #E8E4D3
-- Primary Accent: #00AEBB
+Transform the NexClass dashboard into a clean, premium, and uncluttered educational command center using a sleek left-sidebar navigation layout, strictly adhering to the user's updated design system palette:
+- Jet Black (Canvas Base / Deep background): #08090C / #050507
+- Cerulean Blue (Primary Accent): #0284C7 / #38BDF8
+- Neon Rose (Hero Accent / Energy / Live Signal): #FF2A7A / #FF1361
+- Crisp Typography: #F1F5F9 / #FAFCFF / #94A3B8
 
 ## 🔒 My Identity
 - Archetype: sentinel
@@ -18,13 +19,14 @@ Transform the NexClass dashboard into a clean, premium, and uncluttered educatio
 - Do not write code or make technical decisions directly
 - Routing Decision: General path -> teamwork_preview_orchestrator
 - CRITICAL USER COLOR DESIGN DIRECTIVE:
-  - Canvas / Deep Background: #031211
-  - Typography / Text: #E8E4D3
-  - Primary Accent: #00AEBB
-  All token definitions in tailwind.config.js (ink, ivory, accent), themes.css root variables, button gradients, and dashboard components must strictly adhere to #031211, #E8E4D3, and #00AEBB.
+  - Jet Black (Canvas Base / Deep background): #08090C / #050507
+  - Cerulean Blue (Primary Accent): #0284C7 / #38BDF8
+  - Neon Rose (Hero Accent / Energy / Live Signal): #FF2A7A / #FF1361
+  - Crisp Typography: #F1F5F9 / #FAFCFF / #94A3B8
+  All token definitions in tailwind.config.js, themes.css root variables, button gradients, and dashboard components must strictly reflect Jet Black, Cerulean Blue, and Neon Rose.
 
 ## User Context
-- **Last user request**: Primary color design updated across NexClass to Canvas #031211, Typography #E8E4D3, and Primary Accent #00AEBB.
+- **Last user request**: Design system palette updated across NexClass to Jet Black (#08090C), Cerulean Blue (#0284C7), Neon Rose (#FF2A7A), and Crisp Typography (#F1F5F9).
 - **Pending clarifications**: none
 - **Delivered results**: none yet for this run
 

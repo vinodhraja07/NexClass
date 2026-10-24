@@ -1,53 +1,53 @@
 /* ==========================================================================
    NEXCLASS OFFICIAL DESIGN SYSTEM — SIGNATURE PALETTE
-   Canvas Base: #031211 | Typography: #E8E4D3 | Primary Accent: #00AEBB
+   Canvas Base: #08090C (Jet Black) | Primary Accent: #0284C7 (Cerulean Blue) | Energy Accent: #FF2A7A (Neon Rose)
    ========================================================================== */
 
 /* Official Signature Palette as Default Root */
 :root,
 [data-theme="obsidian-mint"],
 [data-theme="default"] {
-  --background: #031211;
-  --background-secondary: #061A19;
-  --surface: #0A2422;
-  --surface-elevated: #153C39;
-  --primary: #00AEBB;
-  --secondary-accent: #26C8D6;
-  --ai-accent: #77E2EB;
-  --text-primary: #E8E4D3;
-  --text-secondary: #A39B7C;
-  --border: #1D4D4A;
-  --muted: #0F2F2D;
+  --background: #08090C;
+  --background-secondary: #0D0E14;
+  --surface: #12141C;
+  --surface-elevated: #1E2230;
+  --primary: #0284C7;
+  --secondary-accent: #FF2A7A;
+  --ai-accent: #38BDF8;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --border: #282D40;
+  --muted: #171A24;
 
-  --success: #00AEBB;
+  --success: #0284C7;
   --warning: #FFB547;
-  --danger: #FF4D6D;
-  --focus-ring: rgba(0, 174, 187, 0.45);
-  --shadow: 0 20px 48px -16px rgba(1, 10, 9, 0.88);
-  --card-gradient: linear-gradient(180deg, #0A2422 0%, #031211 100%);
+  --danger: #FF1361;
+  --focus-ring: rgba(2, 132, 199, 0.45);
+  --shadow: 0 20px 48px -16px rgba(0, 0, 0, 0.92);
+  --card-gradient: linear-gradient(180deg, #12141C 0%, #08090C 100%);
 
   /* RGB channels for Tailwind opacity modifiers */
-  --color-bg: 3 18 17;
-  --color-bg-secondary: 6 26 25;
-  --color-surface: 10 36 34;
-  --color-surface-elevated: 21 60 57;
-  --color-primary: 0 174 187;
-  --color-secondary-accent: 38 200 214;
-  --color-ai-accent: 119 226 235;
-  --color-text-primary: 232 228 211;
-  --color-text-secondary: 163 155 124;
-  --color-border: 29 77 74;
-  --color-muted: 15 47 45;
+  --color-bg: 8 9 12;
+  --color-bg-secondary: 13 14 20;
+  --color-surface: 18 20 28;
+  --color-surface-elevated: 30 34 48;
+  --color-primary: 2 132 199;
+  --color-secondary-accent: 255 42 122;
+  --color-ai-accent: 56 189 248;
+  --color-text-primary: 241 245 249;
+  --color-text-secondary: 148 163 184;
+  --color-border: 40 45 64;
+  --color-muted: 23 26 36;
 
   /* Legacy variable alignment */
-  --nc-ink: 3 18 17;
-  --nc-surface: 10 36 34;
-  --nc-raised: 21 60 57;
-  --nc-line: 29 77 74;
-  --nc-accent: 0 174 187;
-  --nc-lime: 38 200 214;
-  --nc-ivory: 232 228 211;
-  --nc-muted: 163 155 124;
+  --nc-ink: 8 9 12;
+  --nc-surface: 18 20 28;
+  --nc-raised: 30 34 48;
+  --nc-line: 40 45 64;
+  --nc-accent: 2 132 199;
+  --nc-lime: 255 42 122;
+  --nc-ivory: 241 245 249;
+  --nc-muted: 148 163 184;
 }
 
 /* Theme 02: Monsoon Aurora */

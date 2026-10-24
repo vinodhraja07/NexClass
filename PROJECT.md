@@ -5,16 +5,14 @@ NexClass is an AI-powered multilingual virtual classroom platform architected as
 
 This project phase transforms the NexClass dashboard into a clean, premium, and uncluttered educational command center using a sleek left-sidebar navigation layout with dark glassmorphism, fluid spring motion, and focused responsive views.
 
-- **Theme Palette & Identity (MANDATORY & DEFINITIVE USER DIRECTIVE 2026-10-24T04:11:21Z)**:
-  - User explicitly rejected midnight-purple and any purple/lavender styling.
-  - The exact original signature NexClass palette is **Obsidian Mint**:
-    - **Obsidian Jet Background**: `#070B14` / `#05080F` / `#0A101C`
-    - **Emerald Mint Primary Accent**: `#2EE0A8` / `#5FEAB9`
-    - **Lime Yellow/Green Secondary Accent**: `#D3F25C`
-    - **Warm Ivory Typography**: `#FBF8F2` / `#F4EFE6` / `#A79C8B`
-    - **Border**: `#1F2C45` / `#172136`
-  - `DEFAULT_THEME_ID` is strictly `"obsidian-mint"`.
-  - Tailwind tokens `ink`, `accent`, `lime`, `ivory`, and `signal.live` directly reflect these static hex values.
+- **Theme Palette & Identity (LATEST USER DIRECTIVE 2026-10-24T04:31:29Z)**:
+  - Exact design system palette:
+    - **Jet Black (Canvas Base / Deep background)**: `#08090C` / `#050507`
+    - **Cerulean Blue (Primary Accent)**: `#0284C7` / `#38BDF8`
+    - **Neon Rose (Hero Accent / Energy / Live Signal)**: `#FF2A7A` / `#FF1361`
+    - **Crisp Typography**: `#F1F5F9` / `#FAFCFF` / `#94A3B8`
+    - **Surface & Borders**: Harmonious dark slate/jet (`#11141B`, border `#1E2430`, elevated `#181D27`)
+  - All token definitions in `tailwind.config.js` (`ink`, `accent`, `rose`, `signal.live`), `themes.css` root variables, button gradients, and dashboard components strictly adhere to this palette.
 - **Navigation & Layout Architecture**:
   - Replaces the 2-tier horizontal top header with a sleek, collapsible left-sidebar navigation (`DashboardSidebar`).
   - Brand & user identity: NexClass wordmark with role indicator (`Teacher` / `Student`) and active user profile badge.
@@ -23,7 +21,7 @@ This project phase transforms the NexClass dashboard into a clean, premium, and 
   - Sidebar Footer: Live WebRTC / STUN / Neural TTS / ASR / Translation server connection status beacon (`api.providerStatus`) with full diagnostics popover and logout trigger.
   - URL Synchronization: Seamless view switching via `?view=classrooms|create|transcripts|preferences` using `useSearchParams` with zero full-page reloads and layout stability.
 - **Visual Design System**:
-  - Dark glassmorphism with deep velvety dark obsidian backgrounds (`bg-ink-950/90`), translucent panels (`backdrop-blur-xl`), delicate luminous borders (`border-ink-700/60`, `border-accent-400/30`), and subtle specular highlights.
+  - Dark glassmorphism with deep velvety Jet Black backgrounds (`bg-ink-950/90`, `#08090C`), translucent panels (`backdrop-blur-xl`), delicate luminous borders (`border-ink-700/60`, `border-accent-400/30`), and subtle specular highlights.
   - Indic typography: Line-height relaxation (`1.5-1.65`) to prevent clipping on upper matras and lower conjuncts (Hindi, Tamil, Bengali, Marathi, Odia).
 - **Motion & Physics**:
   - Directional slide and blur cross-fade view transitions wrapped in `<AnimatePresence mode="wait">`.
@@ -43,7 +41,7 @@ This project phase transforms the NexClass dashboard into a clean, premium, and 
 | 3 | Server Health & Diagnostics Footer | Live WebRTC/STUN/TTS/ASR/Translation server status beacon and logout action in sidebar footer | M1 | ORIGINAL_REQUEST §R1 |
 | 4 | URL Query View Synchronization | Synchronize active view with `?view=classrooms\|create\|transcripts\|preferences` without page reloads | M1 | ORIGINAL_REQUEST §R1, §R5 |
 | 5 | Dark Glassmorphism Design Tokens | `backdrop-blur-xl`, `bg-ink-950/90`, luminous borders, specular inner highlights | M1 | ORIGINAL_REQUEST §R2 |
-| 6 | Obsidian Mint Palette & Theme Default | Set DEFAULT_THEME_ID to obsidian-mint; #070B14 / #2EE0A8 / #D3F25C / #FBF8F2 / #1F2C45 | M1 | User Directive 2026-10-24 |
+| 6 | Jet Black, Cerulean Blue & Neon Rose Palette | Jet Black #08090C, Cerulean Blue #0284C7, Neon Rose #FF2A7A, Crisp Typography #F1F5F9 | M1 | User Directive 2026-10-24 |
 | 7 | Indic Typography Legibility | Prevent clipping of matras and conjuncts in language badges and text with relaxed line-height | M1 | ORIGINAL_REQUEST §R2 |
 | 8 | Accessibility & Reduced Motion | Wrap in `MotionConfig reducedMotion="user"`, ensure instant fallback when reduced motion preferred | M1 | ORIGINAL_REQUEST §R3 |
 | 9 | Compact Hero Action Deck | Instant 1-Click Meeting (direct launch to room), Join by Code (6-char animated input), Open Demo | M2 | ORIGINAL_REQUEST §R4 |
@@ -63,7 +61,7 @@ This project phase transforms the NexClass dashboard into a clean, premium, and 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Left Sidebar Shell, Responsive Rail & Obsidian Mint Glassmorphism | Features 1, 2, 3, 4, 5, 6, 7, 8 | none | IN_PROGRESS |
+| M1 | Left Sidebar Shell, Responsive Rail & Glassmorphism Design Tokens | Features 1, 2, 3, 4, 5, 6, 7, 8 | none | IN_PROGRESS |
 | M2 | Classrooms Command Center View | Features 9, 10, 11 | M1 | PLANNED |
 | M3 | Create Classroom View & Live Preview | Features 12, 13, 14 | M1 | PLANNED |
 | M4 | Transcripts & Archive View with TXT Export | Features 15, 16, 17, 18, 19 | M1 | PLANNED |

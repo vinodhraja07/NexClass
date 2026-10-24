@@ -17,9 +17,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const buttonVariants: Record<ButtonVariant, string> = {
   primary:
-    "relative overflow-hidden bg-gradient-to-r from-accent-400 via-cyan-400 to-accent-300 text-ink-950 font-semibold tracking-tight border border-accent-300/40 shadow-[0_4px_20px_-4px_rgba(0,174,187,0.5),0_1px_2px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_28px_-2px_rgba(0,174,187,0.7),0_2px_4px_rgba(0,0,0,0.4)] hover:brightness-105 active:brightness-95",
+    "relative overflow-hidden bg-gradient-to-r from-accent-400 via-sky-500 to-rose-400 text-white font-semibold tracking-tight border border-sky-300/30 shadow-[0_4px_20px_-4px_rgba(2,132,199,0.5),0_1px_2px_rgba(0,0,0,0.4)] hover:shadow-[0_6px_28px_-2px_rgba(255,42,122,0.6),0_2px_4px_rgba(0,0,0,0.5)] hover:brightness-105 active:brightness-95",
   secondary:
-    "relative overflow-hidden bg-gradient-to-b from-ink-800/90 to-ink-900/95 text-ivory-50 border border-ink-600/80 hover:border-accent-400/50 hover:bg-ink-750 hover:text-white shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:shadow-[0_0_20px_rgba(0,174,187,0.22)] backdrop-blur-md font-medium",
+    "relative overflow-hidden bg-gradient-to-b from-ink-800/90 to-ink-900/95 text-ivory-50 border border-ink-600/80 hover:border-accent-400/50 hover:bg-ink-750 hover:text-white shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:shadow-[0_0_20px_rgba(2,132,199,0.25)] backdrop-blur-md font-medium",
   ghost:
     "text-ivory-300 hover:text-ivory-50 hover:bg-ink-800/70 border border-transparent hover:border-ink-600/70 hover:shadow-sm font-medium",
   danger:
