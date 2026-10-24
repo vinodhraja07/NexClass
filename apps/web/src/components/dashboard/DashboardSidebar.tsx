@@ -142,9 +142,19 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
     props.serverStatus?.providers.find((p) => p.category === "turn")?.configured ?? true;
   const ttsHealthy =
     props.serverStatus?.providers.find((p) => p.category === "tts")?.configured ?? true;
+  const asrHealthy =
+    props.serverStatus?.providers.find((p) => p.category === "asr")?.configured ?? true;
+  const translationHealthy =
+    props.serverStatus?.providers.find((p) => p.category === "translation")?.configured ?? true;
   const dbHealthy = props.serverStatus?.infrastructure.mongodb.connected ?? true;
   const overallHealthy =
-    props.serverStatus !== null && !props.serverError && turnHealthy && ttsHealthy;
+    props.serverStatus !== null &&
+    !props.serverError &&
+    turnHealthy &&
+    ttsHealthy &&
+    asrHealthy &&
+    translationHealthy &&
+    dbHealthy;
 
   const renderNavList = (isMobile: boolean = false) => {
     return (
@@ -351,6 +361,36 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                 </div>
 
                 <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-ivory-300">Speech Recognition (ASR)</span>
+                    <span
+                      className={clsx(
+                        "inline-flex items-center gap-1 font-mono text-3xs font-medium px-2 py-0.5 rounded-full",
+                        asrHealthy
+                          ? "bg-emerald-400/15 text-emerald-300"
+                          : "bg-amber-400/15 text-amber-300",
+                      )}
+                    >
+                      {asrHealthy ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+                      {asrHealthy ? "Active" : "Zero-Key"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-ivory-300">Neural Translation</span>
+                    <span
+                      className={clsx(
+                        "inline-flex items-center gap-1 font-mono text-3xs font-medium px-2 py-0.5 rounded-full",
+                        translationHealthy
+                          ? "bg-emerald-400/15 text-emerald-300"
+                          : "bg-amber-400/15 text-amber-300",
+                      )}
+                    >
+                      {translationHealthy ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+                      {translationHealthy ? "Active" : "Zero-Key"}
+                    </span>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-ivory-300">WebRTC STUN/TURN</span>
                     <span
