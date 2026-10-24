@@ -69,9 +69,9 @@ export default function DemoIndex() {
                 reduced
                   ? {}
                   : {
-                      y: -5,
-                      borderColor: "rgba(46,224,168,0.45)",
-                      boxShadow: "0 24px 48px -18px rgba(0,0,0,0.85), 0 0 24px rgba(46,224,168,0.14)",
+                      y: -4,
+                      borderColor: "rgba(120,169,139,0.5)",
+                      boxShadow: "0 24px 48px -18px rgba(0,0,0,0.5), 0 0 24px rgba(120,169,139,0.2)",
                     }
               }
               transition={

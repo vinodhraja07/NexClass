@@ -41,7 +41,7 @@ function Waveform({ accent = false }: { accent?: boolean }) {
             transition={{ repeat: Infinity, duration: 1.1, ease: "easeOut" }}
             className="absolute h-5 w-5 rounded-full border border-accent-400"
           />
-          <span className="h-2 w-2 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(46,224,168,0.9)]" />
+          <span className="h-2 w-2 rounded-full bg-accent-300 shadow-[0_0_8px_rgba(50,185,138,0.9)]" />
         </span>
       ) : mode === "pulsar" ? (
         <span className="relative flex h-6 w-6 items-center justify-center overflow-hidden text-accent-300 font-bold text-sm" aria-hidden="true">
@@ -104,7 +104,7 @@ export function ClassroomMock() {
     <figure className="nc-panel relative overflow-hidden shadow-lift border border-ink-600/80 hover:border-accent-400/30 transition-all duration-500 group">
       {/* ambient glow gradient */}
       <div className="absolute -top-24 -right-24 w-72 h-72 bg-accent-400/10 rounded-full blur-3xl pointer-events-none group-hover:bg-accent-400/15 transition-all duration-700" />
-      <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-lime-400/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-sage-400/5 rounded-full blur-3xl pointer-events-none" />
 
       <figcaption className="sr-only">
         A NexClass live classroom with one teacher and four students. The caption panel
@@ -132,7 +132,7 @@ export function ClassroomMock() {
         {/* ---------------------------- video strip --------------------------- */}
         <div className="border-b border-ink-700/70 p-3 sm:p-4 lg:border-b-0 lg:border-r">
           <div className="overflow-hidden rounded-xl border border-ink-600/70 bg-ink-900">
-            <div className="relative flex aspect-[16/9] flex-col items-center justify-center gap-4 bg-[radial-gradient(120%_120%_at_50%_0%,#16203a_0%,#080d18_72%)] overflow-hidden">
+            <div className="relative flex aspect-[16/9] flex-col items-center justify-center gap-4 bg-[radial-gradient(120%_120%_at_50%_0%,#1D3028_0%,#101A16_75%)] overflow-hidden">
               <motion.span
                 className="absolute h-36 w-36 rounded-full border border-accent-400/20 pointer-events-none"
                 animate={{ scale: [1, 1.25, 1], opacity: [0.3, 0.7, 0.3] }}

@@ -13,7 +13,7 @@ export function FinalCta() {
     >
       {/* Ambient background glow orb */}
       <div
-        className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 h-[320px] w-[640px] rounded-full bg-gradient-to-t from-accent-500/15 via-lime-400/8 to-transparent blur-[120px]"
+        className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 h-[320px] w-[640px] rounded-full bg-gradient-to-t from-accent-600/18 via-accent-400/8 to-transparent blur-[120px]"
         aria-hidden="true"
       />
 
@@ -29,7 +29,7 @@ export function FinalCta() {
           <Reveal delay={0.05}>
             <h2 className="mt-6 text-balance text-[32px] leading-[1.06] font-semibold tracking-[-0.03em] text-ivory-50 sm:text-[44px] lg:text-[54px]">
               Bring the room to{" "}
-              <span className="bg-gradient-to-r from-accent-300 via-lime-300 to-accent-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent">
                 everyone&apos;s language.
               </span>
             </h2>

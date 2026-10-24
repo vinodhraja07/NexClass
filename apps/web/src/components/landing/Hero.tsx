@@ -38,7 +38,7 @@ export function Hero() {
               }
         }
         transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none absolute -top-36 left-1/2 w-[760px] h-[450px] bg-gradient-to-tr from-accent-400/25 via-lime-400/18 to-teal-500/10 blur-[130px] rounded-full"
+        className="pointer-events-none absolute -top-36 left-1/2 w-[760px] h-[450px] bg-gradient-to-tr from-accent-400/20 via-accent-300/12 to-sage-400/8 blur-[130px] rounded-full"
         aria-hidden="true"
       />
       <motion.div
@@ -53,7 +53,7 @@ export function Hero() {
               }
         }
         transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-        className="pointer-events-none absolute top-36 -right-20 w-[450px] h-[450px] bg-gradient-to-bl from-accent-500/18 via-lime-400/12 to-transparent blur-[120px] rounded-full"
+        className="pointer-events-none absolute top-36 -right-20 w-[450px] h-[450px] bg-gradient-to-bl from-accent-600/18 via-accent-400/10 to-transparent blur-[120px] rounded-full"
         aria-hidden="true"
       />
       <div
@@ -79,7 +79,7 @@ export function Hero() {
             <br />
             One live classroom.
             <br />
-            <span className="bg-gradient-to-r from-accent-300 via-lime-300 to-accent-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-accent-200 via-accent-300 to-accent-400 bg-clip-text text-transparent">
               Every student in their own language.
             </span>
           </motion.h1>
@@ -94,16 +94,16 @@ export function Hero() {
             transcript is kept exactly as spoken.
           </motion.p>
 
-          {/* Quick Launch & Join Deck - Makes handling the app effortless */}
+          {/* Quick Launch & Join Deck - Emerald Glass Card */}
           <motion.div
             {...fade(0.18)}
-            className="mt-7 rounded-2xl border border-ink-600/90 bg-ink-850/85 p-4 sm:p-5 backdrop-blur-xl shadow-panel max-w-[660px]"
+            className="mt-7 rounded-2xl border border-ink-600/80 bg-ink-850/80 p-4 sm:p-5 backdrop-blur-2xl shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.035),0_0_24px_rgba(120,169,139,0.08)] max-w-[660px]"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
               <div className="flex-1 min-w-0">
                 <label
                   htmlFor="hero-quick-join"
-                  className="block text-2xs font-semibold uppercase tracking-wider text-accent-300"
+                  className="block font-mono text-2xs font-semibold uppercase tracking-wider text-accent-300"
                 >
                   Join a Live Classroom
                 </label>

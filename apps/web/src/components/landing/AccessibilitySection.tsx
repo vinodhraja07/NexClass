@@ -78,7 +78,7 @@ export function AccessibilitySection() {
                 key={item.title}
                 className="group flex gap-5 rounded-2xl border border-ink-700/60 bg-ink-850/50 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink-500 hover:bg-ink-800/80 hover:shadow-panel sm:gap-6"
               >
-                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-ink-600/70 bg-ink-850 text-accent-300 transition-all duration-200 group-hover:border-accent-400/60 group-hover:bg-accent-400/10 group-hover:shadow-[0_0_20px_-4px_rgba(46,224,168,0.4)]">
+                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-ink-600/70 bg-ink-850 text-accent-300 transition-all duration-200 group-hover:border-accent-400/60 group-hover:bg-accent-400/10 group-hover:shadow-[0_0_20px_-4px_rgba(120,169,139,0.35)]">
                   <item.icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <div>

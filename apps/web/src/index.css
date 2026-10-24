@@ -6,14 +6,14 @@
 
 :root {
   color-scheme: dark;
-  --nc-ink: 8 9 12;
-  --nc-surface: 18 20 28;
-  --nc-raised: 30 34 48;
-  --nc-line: 40 45 64;
-  --nc-accent: 2 132 199;
-  --nc-lime: 255 42 122;
-  --nc-ivory: 241 245 249;
-  --nc-muted: 148 163 184;
+  --nc-ink: 16 26 22;
+  --nc-surface: 29 48 40;
+  --nc-raised: 41 64 52;
+  --nc-line: 52 72 59;
+  --nc-accent: 120 169 139;
+  --nc-lime: 50 185 138;
+  --nc-ivory: 233 239 232;
+  --nc-muted: 172 188 175;
 }
 
 @layer base {
@@ -41,124 +41,104 @@
   }
 
   ::selection {
-    background: rgba(2, 132, 199, 0.35);
+    background: rgba(120, 169, 139, 0.32);
+    color: #E9EFE8;
   }
 
   :focus-visible {
-    outline: 2px solid rgb(var(--nc-accent));
+    outline: 2px solid rgb(var(--color-primary, 120 169 139));
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(42, 58, 87, 0.9);
+    background: rgba(52, 72, 59, 0.7);
     border-radius: 999px;
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(60, 80, 118, 0.95);
+    background: rgba(120, 169, 139, 0.75);
     background-clip: content-box;
   }
 }
 
 @layer components {
+  /* Core Emerald Surface */
   .nc-surface {
-    @apply bg-ink-800/80 border border-ink-600/70 rounded-2xl backdrop-blur-xl;
+    @apply bg-ink-800/85 border border-ink-600/70 rounded-2xl backdrop-blur-xl shadow-panel;
   }
 
   .nc-panel {
-    @apply bg-ink-850 border border-ink-600/60 rounded-2xl;
+    @apply bg-ink-850/90 border border-ink-600/60 rounded-2xl;
   }
 
   .nc-hairline {
     @apply border-b border-ink-600/60;
   }
 
-  /* Dark Glassmorphic Panels */
+  /* Emerald Glass Panels with Specular Highlight */
   .nc-glass-panel {
-    @apply bg-ink-900/70 border border-ink-700/60 rounded-2xl backdrop-blur-xl shadow-[0_16px_40px_-16px_rgba(0,0,0,0.65),inset_0_1px_0_0_rgba(255,255,255,0.06)];
+    @apply bg-ink-900/80 border border-ink-600/70 rounded-2xl backdrop-blur-xl shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.035)];
   }
 
-  /* Interactive Glass Cards with Specular Highlight and Subtle Hover Lift */
+  /* Interactive Emerald Glass Card */
   .nc-glass-card {
-    @apply bg-ink-850/50 border border-ink-700/50 rounded-2xl backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.05)] transition-[border-color,background-color,box-shadow] duration-200 hover:border-accent-400/40 hover:bg-ink-850/75 hover:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.75),inset_0_1px_0_0_rgba(255,255,255,0.08)];
+    @apply bg-ink-800/60 border border-ink-650/80 rounded-2xl backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.035)] transition-[border-color,background-color,box-shadow,transform] duration-200 hover:border-accent-400/50 hover:bg-ink-800/85 hover:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.06),0_0_24px_rgba(120,169,139,0.12)];
   }
 
   /* Sleek Left Sidebar Glass */
   .nc-glass-sidebar {
-    @apply bg-ink-950/80 border-r border-ink-700/60 backdrop-blur-2xl shadow-[4px_0_24px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.06)];
+    @apply bg-ink-900/90 border-r border-ink-600/70 backdrop-blur-2xl shadow-[4px_0_24px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.035)];
   }
 
   /* Mobile Slide-Over Drawer Glass */
   .nc-glass-drawer {
-    @apply bg-ink-950/95 border-r border-ink-700/70 backdrop-blur-2xl shadow-[8px_0_40px_rgba(0,0,0,0.75),inset_0_1px_0_0_rgba(255,255,255,0.06)];
+    @apply border-r border-ink-600/80 backdrop-blur-2xl shadow-[8px_0_40px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.04)];
+    background-color: rgba(16, 26, 22, 0.98);
   }
 
-  /* Neon Emerald Live Meeting Glow */
+  /* Floating Control Dock */
+  .nc-glass-dock {
+    @apply bg-ink-850/85 border border-ink-600/80 rounded-2xl backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.05)];
+  }
+
+  /* Soft Emerald Live Meeting Glow */
   .nc-live-glow {
-    @apply border-emerald-400/40 bg-emerald-400/[0.04] shadow-[0_0_24px_-4px_rgba(46,224,168,0.22),inset_0_1px_0_0_rgba(46,224,168,0.12)];
+    @apply border-accent-300/40 bg-accent-300/[0.06] shadow-[0_0_24px_-4px_rgba(50,185,138,0.25),inset_0_1px_0_0_rgba(50,185,138,0.15)];
   }
 
-  /* Signature Mint/Cyan Action Focus Glow */
-  .nc-accent-glow {
-    @apply border-accent-400/40 bg-accent-400/[0.04] shadow-[0_0_24px_-4px_rgba(66,220,197,0.25),inset_0_1px_0_0_rgba(66,220,197,0.15)];
-  }
-
+  /* Emerald Focus Ring */
   .nc-focus {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900;
   }
 
+  /* Eyebrow Label */
   .nc-eyebrow {
-    @apply text-2xs font-semibold uppercase tracking-[0.18em] text-ivory-400;
-  }
-
-  .nc-grain {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-    background-size: 3px 3px;
+    @apply font-mono text-2xs font-semibold uppercase tracking-wider text-accent-300;
   }
 }
 
-@layer utilities {
-  .scrollbar-none {
-    scrollbar-width: none;
-  }
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-/* Indic Script Typography & Matra Clipping Prevention (Task 4 & 5) */
-[lang="hi"],
-[lang="mr"],
-[lang="ta"],
-[lang="bn"],
-[lang="or"],
-.font-indic {
+/* Indic script legibility & vertical rhythm */
+[lang="hi"], [lang="mr"], [lang="ta"], [lang="bn"], [lang="or"], .font-indic {
   font-family: "Noto Sans Devanagari", "Noto Sans Tamil", "Noto Sans Bengali", "Noto Sans Oriya", "Nirmala UI", sans-serif;
   line-height: 1.65 !important;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "kern", "liga", "clig";
   padding-top: 0.05em;
   padding-bottom: 0.05em;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern", "liga", "clig";
 }
 
-
+/* Reduced motion accessibility override */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;

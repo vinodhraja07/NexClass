@@ -49,6 +49,7 @@ import {
 } from "@/components/dashboard/guestSession";
 import { DashboardSidebar, type DashboardView } from "@/components/dashboard/DashboardSidebar";
 import { DashboardMobileHeader } from "@/components/dashboard/DashboardMobileHeader";
+import { ClassroomsView } from "@/components/dashboard/ClassroomsView";
 import { useTheme } from "@/themes/ThemeProvider";
 
 function greetingFor(date: Date): string {
@@ -123,6 +124,7 @@ export default function Dashboard() {
 
   const setActiveTab = handleSelectView;
   const activeTab = activeView;
+  const currentView = activeView;
 
   const isTeacher = user?.role === "teacher";
 
@@ -243,8 +245,13 @@ export default function Dashboard() {
         voiceEnabledByDefault: true,
       });
       setCreated(result.meeting);
+      storeRecentMeeting({
+        code: result.meeting.code,
+        title: result.meeting.title,
+        joinedAt: new Date().toISOString(),
+      });
       void loadMeetings();
-      setActiveTab("create");
+      navigate(`/meet/${result.meeting.code}`);
     } catch (error) {
       if (error instanceof ApiError) {
         setCreateError(error.message);
@@ -254,7 +261,7 @@ export default function Dashboard() {
     } finally {
       setCreatingInstant(false);
     }
-  }, [user?.preferredLanguage, loadMeetings, setActiveTab]);
+  }, [user?.preferredLanguage, loadMeetings, navigate]);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -435,7 +442,7 @@ export default function Dashboard() {
               opacity: [0.15, 0.28, 0.18, 0.15],
             }}
             transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="pointer-events-none fixed -top-32 left-1/2 h-[520px] w-[750px] rounded-full bg-gradient-to-tr from-accent-400/20 via-lime-400/12 to-teal-500/10 blur-[140px]"
+            className="pointer-events-none fixed -top-32 left-1/2 h-[520px] w-[750px] rounded-full bg-gradient-to-tr from-accent-400/20 via-accent-300/10 to-transparent blur-[140px]"
             aria-hidden="true"
           />
         )}
@@ -501,235 +508,24 @@ export default function Dashboard() {
         )}
 
         {/* ==================================================================== */}
-        {/* TAB 1: MY CLASSROOMS                                                 */}
+        {/* TAB 1: CLASSROOMS COMMAND CENTER VIEW                                */}
         {/* ==================================================================== */}
-        {activeTab === "classrooms" && (
-          <motion.div
-            key="classrooms-tab"
-            initial={reduced ? { opacity: 1 } : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
-            className="space-y-6"
-          >
-            {/* Quick Action Bar for Teachers */}
-            {isTeacher ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Action 1: Instant Class */}
-                <div className="relative overflow-hidden rounded-2xl border border-accent-400/35 bg-gradient-to-br from-accent-400/15 via-ink-850 to-ink-900 p-5 shadow-panel flex flex-col justify-between">
-                  <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-400/20 px-2.5 py-0.5 text-3xs font-bold uppercase tracking-wider text-accent-300">
-                      ⚡ Instant Class
-                    </span>
-                    <h3 className="mt-2 text-base font-semibold text-ivory-50">
-                      Start teaching immediately
-                    </h3>
-                    <p className="mt-1 text-2xs text-ivory-300 leading-relaxed">
-                      Launches an instant classroom with all 6 Indic languages enabled. Zero setup needed.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-ink-700/60">
-                    <Button
-                      size="sm"
-                      loading={creatingInstant}
-                      onClick={handleInstantCreate}
-                      className="w-full text-xs font-semibold shadow-md shadow-accent-400/25"
-                      icon={<Sparkles className="h-3.5 w-3.5" />}
-                    >
-                      Start Instant Class
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Action 2: Custom Classroom */}
-                <div className="relative overflow-hidden rounded-2xl border border-ink-600/80 bg-ink-850/80 p-5 shadow-panel flex flex-col justify-between hover:border-ink-500 transition-colors">
-                  <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-700 px-2.5 py-0.5 text-3xs font-bold uppercase tracking-wider text-ivory-300">
-                      📝 Custom Setup
-                    </span>
-                    <h3 className="mt-2 text-base font-semibold text-ivory-50">
-                      Configure custom classroom
-                    </h3>
-                    <p className="mt-1 text-2xs text-ivory-400 leading-relaxed">
-                      Set specific titles, teacher speaker language, restricted languages, or passwords.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-ink-700/60">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setActiveTab("create")}
-                      className="w-full text-xs font-semibold"
-                      icon={<PlusCircle className="h-3.5 w-3.5 text-accent-300" />}
-                    >
-                      Open Custom Setup &rarr;
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Action 3: Quick Join with Code */}
-                <div className="relative overflow-hidden rounded-2xl border border-ink-600/80 bg-ink-850/80 p-5 shadow-panel flex flex-col justify-between hover:border-ink-500 transition-colors sm:col-span-2 lg:col-span-1">
-                  <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-700 px-2.5 py-0.5 text-3xs font-bold uppercase tracking-wider text-ivory-300">
-                      🔑 Enter Another Room
-                    </span>
-                    <h3 className="mt-2 text-base font-semibold text-ivory-50">
-                      Join by 6-char code
-                    </h3>
-                    <p className="mt-1 text-2xs text-ivory-400 leading-relaxed">
-                      Enter a peer&apos;s code to follow as a co-teacher or guest participant.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-ink-700/60 flex items-center gap-2">
-                    <input
-                      type="text"
-                      maxLength={6}
-                      placeholder="e.g. 7KQ2MD"
-                      value={joinCode}
-                      onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                      className="nc-focus h-9 w-full rounded-xl border border-ink-600 bg-ink-900/90 px-3 font-mono text-xs font-semibold uppercase tracking-wider text-ivory-50 placeholder:text-ivory-500"
-                    />
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={joinCode.trim().length !== 6}
-                      onClick={() => navigate(`/meet/${joinCode.trim()}`)}
-                    >
-                      Join
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Student Join Card */
-              <div className="rounded-2xl border border-accent-400/30 bg-ink-850/80 p-6 shadow-panel max-w-xl">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-400/15 px-2.5 py-0.5 text-3xs font-bold uppercase tracking-wider text-accent-300">
-                      Classroom Access
-                    </span>
-                    <h2 className="mt-2 font-display text-xl font-bold text-ivory-50">
-                      Join a Classroom
-                    </h2>
-                    <p className="mt-1 text-xs text-ivory-300">
-                      Enter the 6-character code provided by your teacher to follow in your language.
-                    </p>
-                  </div>
-                  <Badge tone="info">Student</Badge>
-                </div>
-
-                {joinError && (
-                  <ErrorNotice className="mt-4" title="Could not join" message={joinError} />
-                )}
-
-                <form className="mt-5 space-y-4" onSubmit={handleJoin} noValidate>
-                  <FormField id="join-code" label="Meeting code" required>
-                    <CodeInput
-                      id="join-code"
-                      value={joinCode}
-                      onChange={setJoinCode}
-                      invalid={Boolean(joinError)}
-                    />
-                  </FormField>
-
-                  <fieldset className="space-y-1.5">
-                    <legend className="text-xs font-semibold text-ivory-200">
-                      Listening &amp; Caption Language
-                    </legend>
-                    <LanguageChips
-                      mode="single"
-                      value={[joinLanguage]}
-                      onChange={(next) => {
-                        const code = next[0] ?? "en";
-                        setJoinLanguage(code);
-                        void updateLanguage(code);
-                      }}
-                      codes={ALL_LANGUAGE_CODES}
-                      label="Preferred language"
-                      description="Captions and voice translation will play in this language."
-                    />
-                  </fieldset>
-
-                  <Button
-                    type="submit"
-                    size="lg"
-                    loading={joining}
-                    className="w-full text-xs font-semibold"
-                    icon={<Radio className="h-4 w-4" />}
-                  >
-                    {joining ? "Joining classroom…" : "Enter Live Classroom"}
-                  </Button>
-                </form>
-              </div>
-            )}
-
-            {/* Meetings List Container */}
-            <div className="rounded-2xl border border-ink-600/80 bg-ink-850/60 p-5 sm:p-6 shadow-panel">
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-ink-700/60">
-                <div>
-                  <h2 className="font-display text-lg font-semibold text-ivory-50">
-                    {isTeacher ? "Your Active & Scheduled Classrooms" : "Your Classrooms"}
-                  </h2>
-                  <p className="text-2xs text-ivory-400 mt-0.5">
-                    {isTeacher
-                      ? "Real-time multilingual rooms ready to launch or share."
-                      : "Rooms you are enrolled in or scheduled to join."}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => void loadMeetings()}
-                  aria-label="Refresh meetings"
-                >
-                  <RefreshCw
-                    className={clsx("h-3.5 w-3.5", meetingsLoading && "animate-spin")}
-                    aria-hidden="true"
-                  />
-                  Refresh
-                </Button>
-              </div>
-
-              {meetingsError && !offline && (
-                <ErrorNotice className="mt-4" title="Could not load your meetings" message={meetingsError} />
-              )}
-
-              <div className="mt-5 space-y-6">
-                <div>
-                  <h3 className="nc-eyebrow mb-3 flex items-center gap-1.5 text-accent-300">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>Live &amp; Upcoming</span>
-                  </h3>
-                  <MeetingList
-                    meetings={upcoming}
-                    emptyMessage={
-                      isTeacher
-                        ? "No live or scheduled classrooms right now. Use 'Start Instant Class' above or create one."
-                        : "Nothing scheduled right now. Join with a code to follow along."
-                    }
-                  />
-                </div>
-
-                {allRecent.length > 0 && (
-                  <div className="pt-4 border-t border-ink-700/60 flex items-center justify-between">
-                    <p className="text-xs text-ivory-400">
-                      You have {allRecent.length} completed session{allRecent.length > 1 ? "s" : ""} in your history.
-                    </p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setActiveTab("transcripts")}
-                      icon={<FileText className="h-3.5 w-3.5" />}
-                    >
-                      View Transcripts &amp; History &rarr;
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
+        {(activeTab === "classrooms" || currentView === "classrooms") && (
+          <div key="classrooms-tab" className="space-y-6">
+            <ClassroomsView
+              isTeacher={isTeacher}
+              meetings={upcoming.length > 0 ? upcoming : relevant.filter((m) => m.status !== "ended")}
+              recentMeetings={allRecent}
+              loading={meetingsLoading}
+              onRefresh={() => void loadMeetings()}
+              onCreateClick={() => setActiveTab("create")}
+              onNavigateTranscripts={() => setActiveTab("transcripts")}
+              onInstantCreateComplete={() => void loadMeetings()}
+            />
 
             {/* Provider Status Pill */}
             <ProviderStatusBar status={provider} loading={providerLoading} error={providerError} />
-          </motion.div>
+          </div>
         )}
 
         {/* ==================================================================== */}
@@ -1247,7 +1043,7 @@ export default function Dashboard() {
                         Appearance &amp; Dark Theme
                       </h3>
                       <p className="text-3xs text-ivory-400">
-                        Signature Jet Black, Cerulean Blue (#0284C7) &amp; Neon Rose (#FF2A7A) palette
+                        Official Emerald Glass (#101A16) &amp; Sage (#C4B887) palette
                       </p>
                     </div>
                   </div>

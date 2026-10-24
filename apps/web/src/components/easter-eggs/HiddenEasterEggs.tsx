@@ -326,7 +326,7 @@ export function HiddenEasterEggs() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.94 }}
             transition={{ type: "spring", stiffness: 420, damping: 28 }}
-            className="fixed top-6 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-3.5 rounded-2xl border border-accent-400/50 bg-[#161426]/95 px-5 py-3 shadow-[0_12px_36px_rgba(46,224,168,0.25)] backdrop-blur-2xl ring-1 ring-white/10"
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-3.5 rounded-2xl border border-accent-400/50 bg-ink-900/95 px-5 py-3 shadow-[0_12px_36px_rgba(120,169,139,0.25)] backdrop-blur-2xl ring-1 ring-white/10"
           >
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-accent-400/20 text-accent-300 shadow-inner shadow-accent-400/20">
               {toast.icon === "gamepad" ? (

@@ -54,7 +54,7 @@ export default function DemoRoom() {
           </Link>
           <Link
             to="/demo"
-            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1 rounded-xl border border-ink-600/80 bg-gradient-to-b from-ink-800/90 to-ink-900/95 px-3.5 text-[13px] font-medium text-ivory-100 hover:border-accent-400/50 hover:bg-ink-750 hover:text-white shadow-sm hover:shadow-[0_0_15px_rgba(46,224,168,0.15)] transition-all active:scale-95"
+            className="nc-focus inline-flex h-9 shrink-0 items-center gap-1 rounded-xl border border-ink-600/80 bg-ink-800/85 hover:bg-ink-750 px-3.5 text-[13px] font-medium text-ivory-100 hover:border-accent-400/50 hover:text-white shadow-xs hover:shadow-[0_0_15px_rgba(120,169,139,0.2)] transition-all active:scale-95"
           >
             All demos
           </Link>

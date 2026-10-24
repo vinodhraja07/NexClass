@@ -1,53 +1,81 @@
 /* ==========================================================================
-   NEXCLASS OFFICIAL DESIGN SYSTEM — SIGNATURE PALETTE
-   Canvas Base: #08090C (Jet Black) | Primary Accent: #0284C7 (Cerulean Blue) | Energy Accent: #FF2A7A (Neon Rose)
+   NEXCLASS OFFICIAL DESIGN SYSTEM — EMERALD GLASS
+   Premium Futuristic Apple-Inspired Interface System
    ========================================================================== */
 
-/* Official Signature Palette as Default Root */
+/* Official Emerald Glass as Default Root */
 :root,
+[data-theme="emerald-glass"],
 [data-theme="obsidian-mint"],
 [data-theme="default"] {
-  --background: #08090C;
-  --background-secondary: #0D0E14;
-  --surface: #12141C;
-  --surface-elevated: #1E2230;
-  --primary: #0284C7;
-  --secondary-accent: #FF2A7A;
-  --ai-accent: #38BDF8;
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
-  --border: #282D40;
-  --muted: #171A24;
+  /* Surfaces & Backgrounds */
+  --background: #101A16;
+  --background-secondary: #17231D;
+  --surface: #1D3028;
+  --surface-elevated: #294034;
+  --surface-floating: #20382E;
+  --surface-muted: #1A2A21;
 
-  --success: #0284C7;
-  --warning: #FFB547;
-  --danger: #FF1361;
-  --focus-ring: rgba(2, 132, 199, 0.45);
-  --shadow: 0 20px 48px -16px rgba(0, 0, 0, 0.92);
-  --card-gradient: linear-gradient(180deg, #12141C 0%, #08090C 100%);
+  /* Brand Accents */
+  --primary: #78A98B;
+  --primary-hover: #32B98A;
+  --primary-muted: #176B55;
+  --secondary-accent: #C4B887;
+  --ai-accent: #9B9B78;
+  --pale-mint: #B3E5C5;
+
+  /* Typography */
+  --text-primary: #E9EFE8;
+  --text-secondary: #ACBCAF;
+  --text-muted: #829487;
+  --text-inverse: #101A16;
+
+  /* Borders & Effects */
+  --border: #34483B;
+  --border-subtle: #293C32;
+  --border-active: #78A98B;
+  --shadow: rgba(0, 0, 0, 0.22);
+  --emerald-glow: rgba(120, 169, 139, 0.12);
+  --glass-overlay: rgba(255, 255, 255, 0.035);
+  --glass-background: rgba(29, 48, 40, 0.65);
+  --glass-border: rgba(120, 169, 139, 0.16);
+  --focus-ring: rgba(120, 169, 139, 0.45);
+  --card-gradient: linear-gradient(180deg, #1D3028 0%, #17231D 100%);
+
+  /* Semantic */
+  --success: #32B98A;
+  --warning: #E5B869;
+  --danger: #FF5C6C;
+  --info: #78A98B;
 
   /* RGB channels for Tailwind opacity modifiers */
-  --color-bg: 8 9 12;
-  --color-bg-secondary: 13 14 20;
-  --color-surface: 18 20 28;
-  --color-surface-elevated: 30 34 48;
-  --color-primary: 2 132 199;
-  --color-secondary-accent: 255 42 122;
-  --color-ai-accent: 56 189 248;
-  --color-text-primary: 241 245 249;
-  --color-text-secondary: 148 163 184;
-  --color-border: 40 45 64;
-  --color-muted: 23 26 36;
+  --color-bg: 16 26 22;
+  --color-bg-secondary: 23 35 29;
+  --color-surface: 29 48 40;
+  --color-surface-elevated: 41 64 52;
+  --color-surface-floating: 32 56 46;
+  --color-muted: 26 42 33;
+  --color-primary: 120 169 139;
+  --color-primary-hover: 50 185 138;
+  --color-primary-muted: 23 107 85;
+  --color-secondary-accent: 196 184 135;
+  --color-ai-accent: 155 155 120;
+  --color-text-primary: 233 239 232;
+  --color-text-secondary: 172 188 175;
+  --color-text-muted: 130 148 135;
+  --color-border: 52 72 59;
+  --color-border-subtle: 41 60 50;
+  --color-border-active: 120 169 139;
 
   /* Legacy variable alignment */
-  --nc-ink: 8 9 12;
-  --nc-surface: 18 20 28;
-  --nc-raised: 30 34 48;
-  --nc-line: 40 45 64;
-  --nc-accent: 2 132 199;
-  --nc-lime: 255 42 122;
-  --nc-ivory: 241 245 249;
-  --nc-muted: 148 163 184;
+  --nc-ink: 16 26 22;
+  --nc-surface: 29 48 40;
+  --nc-raised: 41 64 52;
+  --nc-line: 52 72 59;
+  --nc-accent: 120 169 139;
+  --nc-lime: 50 185 138;
+  --nc-ivory: 233 239 232;
+  --nc-muted: 172 188 175;
 }
 
 /* Theme 02: Monsoon Aurora */
@@ -56,25 +84,33 @@
   --background-secondary: #152635;
   --surface: #1D3544;
   --surface-elevated: #254251;
+  --surface-floating: #223c4d;
+  --surface-muted: #182C39;
   --primary: #42DCC5;
+  --primary-hover: #5be9d4;
+  --primary-muted: #2aa392;
   --secondary-accent: #FFCA78;
   --ai-accent: #B7A4FF;
   --text-primary: #F3F8F7;
   --text-secondary: #A8BBC5;
+  --text-muted: #728794;
   --border: #304957;
+  --border-subtle: #233945;
+  --border-active: #42DCC5;
   --muted: #182C39;
 
   --success: #34D399;
   --warning: #FBBF24;
   --danger: #FF4D6D;
   --focus-ring: rgba(66, 220, 197, 0.45);
-  --shadow: 0 20px 48px -16px rgba(5, 12, 18, 0.85);
+  --shadow: rgba(5, 12, 18, 0.45);
   --card-gradient: linear-gradient(180deg, #1D3544 0%, #152635 100%);
 
   --color-bg: 16 29 43;
   --color-bg-secondary: 21 38 53;
   --color-surface: 29 53 68;
   --color-surface-elevated: 37 66 81;
+  --color-surface-floating: 34 60 77;
   --color-primary: 66 220 197;
   --color-secondary-accent: 255 202 120;
   --color-ai-accent: 183 164 255;
@@ -99,25 +135,33 @@
   --background-secondary: #211D19;
   --surface: #302820;
   --surface-elevated: #3A3027;
+  --surface-floating: #352b22;
+  --surface-muted: #28221D;
   --primary: #C9A17A;
+  --primary-hover: #dcba94;
+  --primary-muted: #9f7652;
   --secondary-accent: #D4BD75;
   --ai-accent: #A9A08D;
   --text-primary: #F3EBDD;
   --text-secondary: #BDB1A1;
+  --text-muted: #8d8172;
   --border: #514438;
+  --border-subtle: #3f332a;
+  --border-active: #C9A17A;
   --muted: #28221D;
 
   --success: #34D399;
   --warning: #FBBF24;
   --danger: #FF4D6D;
   --focus-ring: rgba(201, 161, 122, 0.5);
-  --shadow: 0 20px 48px -16px rgba(10, 8, 7, 0.85);
+  --shadow: rgba(10, 8, 7, 0.5);
   --card-gradient: linear-gradient(180deg, #302820 0%, #211D19 100%);
 
   --color-bg: 26 23 20;
   --color-bg-secondary: 33 29 25;
   --color-surface: 48 40 32;
   --color-surface-elevated: 58 48 39;
+  --color-surface-floating: 53 43 34;
   --color-primary: 201 161 122;
   --color-secondary-accent: 212 189 117;
   --color-ai-accent: 169 160 141;
@@ -136,74 +180,39 @@
   --nc-muted: 189 177 161;
 }
 
-/* Theme 04: Forest Moderne */
-[data-theme="forest-moderne"] {
-  --background: #101A16;
-  --background-secondary: #17231D;
-  --surface: #1D3028;
-  --surface-elevated: #294034;
-  --primary: #78A98B;
-  --secondary-accent: #C4B887;
-  --ai-accent: #9B9B78;
-  --text-primary: #E9EFE8;
-  --text-secondary: #ACBCAF;
-  --border: #34483B;
-  --muted: #1A2A21;
-
-  --success: #34D399;
-  --warning: #FBBF24;
-  --danger: #FF4D6D;
-  --focus-ring: rgba(120, 169, 139, 0.5);
-  --shadow: 0 20px 48px -16px rgba(5, 10, 8, 0.85);
-  --card-gradient: linear-gradient(180deg, #1D3028 0%, #17231D 100%);
-
-  --color-bg: 16 26 22;
-  --color-bg-secondary: 23 35 29;
-  --color-surface: 29 48 40;
-  --color-surface-elevated: 41 64 52;
-  --color-primary: 120 169 139;
-  --color-secondary-accent: 196 184 135;
-  --color-ai-accent: 155 155 120;
-  --color-text-primary: 233 239 232;
-  --color-text-secondary: 172 188 175;
-  --color-border: 52 72 59;
-  --color-muted: 26 42 33;
-
-  --nc-ink: 16 26 22;
-  --nc-surface: 29 48 40;
-  --nc-raised: 41 64 52;
-  --nc-line: 52 72 59;
-  --nc-accent: 120 169 139;
-  --nc-lime: 196 184 135;
-  --nc-ivory: 233 239 232;
-  --nc-muted: 172 188 175;
-}
-
-/* Theme 05: Ocean Blue */
+/* Theme 04: Ocean Blue */
 [data-theme="ocean-blue"] {
   --background: #0B1724;
   --background-secondary: #122131;
   --surface: #192B3A;
   --surface-elevated: #233A4B;
+  --surface-floating: #1d3345;
+  --surface-muted: #172735;
   --primary: #438EAC;
+  --primary-hover: #5ea8c7;
+  --primary-muted: #2f6b84;
   --secondary-accent: #78B8C9;
   --ai-accent: #9EACC0;
   --text-primary: #E8EFF4;
   --text-secondary: #A8BAC8;
+  --text-muted: #748695;
   --border: #30485A;
+  --border-subtle: #243745;
+  --border-active: #438EAC;
   --muted: #172735;
 
   --success: #34D399;
   --warning: #FBBF24;
   --danger: #FF4D6D;
   --focus-ring: rgba(67, 142, 172, 0.5);
-  --shadow: 0 20px 48px -16px rgba(3, 8, 14, 0.85);
+  --shadow: rgba(3, 8, 14, 0.5);
   --card-gradient: linear-gradient(180deg, #192B3A 0%, #122131 100%);
 
   --color-bg: 11 23 36;
   --color-bg-secondary: 18 33 49;
   --color-surface: 25 43 58;
   --color-surface-elevated: 35 58 75;
+  --color-surface-floating: 29 51 69;
   --color-primary: 67 142 172;
   --color-secondary-accent: 120 184 201;
   --color-ai-accent: 158 172 192;

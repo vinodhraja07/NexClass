@@ -1,21 +1,29 @@
 export type ThemeId =
-  | "obsidian-mint"
+  | "emerald-glass"
   | "monsoon-aurora"
   | "earth-sand"
-  | "forest-moderne"
-  | "ocean-blue";
+  | "ocean-blue"
+  | "obsidian-mint";
 
 export interface ThemeColors {
   background: string;
   backgroundSecondary: string;
   surface: string;
   surfaceElevated: string;
+  surfaceFloating?: string;
+  surfaceMuted?: string;
   primary: string;
+  primaryHover?: string;
+  primaryMuted?: string;
   secondaryAccent: string;
   aiAccent: string;
+  paleMint?: string;
   textPrimary: string;
   textSecondary: string;
+  textMuted?: string;
   border: string;
+  borderSubtle?: string;
+  borderActive?: string;
   muted: string;
 }
 
@@ -24,6 +32,7 @@ export interface ThemeRgb {
   backgroundSecondary: string;
   surface: string;
   surfaceElevated: string;
+  surfaceFloating?: string;
   primary: string;
   secondaryAccent: string;
   aiAccent: string;
@@ -44,12 +53,54 @@ export interface ThemeDefinition {
 }
 
 export const THEMES: Record<ThemeId, ThemeDefinition> = {
+  "emerald-glass": {
+    id: "emerald-glass",
+    name: "Emerald Glass",
+    tagline: "Official NexClass · Apple-Inspired Futuristic Emerald",
+    personality: ["Premium", "Apple-Inspired", "Futuristic", "Calm", "Sophisticated"],
+    description: "Deep green-black backgrounds (#101A16), muted emerald accents (#78A98B), soft emerald (#32B98A), and translucent glass surfaces.",
+    colors: {
+      background: "#101A16",
+      backgroundSecondary: "#17231D",
+      surface: "#1D3028",
+      surfaceElevated: "#294034",
+      surfaceFloating: "#20382E",
+      surfaceMuted: "#1A2A21",
+      primary: "#78A98B",
+      primaryHover: "#32B98A",
+      primaryMuted: "#176B55",
+      secondaryAccent: "#C4B887",
+      aiAccent: "#9B9B78",
+      paleMint: "#B3E5C5",
+      textPrimary: "#E9EFE8",
+      textSecondary: "#ACBCAF",
+      textMuted: "#829487",
+      border: "#34483B",
+      borderSubtle: "#293C32",
+      borderActive: "#78A98B",
+      muted: "#1A2A21",
+    },
+    rgb: {
+      background: "16 26 22",
+      backgroundSecondary: "23 35 29",
+      surface: "29 48 40",
+      surfaceElevated: "41 64 52",
+      surfaceFloating: "32 56 46",
+      primary: "120 169 139",
+      secondaryAccent: "196 184 135",
+      aiAccent: "155 155 120",
+      textPrimary: "233 239 232",
+      textSecondary: "172 188 175",
+      border: "52 72 59",
+      muted: "26 42 33",
+    },
+  },
   "obsidian-mint": {
     id: "obsidian-mint",
-    name: "Jet & Cerulean Rose",
-    tagline: "Signature Jet Black · Cerulean Blue · Neon Rose",
-    personality: ["Electric", "Futuristic", "High-Contrast", "Crisp", "Vibrant"],
-    description: "Deep jet black (#08090C) canvas with vibrant cerulean blue (#0284C7) and electric neon rose (#FF2A7A).",
+    name: "Obsidian & Mint",
+    tagline: "Classic Signature · Obsidian & Mint",
+    personality: ["High-Contrast", "Deep", "Luminous"],
+    description: "Deep dark canvas with vivid mint accents and crisp ivory text.",
     colors: {
       background: "#08090C",
       backgroundSecondary: "#0D0E14",
@@ -143,39 +194,6 @@ export const THEMES: Record<ThemeId, ThemeDefinition> = {
       muted: "40 34 29",
     },
   },
-  "forest-moderne": {
-    id: "forest-moderne",
-    name: "Forest Moderne",
-    tagline: "Nordic Botanical Emerald",
-    personality: ["Balanced", "Deep", "Organic", "Sophisticated", "Refined"],
-    description: "Deep pine forest darks with sage highlights and muted bronze accents.",
-    colors: {
-      background: "#101A16",
-      backgroundSecondary: "#17231D",
-      surface: "#1D3028",
-      surfaceElevated: "#294034",
-      primary: "#78A98B",
-      secondaryAccent: "#C4B887",
-      aiAccent: "#9B9B78",
-      textPrimary: "#E9EFE8",
-      textSecondary: "#ACBCAF",
-      border: "#34483B",
-      muted: "#1A2A21",
-    },
-    rgb: {
-      background: "16 26 22",
-      backgroundSecondary: "23 35 29",
-      surface: "29 48 40",
-      surfaceElevated: "41 64 52",
-      primary: "120 169 139",
-      secondaryAccent: "196 184 135",
-      aiAccent: "155 155 120",
-      textPrimary: "233 239 232",
-      textSecondary: "172 188 175",
-      border: "52 72 59",
-      muted: "26 42 33",
-    },
-  },
   "ocean-blue": {
     id: "ocean-blue",
     name: "Ocean Blue",
@@ -213,7 +231,7 @@ export const THEMES: Record<ThemeId, ThemeDefinition> = {
 
 export const THEME_LIST: ThemeDefinition[] = Object.values(THEMES);
 
-export const DEFAULT_THEME_ID: ThemeId = "obsidian-mint";
+export const DEFAULT_THEME_ID: ThemeId = "emerald-glass";
 
 export function isThemeId(value: unknown): value is ThemeId {
   return typeof value === "string" && value in THEMES;

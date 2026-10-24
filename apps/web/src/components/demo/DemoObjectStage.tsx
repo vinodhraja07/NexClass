@@ -208,7 +208,7 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
               y1="10"
               x2="320"
               y2="10"
-              stroke="#38BDF8"
+              stroke="#32B98A"
               strokeWidth="2.5"
               strokeDasharray="6 3"
               opacity="0.9"
@@ -220,7 +220,7 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
             <path
               d="M 10 24 L 10 10 L 24 10 M 310 24 L 310 10 L 296 10 M 10 196 L 10 210 L 24 210 M 310 196 L 310 210 L 296 210"
               fill="none"
-              stroke="#38BDF8"
+              stroke="#32B98A"
               strokeWidth="1.5"
               opacity="0.85"
             />
@@ -228,7 +228,7 @@ export function DemoObjectStage({ labels, variant, language, className }: DemoOb
               x="160"
               y="22"
               textAnchor="middle"
-              fill="#38BDF8"
+              fill="#32B98A"
               fontSize="8.5"
               fontFamily="JetBrains Mono, monospace"
               letterSpacing="2"

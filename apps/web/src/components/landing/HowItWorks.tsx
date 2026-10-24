@@ -82,7 +82,7 @@ function StepNode({ step, accent = false }: { step: Step; accent?: boolean }) {
       className={[
         "group relative flex h-full flex-col rounded-xl border px-4 py-4 transition-all duration-300",
         accent
-          ? "border-accent-400/50 bg-accent-400/[0.08] shadow-[0_0_24px_-6px_rgba(46,224,168,0.35)] hover:border-accent-300 hover:shadow-[0_0_30px_-4px_rgba(46,224,168,0.5)]"
+          ? "border-accent-400/50 bg-accent-400/[0.08] shadow-[0_0_24px_-6px_rgba(120,169,139,0.35)] hover:border-accent-300 hover:shadow-[0_0_30px_-4px_rgba(50,185,138,0.5)]"
           : "border-ink-600/70 bg-ink-850/80 hover:border-accent-400/40 hover:bg-ink-800/90 hover:shadow-panel",
       ].join(" ")}
     >
@@ -169,7 +169,7 @@ export function HowItWorks() {
             </div>
 
             <div className="rounded-2xl border border-ink-600/70 bg-ink-850/70 p-4 sm:p-5">
-              <p className="nc-eyebrow text-lime-300/80">Voice lane</p>
+              <p className="nc-eyebrow text-accent-300">Voice lane</p>
               <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:items-stretch">
                 {VOICE_LANE.map((step, index) => (
                   <div key={step.n} className="flex flex-1 flex-col lg:flex-row lg:items-stretch">

@@ -84,10 +84,10 @@ export function CaptionOverlay({
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6 }}
             transition={springTransition}
-            className="pointer-events-auto max-w-3xl rounded-2xl bg-black/85 px-5 py-3 text-white backdrop-blur-xl shadow-2xl border border-white/15"
+            className="pointer-events-auto max-w-3xl rounded-2xl bg-ink-950/90 px-5 py-3 text-ivory-100 backdrop-blur-2xl shadow-glass border border-ink-600/70"
           >
-            <div className="flex items-center gap-2 text-xs font-semibold text-primary mb-1">
-              <Radio className="h-3.5 w-3.5 animate-pulse text-emerald-400" />
+            <div className="flex items-center gap-2 text-xs font-semibold text-accent-300 mb-1">
+              <Radio className="h-3.5 w-3.5 animate-pulse text-accent-300" />
               <span>{interim.speakerName || "Speaker"}</span>
               <span className="text-white/60 font-normal">• Transcribing live</span>
             </div>
@@ -105,7 +105,7 @@ export function CaptionOverlay({
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6 }}
             transition={springTransition}
-            className="pointer-events-auto max-w-3xl rounded-2xl bg-black/85 px-5 py-3 text-white backdrop-blur-xl shadow-2xl border border-white/15"
+            className="pointer-events-auto max-w-3xl rounded-2xl bg-ink-950/90 px-5 py-3 text-ivory-100 backdrop-blur-2xl shadow-glass border border-ink-600/70"
           >
             {/* Header: Speaker + Language Routing */}
             <div className="flex items-center gap-2 pb-1 text-xs text-white/70">

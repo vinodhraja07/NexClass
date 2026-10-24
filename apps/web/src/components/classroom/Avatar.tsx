@@ -10,14 +10,14 @@ const SIZES = {
   xl: "h-20 w-20 text-xl",
 } as const;
 
-// Apple-inspired refined dark avatar palette presets
+// Apple-inspired refined Emerald Glass avatar palette presets
 const AVATAR_PALETTES = [
-  { bg: "from-teal-600/30 to-emerald-800/40 text-teal-200 border-teal-500/30" },
-  { bg: "from-sky-600/30 to-blue-800/40 text-sky-200 border-sky-500/30" },
-  { bg: "from-purple-600/30 to-indigo-800/40 text-purple-200 border-purple-500/30" },
-  { bg: "from-amber-600/30 to-orange-800/40 text-amber-200 border-amber-500/30" },
-  { bg: "from-rose-600/30 to-pink-800/40 text-rose-200 border-rose-500/30" },
-  { bg: "from-emerald-600/30 to-teal-800/40 text-emerald-200 border-emerald-500/30" },
+  { bg: "from-accent-600/35 to-ink-800/80 text-accent-200 border-accent-400/30" },
+  { bg: "from-sage-400/25 to-ink-800/80 text-sage-300 border-sage-400/30" },
+  { bg: "from-accent-500/35 to-ink-800/80 text-accent-100 border-accent-300/30" },
+  { bg: "from-teal-600/30 to-ink-800/80 text-teal-200 border-teal-500/30" },
+  { bg: "from-amber-600/25 to-ink-800/80 text-amber-200 border-amber-500/30" },
+  { bg: "from-accent-400/30 to-ink-800/80 text-ivory-100 border-accent-400/30" },
 ];
 
 function getPalette(name: string) {

@@ -82,7 +82,7 @@ const STRENGTH_COLORS = [
   "bg-ink-500",
   "bg-signal-live",
   "bg-signal-warn",
-  "bg-lime-400",
+  "bg-accent-300",
   "bg-accent-400",
 ];
 

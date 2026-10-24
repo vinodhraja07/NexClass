@@ -101,10 +101,10 @@ export function VideoTile({
       transition={springTransition}
       className={clsx(
         "group relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl select-none",
-        "bg-[#1B192A] border shadow-md",
+        "bg-ink-850/90 border shadow-md",
         activeSpeaker
-          ? "border-primary ring-2 ring-primary/60 shadow-lg shadow-primary/25"
-          : "border-[#403B56]/50 hover:border-[#403B56]",
+          ? "border-accent-300 ring-2 ring-accent-300/60 shadow-lg shadow-accent-300/20"
+          : "border-ink-600/60 hover:border-accent-400/50",
         className,
       )}
       style={{
@@ -189,7 +189,7 @@ export function VideoTile({
       </div>
 
       {/* Google Meet Signature Bottom-Left Name Pill */}
-      <div className="absolute bottom-2.5 left-2.5 z-10 flex max-w-[90%] items-center gap-1.5 rounded-lg bg-black/65 px-2.5 py-1 text-xs text-white backdrop-blur-md shadow-md border border-white/10">
+      <div className="absolute bottom-2.5 left-2.5 z-10 flex max-w-[90%] items-center gap-1.5 rounded-lg bg-ink-950/80 px-2.5 py-1 text-xs text-ivory-100 backdrop-blur-xl shadow-md border border-ink-600/70">
         {/* Mic status inside name pill */}
         {participant.audioEnabled ? (
           activeSpeaker ? (

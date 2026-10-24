@@ -176,7 +176,7 @@ export function ClassroomToolbar({
           className={clsx(
             "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             audioEnabled
-              ? "bg-surface/85 text-text-primary border border-white/10 shadow-[0_4px_14px_rgba(0,0,0,0.35)] hover:border-primary/60 hover:shadow-[0_0_20px_rgba(46,224,168,0.3)] hover:text-primary backdrop-blur-xl"
+              ? "bg-surface/85 text-text-primary border border-white/10 shadow-[0_4px_14px_rgba(0,0,0,0.35)] hover:border-primary/60 hover:shadow-[0_0_20px_rgba(120,169,139,0.3)] hover:text-primary backdrop-blur-xl"
               : "bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 text-white shadow-[0_0_22px_rgba(244,63,94,0.45)] hover:brightness-110 border border-rose-400/40",
           )}
         >
@@ -201,7 +201,7 @@ export function ClassroomToolbar({
           className={clsx(
             "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             videoEnabled
-              ? "bg-surface/85 text-text-primary border border-white/10 shadow-[0_4px_14px_rgba(0,0,0,0.35)] hover:border-primary/60 hover:shadow-[0_0_20px_rgba(46,224,168,0.3)] hover:text-primary backdrop-blur-xl"
+              ? "bg-surface/85 text-text-primary border border-white/10 shadow-[0_4px_14px_rgba(0,0,0,0.35)] hover:border-primary/60 hover:shadow-[0_0_20px_rgba(120,169,139,0.3)] hover:text-primary backdrop-blur-xl"
               : "bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 text-white shadow-[0_0_22px_rgba(244,63,94,0.45)] hover:brightness-110 border border-rose-400/40",
           )}
         >
@@ -225,8 +225,8 @@ export function ClassroomToolbar({
           className={clsx(
             "nc-focus grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             captionsVisible
-              ? "bg-gradient-to-r from-accent-400 via-emerald-400 to-lime-300 text-ink-950 font-bold shadow-[0_0_24px_rgba(46,224,168,0.55)] border border-emerald-300/40 hover:brightness-105"
-              : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary shadow-sm hover:shadow-[0_0_14px_rgba(46,224,168,0.2)] backdrop-blur-xl",
+              ? "bg-gradient-to-r from-accent-400 via-accent-300 to-accent-200 text-ink-950 font-bold shadow-[0_0_24px_rgba(50,185,138,0.45)] border border-accent-200/40 hover:brightness-105"
+              : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary shadow-xs hover:shadow-[0_0_14px_rgba(120,169,139,0.2)] backdrop-blur-xl",
           )}
         >
           <Captions className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -249,13 +249,13 @@ export function ClassroomToolbar({
             className={clsx(
               "nc-focus relative grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
               voiceMode === "translated"
-                ? "bg-accent-400/15 text-accent-300 border border-accent-400/50 shadow-[0_0_20px_rgba(46,224,168,0.3)] hover:bg-accent-400/25"
+                ? "bg-accent-400/15 text-accent-300 border border-accent-400/50 shadow-[0_0_20px_rgba(50,185,138,0.25)] hover:bg-accent-400/25"
                 : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary backdrop-blur-xl",
             )}
           >
             <Headphones className="h-4 w-4 sm:h-5 sm:w-5" />
             {voiceMode === "translated" && (
-              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-400 ring-2 ring-background animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-accent-300 ring-2 ring-background animate-pulse" />
             )}
           </motion.button>
         )}
@@ -274,7 +274,7 @@ export function ClassroomToolbar({
           className={clsx(
             "nc-focus hidden sm:grid h-12 w-12 place-items-center rounded-full transition-all select-none cursor-pointer",
             screenSharing
-              ? "bg-gradient-to-r from-accent-400 to-emerald-400 text-ink-950 font-bold shadow-[0_0_24px_rgba(46,224,168,0.5)] border border-emerald-300/40"
+              ? "bg-gradient-to-r from-accent-400 to-accent-300 text-ink-950 font-bold shadow-[0_0_24px_rgba(50,185,138,0.45)] border border-accent-200/40"
               : "bg-surface/85 text-text-secondary border border-white/10 hover:border-primary/50 hover:text-text-primary backdrop-blur-xl",
           )}
         >

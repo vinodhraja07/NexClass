@@ -188,7 +188,7 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                     : "gap-3 px-3.5 py-2.5",
                   isActive
                     ? item.isQuickAction
-                      ? "bg-accent-400/20 text-accent-300 font-semibold shadow-[0_0_20px_-4px_rgba(2,132,199,0.4)] border border-accent-400/40"
+                      ? "bg-accent-400/20 text-accent-300 font-semibold shadow-[0_0_20px_-4px_rgba(120,169,139,0.35)] border border-accent-400/40"
                       : "bg-ink-800/80 text-ivory-50 font-semibold border border-ink-600/70 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
                     : item.isQuickAction
                       ? "bg-accent-400/10 text-accent-300 hover:bg-accent-400/20 hover:text-ivory-50 border border-accent-400/25"
@@ -203,7 +203,7 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                     layoutId={isMobile ? "mobileActiveIndicator" : "desktopActiveIndicator"}
                     className={clsx(
                       "absolute left-0 top-2 bottom-2 w-1 rounded-r-full",
-                      item.isQuickAction ? "bg-rose-400" : "bg-accent-400",
+                      item.isQuickAction ? "bg-accent-300" : "bg-accent-400",
                     )}
                     transition={{ type: "spring", stiffness: 450, damping: 30 }}
                   />
@@ -217,7 +217,7 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                     isActive
                       ? item.isQuickAction
                         ? "text-accent-300"
-                        : "text-emerald-400"
+                        : "text-accent-300"
                       : "text-ivory-400 group-hover:text-ivory-200",
                   )}
                 >
@@ -233,7 +233,7 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                         className={clsx(
                           "ml-2 shrink-0 rounded-full px-2 py-0.5 font-mono text-2xs font-semibold uppercase tracking-wider",
                           item.id === "classrooms" && activeCount > 0
-                            ? "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30"
+                            ? "bg-accent-300/15 text-accent-300 border border-accent-300/30"
                             : "bg-ink-700/70 text-ivory-300 border border-ink-600/50",
                         )}
                       >
@@ -257,7 +257,7 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-ivory-50">{item.label}</span>
                       {item.badge && (
-                        <span className="rounded-full bg-emerald-400/20 px-1.5 py-0.2 font-mono text-3xs font-bold text-emerald-300">
+                        <span className="rounded-full bg-accent-300/20 px-1.5 py-0.2 font-mono text-3xs font-bold text-accent-300">
                           {item.badge}
                         </span>
                       )}
@@ -302,7 +302,7 @@ export function DashboardSidebar(props: DashboardSidebarProps) {
                       className="absolute h-full w-full rounded-full bg-accent-400"
                     />
                   )}
-                  <span className="relative h-2 w-2 rounded-full bg-accent-400 shadow-[0_0_8px_#0284C7]" />
+                  <span className="relative h-2 w-2 rounded-full bg-accent-300 shadow-[0_0_8px_#32B98A]" />
                 </>
               ) : (
                 <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_#FBBF24]" />

@@ -101,14 +101,15 @@ export function SettingsPanel({
           <div className="rounded-2xl border border-border/70 bg-surface p-3.5 shadow-xs">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-text-primary">Jet Black &amp; Cerulean Rose</p>
-                <p className="text-[11px] text-text-secondary">Official NexClass #08090C · #0284C7 · #FF2A7A</p>
+                <p className="text-xs font-semibold text-text-primary">Emerald Glass</p>
+                <p className="text-[11px] text-text-secondary">Official NexClass #101A16 · #78A98B · #32B98A · #C4B887</p>
               </div>
               <div className="flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2.5 py-1">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#08090C] ring-1 ring-border/80" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#12141C]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#0284C7]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#FF2A7A]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#101A16] ring-1 ring-border/80" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#1D3028]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#78A98B]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#32B98A]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#C4B887]" />
                 <span className="ml-1 text-[10px] font-semibold text-primary">Active</span>
               </div>
             </div>

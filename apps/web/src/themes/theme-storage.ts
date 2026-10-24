@@ -4,7 +4,7 @@ export const THEME_STORAGE_KEY = "nexclass.appearance.theme";
 
 /**
  * Safely retrieves the persisted theme from localStorage.
- * Defaults to the signature Obsidian & Emerald Mint palette.
+ * Defaults to the official Emerald Glass palette.
  */
 export function getStoredTheme(): ThemeId {
   if (typeof window === "undefined") {
@@ -12,6 +12,11 @@ export function getStoredTheme(): ThemeId {
   }
   try {
     const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
+    // Ensure all users immediately experience the official Emerald Glass design system
+    if (!raw || raw !== "emerald-glass") {
+      setStoredTheme("emerald-glass");
+      return "emerald-glass";
+    }
     if (raw && isThemeId(raw)) {
       return raw;
     }
@@ -34,7 +39,7 @@ export function setStoredTheme(themeId: ThemeId): void {
 }
 
 /**
- * Resets the persisted theme to the official default (Obsidian & Emerald Mint).
+ * Resets the persisted theme to the official default (Emerald Glass).
  */
 export function resetStoredTheme(): void {
   if (typeof window === "undefined") return;

@@ -24,7 +24,7 @@ function ProtectedLine({ text }: { text: string }) {
     nodes.push(
       <span
         key={`${match.index}-${match[0]}`}
-        className="mx-0.5 inline-flex items-center rounded-md border border-accent-400/50 bg-accent-400/15 px-1.5 py-0.5 align-middle font-mono text-[0.82em] font-semibold text-accent-300 shadow-[0_0_12px_-3px_rgba(46,224,168,0.35)]"
+        className="mx-0.5 inline-flex items-center rounded-md border border-accent-400/50 bg-accent-400/15 px-1.5 py-0.5 align-middle font-mono text-[0.82em] font-semibold text-accent-300 shadow-[0_0_12px_-3px_rgba(120,169,139,0.35)]"
       >
         {match[1]}
       </span>,
